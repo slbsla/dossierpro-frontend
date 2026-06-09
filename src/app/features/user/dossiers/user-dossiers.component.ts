@@ -15,6 +15,7 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
   viewDossier: Dossier | null = null;
 
   searchTerm = '';
+  selectedType = '';
   private search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
 
@@ -29,10 +30,11 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
   ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }
 
   onSearch(term: string) { this.searchTerm = term; this.search$.next(term); }
+  onTypeChange(type: string) { this.selectedType = type; this.load(0); }
 
   load(p = 0, search = this.searchTerm) {
     this.loading = true;
-    this.api.getUserDossiers(p, 8, search).subscribe({ next: r => { this.page = r; this.loading = false; }, error: () => this.loading = false });
+    this.api.getUserDossiers(p, 8, search, this.selectedType).subscribe({ next: r => { this.page = r; this.loading = false; }, error: () => this.loading = false });
   }
 
   openCreate() {

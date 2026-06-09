@@ -13,6 +13,16 @@
     <button class="search-clear" *ngIf="searchTerm" (click)="onSearch('')" title="Effacer">
       <span class="material-icons" style="font-size:16px">close</span>
     </button>
+    <div class="search-divider"></div>
+    <span class="search-type-label">Type :</span>
+    <select class="search-type-select" [value]="selectedType" (change)="onTypeChange($any($event.target).value)">
+      <option value="">Tous</option>
+      <option *ngFor="let t of dossierTypes" [value]="t">{{ t }}</option>
+    </select>
+    <div class="search-divider"></div>
+    <button class="search-reset-btn" (click)="onSearch(''); onTypeChange('')" title="Réinitialiser les filtres">
+      <span class="material-icons" style="font-size:15px;vertical-align:middle">refresh</span> Recharger
+    </button>
   </div>
 
   <div class="card">

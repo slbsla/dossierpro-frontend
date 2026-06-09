@@ -125,9 +125,10 @@ export class ApiService {
   }
 
   // ---- User ----
-  getUserDossiers(page = 0, size = 8, search = ''): Observable<PageResponse<Dossier>> {
+  getUserDossiers(page = 0, size = 8, search = '', type = ''): Observable<PageResponse<Dossier>> {
     let params = new HttpParams().set('page', page).set('size', size);
     if (search.trim()) params = params.set('search', search.trim());
+    if (type.trim())   params = params.set('type', type.trim());
     return this.http.get<PageResponse<Dossier>>(`${this.API}/user/dossiers`, { params });
   }
 
