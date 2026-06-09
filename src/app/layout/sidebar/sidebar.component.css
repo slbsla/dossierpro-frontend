@@ -1,21 +1,77 @@
+/* ── Per-role color tokens ─────────────────────────────────── */
+.sidebar[data-role="admin"] {
+  --sb-bg:          #0f172a;   /* near-black with blue tint   */
+  --sb-accent:      #7c3aed;   /* purple active               */
+  --sb-accent-glow: rgba(124,58,237,.25);
+  --sb-divider:     rgba(255,255,255,.06);
+  --sb-hover:       rgba(255,255,255,.06);
+  --sb-text:        #94a3b8;
+  --sb-logo-bg:     rgba(124,58,237,.18);
+  --sb-logo-color:  #a78bfa;
+}
+
+.sidebar[data-role="entity_manager"] {
+  --sb-bg:          #1e293b;   /* slate blue (default)        */
+  --sb-accent:      #2563eb;   /* blue active                 */
+  --sb-accent-glow: rgba(37,99,235,.25);
+  --sb-divider:     rgba(255,255,255,.08);
+  --sb-hover:       rgba(255,255,255,.07);
+  --sb-text:        #94a3b8;
+  --sb-logo-bg:     rgba(37,99,235,.18);
+  --sb-logo-color:  #60a5fa;
+}
+
+.sidebar[data-role="user"] {
+  --sb-bg:          #134e4a;   /* dark teal                   */
+  --sb-accent:      #0d9488;   /* teal active                 */
+  --sb-accent-glow: rgba(13,148,136,.25);
+  --sb-divider:     rgba(255,255,255,.08);
+  --sb-hover:       rgba(255,255,255,.07);
+  --sb-text:        #99f6e4;
+  --sb-logo-bg:     rgba(13,148,136,.18);
+  --sb-logo-color:  #5eead4;
+}
+
+/* Fallback when role not yet loaded */
+.sidebar:not([data-role]) {
+  --sb-bg:          #1e293b;
+  --sb-accent:      #2563eb;
+  --sb-accent-glow: rgba(37,99,235,.25);
+  --sb-divider:     rgba(255,255,255,.08);
+  --sb-hover:       rgba(255,255,255,.07);
+  --sb-text:        #94a3b8;
+  --sb-logo-bg:     rgba(37,99,235,.18);
+  --sb-logo-color:  #60a5fa;
+}
+/* ──────────────────────────────────────────────────────────── */
+
 .sidebar {
   width: 240px;
   min-height: 100vh;
-  background: var(--sidebar-bg);
+  background: var(--sb-bg);
   display: flex;
   flex-direction: column;
   padding: 0;
   flex-shrink: 0;
+  transition: background .3s ease;
 }
 .sidebar-logo {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 20px 20px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid var(--sb-divider);
 }
-.logo-icon { font-size: 22px; }
+.logo-icon {
+  font-size: 22px;
+  color: var(--sb-logo-color);
+  width: 34px; height: 34px;
+  background: var(--sb-logo-bg);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
 .logo-text { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -.3px; }
+
 .sidebar-user {
   display: flex;
   align-items: center;
@@ -25,7 +81,7 @@
 .user-avatar {
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: var(--primary);
+  background: var(--sb-accent);
   color: #fff;
   display: flex;
   align-items: center;
@@ -37,7 +93,9 @@
 .user-info { min-width: 0; }
 .user-name { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-role { margin-top: 2px; }
-.sidebar-divider { border-color: rgba(255,255,255,.08); margin: 0 20px; }
+
+.sidebar-divider { border-color: var(--sb-divider); margin: 0 20px; }
+
 .sidebar-nav { flex: 1; padding: 12px 12px 0; display: flex; flex-direction: column; gap: 2px; }
 .nav-item {
   display: flex;
@@ -45,7 +103,7 @@
   gap: 10px;
   padding: 10px 12px;
   border-radius: 6px;
-  color: var(--sidebar-text);
+  color: var(--sb-text);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -56,9 +114,14 @@
   width: 100%;
   text-align: left;
 }
-.nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
-.nav-item.active { background: var(--primary); color: #fff; }
+.nav-item:hover { background: var(--sb-hover); color: #fff; }
+.nav-item.active {
+  background: var(--sb-accent);
+  box-shadow: 0 0 0 1px var(--sb-accent-glow), 0 2px 8px var(--sb-accent-glow);
+  color: #fff;
+}
 .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-.sidebar-footer { padding: 12px; border-top: 1px solid rgba(255,255,255,.08); margin-top: auto; }
+
+.sidebar-footer { padding: 12px; border-top: 1px solid var(--sb-divider); margin-top: auto; }
 .logout-btn { color: #f87171 !important; }
 .logout-btn:hover { background: rgba(239,68,68,.15) !important; }

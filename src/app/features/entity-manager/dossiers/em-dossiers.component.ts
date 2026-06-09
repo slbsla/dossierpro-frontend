@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { Dossier, DossierStatus, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
@@ -17,8 +18,12 @@ export class EmDossiersComponent implements OnInit {
   workflowLoading = false; workflowError = '';
   DossierStatus = DossierStatus;
 
-  constructor(private api: ApiService, private confirm: ConfirmDialogService) {}
-  ngOnInit() { this.loadPending(); this.loadValidated(); }
+  constructor(private api: ApiService, private confirm: ConfirmDialogService, private route: ActivatedRoute) {}
+  ngOnInit() {
+    const tab = this.route.snapshot.queryParamMap.get('tab');
+    if (tab === 'validated' || tab === 'pending') this.activeTab = tab;
+    this.loadPending(); this.loadValidated();
+  }
 
   loadPending(p = 0) {
     this.loading = true;

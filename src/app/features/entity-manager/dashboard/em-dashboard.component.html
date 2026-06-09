@@ -9,11 +9,11 @@
   <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
   <ng-container *ngIf="!loading && dashboard">
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">{{ dashboard.totalUsers }}</div><div class="stat-label">Utilisateurs</div></div>
+      <a routerLink="/em/users" class="stat-card stat-card-link"><div class="stat-icon">👥</div><div class="stat-value">{{ dashboard.totalUsers }}</div><div class="stat-label">Utilisateurs</div></a>
       <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-value">{{ dashboard.totalDossiers }}</div><div class="stat-label">Total Dossiers</div></div>
-      <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value" style="color:var(--warning)">{{ dashboard.pendingDossiers }}</div><div class="stat-label">En Attente</div></div>
-      <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" style="color:var(--success)">{{ dashboard.validatedDossiers }}</div><div class="stat-label">Validés</div></div>
-      <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-value" style="color:var(--danger)">{{ dashboard.rejectedDossiers }}</div><div class="stat-label">Rejetés</div></div>
+      <a routerLink="/em/dossiers" [queryParams]="{tab:'pending'}" class="stat-card stat-card-link"><div class="stat-icon">⏳</div><div class="stat-value" style="color:var(--warning)">{{ dashboard.pendingDossiers }}</div><div class="stat-label">En Attente</div></a>
+      <a routerLink="/em/dossiers" [queryParams]="{tab:'validated'}" class="stat-card stat-card-link"><div class="stat-icon">✅</div><div class="stat-value" style="color:var(--success)">{{ dashboard.validatedDossiers }}</div><div class="stat-label">Validés</div></a>
+      <a routerLink="/em/dossiers" [queryParams]="{tab:'rejected'}" class="stat-card stat-card-link"><div class="stat-icon">❌</div><div class="stat-value" style="color:var(--danger)">{{ dashboard.rejectedDossiers }}</div><div class="stat-label">Rejetés</div></a>
     </div>
 
     <!-- Activités récentes -->
@@ -51,4 +51,6 @@
 <style>
 .card-header { padding: 16px 20px 0; }
 .card-title { font-size: 15px; font-weight: 600; color: var(--text-dark); }
+.stat-card-link { text-decoration: none; cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.stat-card-link:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.1); }
 </style>
