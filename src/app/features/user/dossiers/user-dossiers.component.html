@@ -19,10 +19,10 @@
             <td><span class="badge" [ngClass]="statusClass(d.status)">{{ d.status }}</span></td>
             <td>{{ d.expirationDate | date:'dd/MM/yyyy' }}</td>
             <td>
-              <button class="btn btn-sm btn-secondary" (click)="openEdit(d)" [disabled]="d.status !== DossierStatus.DRAFT" title="Modifier">✏️</button>
-              <button class="btn btn-sm btn-primary" style="margin-left:4px" (click)="submit(d.reference)" *ngIf="d.status===DossierStatus.DRAFT" title="Soumettre">📤</button>
-              <button class="btn btn-sm btn-success" style="margin-left:4px" (click)="downloadPdf(d.reference)" *ngIf="d.status==='VALIDATED' && d.hasPdf" title="Télécharger le PDF">📄</button>
-              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(d.reference)" [disabled]="d.status !== DossierStatus.DRAFT" title="Supprimer">🗑️</button>
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(d)" [disabled]="d.status === DossierStatus.VALIDATED" title="Modifier"><span class="material-icons" style="font-size:16px">edit</span></button>
+              <button class="btn btn-sm btn-primary" style="margin-left:4px" (click)="submit(d.reference)" *ngIf="d.status===DossierStatus.DRAFT" title="Soumettre"><span class="material-icons" style="font-size:16px">send</span></button>
+              <button class="btn btn-sm btn-success" style="margin-left:4px" (click)="downloadPdf(d.reference)" *ngIf="d.status==='VALIDATED' && d.hasPdf" title="Télécharger le PDF"><span class="material-icons" style="font-size:16px">download</span></button>
+              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(d.reference)" [disabled]="d.status === DossierStatus.VALIDATED" title="Supprimer"><span class="material-icons" style="font-size:16px">delete_forever</span></button>
             </td>
           </tr>
           <tr *ngIf="page.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📋</div><p>Aucun dossier. Créez votre premier dossier !</p></div></td></tr>

@@ -26,7 +26,7 @@
             <td>{{ d.amount | number:'1.2-2' }} €</td>
             <td>{{ d.userFullName || d.userReference }}</td>
             <td>{{ d.submitDate | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td><button class="btn btn-sm btn-primary" (click)="openValidation(d)">📋 Valider</button></td>
+            <td><button class="btn btn-sm btn-primary" (click)="openValidation(d)"><span class="material-icons" style="font-size:16px;vertical-align:middle">manage_search</span> Valider</button></td>
           </tr>
           <tr *ngIf="pendingPage.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">✅</div><p>Aucun dossier en attente</p></div></td></tr>
         </tbody>
@@ -53,7 +53,7 @@
             <td>{{ d.userFullName || d.userReference }}</td>
             <td>{{ (d.validationDate || d.rejectDate) | date:'dd/MM/yyyy' }}</td>
             <td>
-              <button *ngIf="d.hasPdf" class="btn btn-sm btn-success" (click)="downloadPdf(d.reference)" title="Télécharger le PDF signé">📄 PDF</button>
+              <button *ngIf="d.hasPdf" class="btn btn-sm btn-success" (click)="downloadPdf(d.reference)" title="Télécharger le PDF signé"><span class="material-icons" style="font-size:16px;vertical-align:middle">download</span> PDF</button>
               <span *ngIf="!d.hasPdf" style="color:var(--text-muted)">—</span>
             </td>
           </tr>
@@ -111,7 +111,7 @@
 
       <div class="modal-actions">
         <button class="btn btn-secondary" (click)="closeWorkflow()">Fermer</button>
-        <button class="btn btn-danger" (click)="rejectMode=!rejectMode" *ngIf="!rejectMode">❌ Rejeter</button>
+        <button class="btn btn-danger" (click)="rejectMode=!rejectMode" *ngIf="!rejectMode"><span class="material-icons" style="font-size:16px;vertical-align:middle">disabled_by_default</span> Rejeter</button>
         <button class="btn btn-danger" (click)="reject()" [disabled]="workflowLoading" *ngIf="rejectMode">Confirmer le rejet</button>
         <button class="btn btn-primary" (click)="workflowStep=2" *ngIf="!rejectMode">Continuer →</button>
       </div>
@@ -129,7 +129,8 @@
       <div class="modal-actions">
         <button class="btn btn-secondary" (click)="workflowStep=1">← Retour</button>
         <button class="btn btn-primary" (click)="generatePdf()" [disabled]="workflowLoading">
-          {{ workflowLoading ? '⏳ Génération...' : '📄 Générer le PDF' }}
+          <span class="material-icons" style="font-size:16px;vertical-align:middle">picture_as_pdf</span>
+          {{ workflowLoading ? 'Génération...' : 'Générer le PDF' }}
         </button>
       </div>
     </ng-container>
@@ -146,7 +147,8 @@
       <div class="modal-actions">
         <button class="btn btn-secondary" (click)="workflowStep=2">← Retour</button>
         <button class="btn btn-success" (click)="signAndValidate()" [disabled]="workflowLoading">
-          {{ workflowLoading ? '⏳ Validation...' : '🔐 Signer et Valider' }}
+          <span class="material-icons" style="font-size:16px;vertical-align:middle">check_circle_outline</span>
+          {{ workflowLoading ? 'Validation...' : 'Signer et Valider' }}
         </button>
       </div>
     </ng-container>

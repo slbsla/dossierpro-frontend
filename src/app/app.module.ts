@@ -6,6 +6,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { LayoutModule } from './layout/layout.module';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -15,6 +16,7 @@ import { LayoutModule } from './layout/layout.module';
     FormsModule,
     ReactiveFormsModule,
     LayoutModule,
+    SharedModule,
     AppRoutingModule
   ],
   providers: [

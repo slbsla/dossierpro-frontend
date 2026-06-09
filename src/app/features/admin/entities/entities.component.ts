@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { EntityOrg, EntityMng, EntitySector, PageResponse } from '../../../core/models/models';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({ selector: 'app-entities', templateUrl: './entities.component.html' })
 export class EntitiesComponent implements OnInit {
@@ -12,7 +13,7 @@ export class EntitiesComponent implements OnInit {
   form!: FormGroup; error = ''; success = '';
   sectors = Object.values(EntitySector);
 
-  constructor(private api: ApiService, private fb: FormBuilder) {}
+  constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
 
   ngOnInit() { this.load(); this.loadManagers(); }
 
@@ -43,9 +44,18 @@ export class EntitiesComponent implements OnInit {
     obs.subscribe({ next: () => { this.showModal = false; this.load(this.page.page); this.success = this.editMode ? 'Entité modifiée' : 'Entité créée'; setTimeout(() => this.success = '', 3000); }, error: (e) => this.error = e?.error?.message || 'Erreur' });
   }
 
-  delete(code: string) {
-    if (!confirm('Confirmer la suppression de cette entité ?')) return;
-    this.api.deleteEntity(code).subscribe({ next: () => { this.load(this.page.page); this.success = 'Entité supprimée'; setTimeout(() => this.success = '', 3000); }, error: (e) => alert(e?.error?.message || 'Erreur lors de la suppression') });
+  async delete(code: string) {
+    const ok = await this.confirm.open({
+      title: 'Supprimer l\'entité',
+      message: 'Cette entité et toutes ses données associées seront supprimées définitivement.',
+      confirmLabel: 'Supprimer',
+      type: 'danger'
+    });
+    if (!ok) return;
+    this.api.deleteEntity(code).subscribe({
+      next: () => { this.load(this.page.page); this.success = 'Entité supprimée'; setTimeout(() => this.success = '', 3000); },
+      error: (e) => this.confirm.open({ title: 'Erreur', message: e?.error?.message || 'Erreur lors de la suppression', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
+    });
   }
 
   pages() { return Array.from({ length: this.page.totalPages }, (_, i) => i); }

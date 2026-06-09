@@ -1,0 +1,25 @@
+<div class="cdialog-overlay" *ngIf="visible" (click)="cancel()">
+  <div class="cdialog-box" (click)="$event.stopPropagation()">
+
+    <div class="cdialog-header" [ngClass]="'cdialog-header--' + (config.type || 'info')">
+      <span class="material-icons cdialog-icon">{{ icon }}</span>
+      <h3 class="cdialog-title">{{ config.title }}</h3>
+    </div>
+
+    <div class="cdialog-body">
+      <p>{{ config.message }}</p>
+    </div>
+
+    <div class="cdialog-footer">
+      <button class="btn btn-secondary" (click)="cancel()">
+        <span class="material-icons" style="font-size:16px;vertical-align:middle">close</span>
+        {{ config.cancelLabel || 'Annuler' }}
+      </button>
+      <button [class]="confirmClass" (click)="confirm()">
+        <span class="material-icons" style="font-size:16px;vertical-align:middle">check</span>
+        {{ config.confirmLabel || 'Confirmer' }}
+      </button>
+    </div>
+
+  </div>
+</div>

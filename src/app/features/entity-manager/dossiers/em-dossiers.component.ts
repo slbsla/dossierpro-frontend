@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { Dossier, DossierStatus, PageResponse } from '../../../core/models/models';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({ selector: 'app-em-dossiers', templateUrl: './em-dossiers.component.html', styleUrls: ['./em-dossiers.component.css'] })
 export class EmDossiersComponent implements OnInit {
@@ -16,7 +17,7 @@ export class EmDossiersComponent implements OnInit {
   workflowLoading = false; workflowError = '';
   DossierStatus = DossierStatus;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private confirm: ConfirmDialogService) {}
   ngOnInit() { this.loadPending(); this.loadValidated(); }
 
   loadPending(p = 0) {
@@ -70,7 +71,7 @@ export class EmDossiersComponent implements OnInit {
         a.click();
         URL.revokeObjectURL(url);
       },
-      error: () => alert('PDF non disponible pour ce dossier.')
+      error: () => this.confirm.open({ title: 'PDF indisponible', message: 'Le PDF n\'est pas disponible pour ce dossier.', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
     });
   }
 

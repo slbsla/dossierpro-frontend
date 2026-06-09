@@ -1,0 +1,79 @@
+.cdialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn .15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.cdialog-box {
+  background: var(--card-bg, #fff);
+  border-radius: 12px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  overflow: hidden;
+  animation: slideUp .18s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ---- Header ---- */
+.cdialog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.cdialog-header--danger  { background: #fff5f5; }
+.cdialog-header--warning { background: #fffbeb; }
+.cdialog-header--info    { background: #f0f7ff; }
+
+.cdialog-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.cdialog-header--danger  .cdialog-icon { color: var(--danger, #ef4444); }
+.cdialog-header--warning .cdialog-icon { color: #f59e0b; }
+.cdialog-header--info    .cdialog-icon { color: var(--primary, #3b82f6); }
+
+.cdialog-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+  margin: 0;
+}
+
+/* ---- Body ---- */
+.cdialog-body {
+  padding: 16px 24px 20px;
+}
+
+.cdialog-body p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.55;
+}
+
+/* ---- Footer ---- */
+.cdialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 24px 20px;
+}

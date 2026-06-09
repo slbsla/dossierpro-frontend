@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { Dossier, DossierStatus, DossierType, PageResponse } from '../../../core/models/models';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({ selector: 'app-user-dossiers', templateUrl: './user-dossiers.component.html' })
 export class UserDossiersComponent implements OnInit {
@@ -12,7 +13,7 @@ export class UserDossiersComponent implements OnInit {
   DossierStatus = DossierStatus;
   viewDossier: Dossier | null = null;
 
-  constructor(private api: ApiService, private fb: FormBuilder) {}
+  constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
   ngOnInit() { this.load(); }
 
   load(p = 0) {
@@ -27,7 +28,7 @@ export class UserDossiersComponent implements OnInit {
   }
 
   openEdit(d: Dossier) {
-    if (d.status !== DossierStatus.DRAFT) return;
+    if (d.status === DossierStatus.VALIDATED) return;
     this.editMode = true; this.selectedRef = d.reference; this.error = '';
     this.form = this.fb.group({ libelle: [d.libelle, Validators.required], description: [d.description], type: [d.type, Validators.required], amount: [d.amount, [Validators.required, Validators.min(0)]] });
     this.showModal = true;
@@ -39,14 +40,32 @@ export class UserDossiersComponent implements OnInit {
     obs.subscribe({ next: () => { this.showModal = false; this.load(this.page.page); this.success = this.editMode ? 'Dossier modifié' : 'Dossier créé'; setTimeout(() => this.success = '', 3000); }, error: (e) => this.error = e?.error?.message || 'Erreur' });
   }
 
-  submit(ref: string) {
-    if (!confirm('Soumettre ce dossier au manager ?')) return;
-    this.api.submitDossier(ref).subscribe({ next: () => { this.load(this.page.page); this.success = 'Dossier soumis'; setTimeout(() => this.success = '', 3000); }, error: (e) => alert(e?.error?.message || 'Erreur') });
+  async submit(ref: string) {
+    const ok = await this.confirm.open({
+      title: 'Soumettre le dossier',
+      message: 'Ce dossier sera envoyé à votre manager pour validation. Continuer ?',
+      confirmLabel: 'Soumettre',
+      type: 'info'
+    });
+    if (!ok) return;
+    this.api.submitDossier(ref).subscribe({
+      next: () => { this.load(this.page.page); this.success = 'Dossier soumis'; setTimeout(() => this.success = '', 3000); },
+      error: (e) => this.showError(e?.error?.message || 'Erreur lors de la soumission')
+    });
   }
 
-  delete(ref: string) {
-    if (!confirm('Supprimer ce dossier ?')) return;
-    this.api.deleteDossier(ref).subscribe({ next: () => { this.load(this.page.page); this.success = 'Dossier supprimé'; setTimeout(() => this.success = '', 3000); }, error: (e) => alert(e?.error?.message || 'Erreur') });
+  async delete(ref: string) {
+    const ok = await this.confirm.open({
+      title: 'Supprimer le dossier',
+      message: 'Cette action est irréversible. Le dossier sera définitivement supprimé.',
+      confirmLabel: 'Supprimer',
+      type: 'danger'
+    });
+    if (!ok) return;
+    this.api.deleteDossier(ref).subscribe({
+      next: () => { this.load(this.page.page); this.success = 'Dossier supprimé'; setTimeout(() => this.success = '', 3000); },
+      error: (e) => this.showError(e?.error?.message || 'Erreur lors de la suppression')
+    });
   }
 
   downloadPdf(ref: string) {
@@ -54,13 +73,15 @@ export class UserDossiersComponent implements OnInit {
       next: (blob) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `dossier-${ref}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
+        a.href = url; a.download = `dossier-${ref}.pdf`;
+        a.click(); URL.revokeObjectURL(url);
       },
-      error: () => alert('PDF non disponible pour ce dossier.')
+      error: () => this.showError('PDF non disponible pour ce dossier.')
     });
+  }
+
+  private async showError(msg: string) {
+    await this.confirm.open({ title: 'Erreur', message: msg, confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' });
   }
 
   pages() { return Array.from({ length: this.page.totalPages }, (_, i) => i); }

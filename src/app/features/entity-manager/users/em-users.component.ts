@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { EntityUser, PageResponse } from '../../../core/models/models';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({ selector: 'app-em-users', templateUrl: './em-users.component.html', styleUrls: ['./em-users.component.css'] })
 export class EmUsersComponent implements OnInit {
@@ -10,7 +11,7 @@ export class EmUsersComponent implements OnInit {
   form!: FormGroup; error = ''; success = '';
   showPassword = false; showConfirmPassword = false;
 
-  constructor(private api: ApiService, private fb: FormBuilder) {}
+  constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
   ngOnInit() { this.load(); }
 
   load(p = 0) {
@@ -45,40 +46,36 @@ export class EmUsersComponent implements OnInit {
 
   save() {
     if (this.form.invalid) return;
-
-    if (!this.editMode) {
-      if (this.form.value.password !== this.form.value.confirmPassword) {
-        this.error = 'Les mots de passe ne correspondent pas.';
-        return;
-      }
+    if (!this.editMode && this.form.value.password !== this.form.value.confirmPassword) {
+      this.error = 'Les mots de passe ne correspondent pas.'; return;
     }
-
     const { confirmPassword, ...payload } = this.form.value;
-    const obs = this.editMode
-      ? this.api.updateEmUser(this.selectedRef!, payload)
-      : this.api.createEmUser(payload);
-
+    const obs = this.editMode ? this.api.updateEmUser(this.selectedRef!, payload) : this.api.createEmUser(payload);
     obs.subscribe({
-      next: () => {
-        this.showModal = false;
-        this.load(this.page.page);
-        this.success = this.editMode ? 'Utilisateur modifié avec succès.' : 'Utilisateur créé avec succès.';
-        setTimeout(() => this.success = '', 5000);
-      },
+      next: () => { this.showModal = false; this.load(this.page.page); this.success = this.editMode ? 'Utilisateur modifié avec succès.' : 'Utilisateur créé avec succès.'; setTimeout(() => this.success = '', 5000); },
       error: (e) => this.error = e?.error?.message || 'Erreur'
     });
   }
 
-  delete(ref: string) {
-    if (!confirm('Supprimer cet utilisateur et tous ses dossiers ?')) return;
+  async delete(ref: string) {
+    const ok = await this.confirm.open({
+      title: 'Supprimer l\'utilisateur',
+      message: 'L\'utilisateur et tous ses dossiers seront supprimés définitivement.',
+      confirmLabel: 'Supprimer',
+      type: 'danger'
+    });
+    if (!ok) return;
     this.api.deleteEmUser(ref).subscribe({
       next: () => { this.load(this.page.page); this.success = 'Utilisateur supprimé'; setTimeout(() => this.success = '', 3000); },
-      error: (e) => alert(e?.error?.message || 'Erreur')
+      error: (e) => this.confirm.open({ title: 'Erreur', message: e?.error?.message || 'Erreur', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
     });
   }
 
-  toggleActive(ref: string) {
-    this.api.toggleUserActive(ref).subscribe({ next: () => this.load(this.page.page), error: (e) => alert(e?.error?.message || 'Erreur') });
+  async toggleActive(ref: string) {
+    this.api.toggleUserActive(ref).subscribe({
+      next: () => this.load(this.page.page),
+      error: (e) => this.confirm.open({ title: 'Erreur', message: e?.error?.message || 'Erreur', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
+    });
   }
 
   pages() { return Array.from({ length: this.page.totalPages }, (_, i) => i); }

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { EntityMng, PageResponse } from '../../../core/models/models';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({ selector: 'app-entity-managers', templateUrl: './entity-managers.component.html', styleUrls: ['./entity-managers.component.css'] })
 export class EntityManagersComponent implements OnInit {
@@ -10,7 +11,7 @@ export class EntityManagersComponent implements OnInit {
   form!: FormGroup; error = ''; success = '';
   showPassword = false; showConfirmPassword = false;
 
-  constructor(private api: ApiService, private fb: FormBuilder) {}
+  constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
   ngOnInit() { this.load(); }
 
   load(p = 0) {
@@ -34,7 +35,6 @@ export class EntityManagersComponent implements OnInit {
 
   openEdit(m: EntityMng) {
     this.editMode = true; this.selectedRef = m.reference; this.error = '';
-    // Pas de champ mot de passe en édition
     this.form = this.fb.group({
       firstName: [m.firstName, Validators.required],
       lastName:  [m.lastName,  Validators.required],
@@ -46,37 +46,28 @@ export class EntityManagersComponent implements OnInit {
 
   save() {
     if (this.form.invalid) return;
-
-    // Validation confirmation mot de passe (création uniquement)
-    if (!this.editMode) {
-      if (this.form.value.password !== this.form.value.confirmPassword) {
-        this.error = 'Les mots de passe ne correspondent pas.';
-        return;
-      }
+    if (!this.editMode && this.form.value.password !== this.form.value.confirmPassword) {
+      this.error = 'Les mots de passe ne correspondent pas.'; return;
     }
-
-    // On n'envoie pas confirmPassword au backend
     const { confirmPassword, ...payload } = this.form.value;
-    const obs = this.editMode
-      ? this.api.updateEntityManager(this.selectedRef!, payload)
-      : this.api.createEntityManager(payload);
-
+    const obs = this.editMode ? this.api.updateEntityManager(this.selectedRef!, payload) : this.api.createEntityManager(payload);
     obs.subscribe({
-      next: () => {
-        this.showModal = false;
-        this.load(this.page.page);
-        this.success = this.editMode ? 'Entity Manager modifié avec succès.' : 'Entity Manager créé avec succès.';
-        setTimeout(() => this.success = '', 5000);
-      },
+      next: () => { this.showModal = false; this.load(this.page.page); this.success = this.editMode ? 'Entity Manager modifié avec succès.' : 'Entity Manager créé avec succès.'; setTimeout(() => this.success = '', 5000); },
       error: (e) => this.error = e?.error?.message || 'Une erreur est survenue.'
     });
   }
 
-  delete(ref: string) {
-    if (!confirm('Confirmer la suppression de cet Entity Manager ?')) return;
+  async delete(ref: string) {
+    const ok = await this.confirm.open({
+      title: 'Supprimer l\'Entity Manager',
+      message: 'Cet Entity Manager sera supprimé définitivement. Cette action est irréversible.',
+      confirmLabel: 'Supprimer',
+      type: 'danger'
+    });
+    if (!ok) return;
     this.api.deleteEntityManager(ref).subscribe({
       next: () => { this.load(this.page.page); this.success = 'EM supprimé'; setTimeout(() => this.success = '', 3000); },
-      error: (e) => alert(e?.error?.message || 'Erreur lors de la suppression')
+      error: (e) => this.confirm.open({ title: 'Erreur', message: e?.error?.message || 'Erreur lors de la suppression', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
     });
   }
 
