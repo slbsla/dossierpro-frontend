@@ -1,0 +1,26 @@
+<app-navbar title="Mes Informations"></app-navbar>
+<div class="page-content">
+  <div class="page-header"><h2 class="page-title">Mes Informations</h2></div>
+  <div class="form-row">
+    <div class="card" *ngIf="user">
+      <div class="card-header"><span class="card-title">Profil Entity Manager</span></div>
+      <div class="info-row"><span class="info-label">Référence</span><code>{{ user.uniqueReference }}</code></div>
+      <div class="info-row"><span class="info-label">Prénom</span><span>{{ user.firstName || '—' }}</span></div>
+      <div class="info-row"><span class="info-label">Nom</span><span>{{ user.lastName || '—' }}</span></div>
+      <div class="info-row"><span class="info-label">Téléphone</span><span>{{ user.telephone || '—' }}</span></div>
+      <div class="info-row"><span class="info-label">Entité</span><code>{{ user.entityCode || '—' }}</code></div>
+    </div>
+    <div class="card" *ngIf="dashboard">
+      <div class="card-header"><span class="card-title">Mon Entité</span></div>
+      <div class="info-row"><span class="info-label">Code</span><code>{{ dashboard.entityCode }}</code></div>
+      <div class="info-row"><span class="info-label">Nom</span><span>{{ dashboard.entityName }}</span></div>
+      <div class="info-row"><span class="info-label">Utilisateurs</span><span>{{ dashboard.totalUsers }}</span></div>
+      <div class="info-row"><span class="info-label">Dossiers</span><span>{{ dashboard.totalDossiers }}</span></div>
+    </div>
+  </div>
+</div>
+<style>
+.info-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--gray-border); }
+.info-row:last-child { border-bottom:none; }
+.info-label { font-weight:500; color:var(--gray-text); }
+</style>

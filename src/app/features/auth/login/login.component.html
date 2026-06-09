@@ -1,0 +1,25 @@
+<div class="login-page">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="login-logo">📁</div>
+      <h1>DossierPro</h1>
+      <p>Gestion de dossiers professionnels</p>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+      <div class="form-group">
+        <label class="form-label">Login</label>
+        <input class="form-control" formControlName="username" placeholder="A00001 / M... / U..." autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <input class="form-control" type="password" formControlName="password" placeholder="••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" type="submit" [disabled]="loading" style="width:100%;justify-content:center;padding:12px">
+        <span *ngIf="!loading">Connexion</span>
+        <span *ngIf="loading"><span class="spinner" style="width:16px;height:16px;border-width:2px"></span></span>
+      </button>
+    </form>
+    <p class="login-hint">Mot de passe par défaut : <strong>00000</strong></p>
+  </div>
+</div>

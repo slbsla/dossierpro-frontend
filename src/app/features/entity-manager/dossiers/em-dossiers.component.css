@@ -1,0 +1,8 @@
+.tabs { display:flex; gap:4px; margin-bottom:16px; border-bottom:2px solid var(--gray-border); }
+.tab-btn { padding:10px 20px; border:none; background:none; cursor:pointer; font-size:14px; font-weight:500; color:var(--gray-text); border-bottom:2px solid transparent; margin-bottom:-2px; }
+.tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+.tab-badge { display:inline-flex; align-items:center; justify-content:center; background:var(--primary-light); color:var(--primary); border-radius:20px; font-size:11px; font-weight:700; padding:1px 7px; margin-left:6px; }
+.dossier-detail { background:var(--gray-light); border-radius:var(--radius); padding:16px; }
+.detail-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--gray-border); }
+.detail-row:last-child { border-bottom:none; }
+.detail-label { font-size:13px; color:var(--gray-text); font-weight:500; min-width:100px; }

@@ -1,0 +1,64 @@
+<app-navbar title="Utilisateurs"></app-navbar>
+<div class="page-content">
+  <div class="page-header">
+    <div><h2 class="page-title">Utilisateurs</h2><p class="page-subtitle">{{ page.totalElements }} utilisateur(s)</p></div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Nouvel Utilisateur</button>
+  </div>
+  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <div class="card">
+    <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loading">
+      <table>
+        <thead><tr><th>Référence</th><th>Nom</th><th>Email</th><th>Téléphone</th><th>Statut</th><th>1ère cnx</th><th>Créé le</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let u of page.content">
+            <td><code>{{ u.reference }}</code></td>
+            <td><strong>{{ u.firstName }} {{ u.lastName }}</strong></td>
+            <td>{{ u.email || '—' }}</td>
+            <td>{{ u.telephone || '—' }}</td>
+            <td>
+              <label class="toggle">
+                <input type="checkbox" [checked]="u.isActive" (change)="toggleActive(u.reference)">
+                <span class="toggle-slider"></span>
+              </label>
+            </td>
+            <td><span class="badge" [ngClass]="u.isFirstConnexion ? 'badge-warning' : 'badge-active'">{{ u.isFirstConnexion ? 'Non' : 'Oui' }}</span></td>
+            <td>{{ u.creationDate | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(u)">✏️</button>
+              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(u.reference)">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="page.content.length===0"><td colspan="8"><div class="empty-state"><div class="empty-state-icon">👥</div><p>Aucun utilisateur</p></div></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" *ngIf="page.totalPages > 1">
+        <button (click)="load(page.page-1)" [disabled]="page.page===0">◀</button>
+        <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="load(p)">{{ p+1 }}</button>
+        <button (click)="load(page.page+1)" [disabled]="page.last">▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Créer' }} un Utilisateur</h3>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <form [formGroup]="form">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Prénom *</label><input class="form-control" formControlName="firstName"></div>
+        <div class="form-group"><label class="form-label">Nom *</label><input class="form-control" formControlName="lastName"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Email</label><input class="form-control" type="email" formControlName="email"></div>
+        <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" formControlName="telephone"></div>
+      </div>
+      <p class="form-hint" *ngIf="!editMode">💡 Mot de passe initial: <strong>00000</strong>. Référence générée automatiquement.</p>
+    </form>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showModal=false">Annuler</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">{{ editMode ? 'Enregistrer' : 'Créer' }}</button>
+    </div>
+  </div>
+</div>

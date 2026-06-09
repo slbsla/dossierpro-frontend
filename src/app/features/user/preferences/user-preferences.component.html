@@ -1,0 +1,56 @@
+<app-navbar title="Préférences"></app-navbar>
+<div class="page-content">
+  <div class="page-header"><h2 class="page-title">Préférences</h2></div>
+  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+  <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+  <div class="card" *ngIf="!loading && prefs" style="max-width:500px">
+    <div class="form-group">
+      <label class="form-label">Thème</label>
+      <div class="pref-options">
+        <label class="pref-option" [class.selected]="prefs.theme===Theme.LIGHT">
+          <input type="radio" name="theme" [value]="Theme.LIGHT" [(ngModel)]="prefs.theme"> ☀️ Clair
+        </label>
+        <label class="pref-option" [class.selected]="prefs.theme===Theme.DARK">
+          <input type="radio" name="theme" [value]="Theme.DARK" [(ngModel)]="prefs.theme"> 🌙 Sombre
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Langue</label>
+      <div class="pref-options">
+        <label class="pref-option" [class.selected]="prefs.preferredLanguage===Language.FR">
+          <input type="radio" name="lang" [value]="Language.FR" [(ngModel)]="prefs.preferredLanguage"> 🇫🇷 Français
+        </label>
+        <label class="pref-option" [class.selected]="prefs.preferredLanguage===Language.EN">
+          <input type="radio" name="lang" [value]="Language.EN" [(ngModel)]="prefs.preferredLanguage"> 🇬🇧 English
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Format de date</label>
+      <select class="form-control" [(ngModel)]="prefs.formatDate">
+        <option value="YYYY_MM_DD">YYYY-MM-DD (ex: 2026-06-09)</option>
+        <option value="DD_MM_YYYY">DD-MM-YYYY (ex: 09-06-2026)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Format de montant</label>
+      <select class="form-control" [(ngModel)]="prefs.formatAmount">
+        <option value="FORMAT_DOT">1.000 (point)</option>
+        <option value="FORMAT_SPACE">1 000 (espace)</option>
+      </select>
+    </div>
+    <div style="margin-top:20px">
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Enregistrement...' : '💾 Sauvegarder' }}
+      </button>
+    </div>
+  </div>
+</div>
+<style>
+.pref-options { display:flex; gap:10px; }
+.pref-option { display:flex; align-items:center; gap:8px; padding:10px 16px; border:2px solid var(--gray-border); border-radius:var(--radius-sm); cursor:pointer; font-size:14px; transition:.15s; }
+.pref-option.selected { border-color:var(--primary); background:var(--primary-light); color:var(--primary); font-weight:600; }
+.pref-option input { display:none; }
+</style>

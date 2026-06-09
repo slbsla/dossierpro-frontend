@@ -1,0 +1,23 @@
+<app-navbar title="Dashboard Entity Manager"></app-navbar>
+<div class="page-content">
+  <div class="page-header"><div><h2 class="page-title">Dashboard</h2><p class="page-subtitle" *ngIf="dashboard">{{ dashboard.entityName }} ({{ dashboard.entityCode }})</p></div></div>
+  <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+  <ng-container *ngIf="!loading && dashboard">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">{{ dashboard.totalUsers }}</div><div class="stat-label">Utilisateurs</div></div>
+      <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-value">{{ dashboard.totalDossiers }}</div><div class="stat-label">Total Dossiers</div></div>
+      <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value" style="color:var(--warning)">{{ dashboard.pendingDossiers }}</div><div class="stat-label">En Attente</div></div>
+      <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" style="color:var(--success)">{{ dashboard.validatedDossiers }}</div><div class="stat-label">Validés</div></div>
+      <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-value" style="color:var(--danger)">{{ dashboard.rejectedDossiers }}</div><div class="stat-label">Rejetés</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Répartition par statut</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;padding:4px 0">
+        <div *ngFor="let s of statusEntries()" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--gray-light);border-radius:6px">
+          <span class="badge" [ngClass]="'badge-'+s[0].toLowerCase()">{{ s[0] }}</span>
+          <span style="font-size:20px;font-weight:700">{{ s[1] }}</span>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

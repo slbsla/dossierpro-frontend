@@ -1,0 +1,151 @@
+<app-navbar title="Dossiers"></app-navbar>
+<div class="page-content">
+  <div class="page-header"><h2 class="page-title">Dossiers</h2></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab==='pending'" (click)="activeTab='pending'">
+      En attente <span class="tab-badge">{{ pendingPage.totalElements }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab==='validated'" (click)="activeTab='validated'">
+      Traités <span class="tab-badge">{{ validatedPage.totalElements }}</span>
+    </button>
+  </div>
+
+  <!-- Pending -->
+  <div class="card" *ngIf="activeTab==='pending'">
+    <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loading">
+      <table>
+        <thead><tr><th>Référence</th><th>Libellé</th><th>Type</th><th>Montant</th><th>Auteur</th><th>Soumis le</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let d of pendingPage.content">
+            <td><code>{{ d.reference }}</code></td>
+            <td><strong>{{ d.libelle }}</strong></td>
+            <td><span class="badge badge-em">{{ d.type }}</span></td>
+            <td>{{ d.amount | number:'1.2-2' }} €</td>
+            <td>{{ d.userFullName || d.userReference }}</td>
+            <td>{{ d.submitDate | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td><button class="btn btn-sm btn-primary" (click)="openValidation(d)">📋 Valider</button></td>
+          </tr>
+          <tr *ngIf="pendingPage.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">✅</div><p>Aucun dossier en attente</p></div></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" *ngIf="pendingPage.totalPages>1">
+        <button (click)="loadPending(pendingPage.page-1)" [disabled]="pendingPage.page===0">◀</button>
+        <button *ngFor="let p of pages(pendingPage)" [class.active]="p===pendingPage.page" (click)="loadPending(p)">{{ p+1 }}</button>
+        <button (click)="loadPending(pendingPage.page+1)" [disabled]="pendingPage.last">▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Validated -->
+  <div class="card" *ngIf="activeTab==='validated'">
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Référence</th><th>Libellé</th><th>Statut</th><th>Montant</th><th>Auteur</th><th>Date</th><th>PDF</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let d of validatedPage.content">
+            <td><code>{{ d.reference }}</code></td>
+            <td>{{ d.libelle }}</td>
+            <td><span class="badge" [ngClass]="statusClass(d.status)">{{ d.status }}</span></td>
+            <td>{{ d.amount | number:'1.2-2' }} €</td>
+            <td>{{ d.userFullName || d.userReference }}</td>
+            <td>{{ (d.validationDate || d.rejectDate) | date:'dd/MM/yyyy' }}</td>
+            <td><span *ngIf="d.hasPdf">📄</span><span *ngIf="!d.hasPdf">—</span></td>
+          </tr>
+          <tr *ngIf="validatedPage.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📋</div><p>Aucun dossier traité</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Validation Workflow Modal -->
+<div class="modal-overlay" *ngIf="workflowStep > 0">
+  <div class="modal-box" style="max-width:600px">
+
+    <!-- Stepper -->
+    <div class="stepper">
+      <div class="step" [class.done]="workflowStep>1" [class.active]="workflowStep===1">
+        <div class="step-circle">{{ workflowStep>1 ? '✓' : '1' }}</div>
+        <div class="step-label">Révision</div>
+      </div>
+      <div class="step" [class.done]="workflowStep>2" [class.active]="workflowStep===2">
+        <div class="step-circle">{{ workflowStep>2 ? '✓' : '2' }}</div>
+        <div class="step-label">Génération PDF</div>
+      </div>
+      <div class="step" [class.active]="workflowStep===3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Signature QR</div>
+      </div>
+    </div>
+
+    <div class="alert alert-error" *ngIf="workflowError">{{ workflowError }}</div>
+
+    <!-- Step 1: Review -->
+    <ng-container *ngIf="workflowStep===1 && selectedDossier">
+      <h3 class="modal-title">Révision du Dossier</h3>
+      <div class="dossier-detail">
+        <div class="detail-row"><span class="detail-label">Référence</span><code>{{ selectedDossier.reference }}</code></div>
+        <div class="detail-row"><span class="detail-label">Libellé</span><span>{{ selectedDossier.libelle }}</span></div>
+        <div class="detail-row"><span class="detail-label">Type</span><span class="badge badge-em">{{ selectedDossier.type }}</span></div>
+        <div class="detail-row"><span class="detail-label">Montant</span><strong>{{ selectedDossier.amount | number:'1.2-2' }} €</strong></div>
+        <div class="detail-row"><span class="detail-label">Auteur</span><span>{{ selectedDossier.userFullName }}</span></div>
+        <div class="detail-row"><span class="detail-label">Entité</span><code>{{ selectedDossier.entityCode }}</code></div>
+        <div class="detail-row" *ngIf="selectedDossier.description"><span class="detail-label">Description</span><span>{{ selectedDossier.description }}</span></div>
+        <div class="detail-row"><span class="detail-label">Soumis le</span><span>{{ selectedDossier.submitDate | date:'dd/MM/yyyy HH:mm' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Expire le</span><span>{{ selectedDossier.expirationDate | date:'dd/MM/yyyy' }}</span></div>
+      </div>
+
+      <!-- Reject form -->
+      <div *ngIf="rejectMode" style="margin-top:16px">
+        <div class="form-group">
+          <label class="form-label">Motif de rejet *</label>
+          <textarea class="form-control" [(ngModel)]="rejectMotif" rows="3" placeholder="Expliquez la raison du rejet..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeWorkflow()">Fermer</button>
+        <button class="btn btn-danger" (click)="rejectMode=!rejectMode" *ngIf="!rejectMode">❌ Rejeter</button>
+        <button class="btn btn-danger" (click)="reject()" [disabled]="workflowLoading" *ngIf="rejectMode">Confirmer le rejet</button>
+        <button class="btn btn-primary" (click)="workflowStep=2" *ngIf="!rejectMode">Continuer →</button>
+      </div>
+    </ng-container>
+
+    <!-- Step 2: Generate PDF -->
+    <ng-container *ngIf="workflowStep===2">
+      <h3 class="modal-title">Génération du PDF</h3>
+      <p style="color:var(--gray-text);margin-bottom:20px">Cette étape génère le document officiel du dossier au format PDF avec toutes les informations pertinentes.</p>
+      <div style="background:var(--gray-light);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:20px">
+        <div style="font-size:48px;margin-bottom:8px">📄</div>
+        <p>Dossier: <strong>{{ selectedDossier?.reference }}</strong></p>
+        <p style="color:var(--gray-text);font-size:13px;margin-top:4px">Le PDF sera généré et sauvegardé automatiquement</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="workflowStep=1">← Retour</button>
+        <button class="btn btn-primary" (click)="generatePdf()" [disabled]="workflowLoading">
+          {{ workflowLoading ? '⏳ Génération...' : '📄 Générer le PDF' }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Step 3: Sign -->
+    <ng-container *ngIf="workflowStep===3">
+      <h3 class="modal-title">Signature avec QR Code</h3>
+      <p style="color:var(--gray-text);margin-bottom:20px">Cette étape ajoute un QR code de vérification au document généré et finalise la validation du dossier.</p>
+      <div style="background:var(--success-light);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:20px">
+        <div style="font-size:48px;margin-bottom:8px">✅</div>
+        <p style="color:var(--success);font-weight:600">PDF généré avec succès</p>
+        <p style="color:var(--gray-text);font-size:13px;margin-top:4px">Cliquez sur "Signer et Valider" pour finaliser</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="workflowStep=2">← Retour</button>
+        <button class="btn btn-success" (click)="signAndValidate()" [disabled]="workflowLoading">
+          {{ workflowLoading ? '⏳ Validation...' : '🔐 Signer et Valider' }}
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>

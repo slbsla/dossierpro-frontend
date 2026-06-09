@@ -1,0 +1,58 @@
+<app-navbar title="Entity Managers"></app-navbar>
+<div class="page-content">
+  <div class="page-header">
+    <div><h2 class="page-title">Entity Managers</h2><p class="page-subtitle">{{ page.totalElements }} manager(s)</p></div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Nouveau EM</button>
+  </div>
+  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <div class="card">
+    <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loading">
+      <table>
+        <thead><tr><th>Référence</th><th>Nom</th><th>Fonction</th><th>Téléphone</th><th>Entité</th><th>Créé le</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let m of page.content">
+            <td><code>{{ m.reference }}</code></td>
+            <td><strong>{{ m.firstName }} {{ m.lastName }}</strong></td>
+            <td>{{ m.fonction || '—' }}</td>
+            <td>{{ m.telephone || '—' }}</td>
+            <td><span *ngIf="m.entityName" class="badge badge-em">{{ m.entityName }}</span><span *ngIf="!m.entityName">—</span></td>
+            <td>{{ m.creationDate | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(m)">✏️</button>
+              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(m.reference)">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="page.content.length === 0"><td colspan="7" class="empty-state"><span class="empty-state-icon">👔</span><p>Aucun Entity Manager</p></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" *ngIf="page.totalPages > 1">
+        <button (click)="load(page.page-1)" [disabled]="page.page===0">◀</button>
+        <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="load(p)">{{ p+1 }}</button>
+        <button (click)="load(page.page+1)" [disabled]="page.last">▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Créer' }} un Entity Manager</h3>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <form [formGroup]="form">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Prénom *</label><input class="form-control" formControlName="firstName"></div>
+        <div class="form-group"><label class="form-label">Nom *</label><input class="form-control" formControlName="lastName"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" formControlName="telephone"></div>
+        <div class="form-group"><label class="form-label">Fonction</label><input class="form-control" formControlName="fonction"></div>
+      </div>
+      <p class="form-hint" *ngIf="!editMode">💡 Le mot de passe initial sera <strong>00000</strong>. La référence sera générée automatiquement.</p>
+    </form>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showModal=false">Annuler</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">{{ editMode ? 'Enregistrer' : 'Créer' }}</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,79 @@
+<app-navbar title="Gestion des Entités"></app-navbar>
+<div class="page-content">
+  <div class="page-header">
+    <div><h2 class="page-title">Entités</h2><p class="page-subtitle">{{ page.totalElements }} entité(s) au total</p></div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Nouvelle Entité</button>
+  </div>
+  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <div class="card">
+    <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loading">
+      <table>
+        <thead><tr><th>Code</th><th>Nom</th><th>Secteur</th><th>Entity Manager</th><th>Statut</th><th>Créé le</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let e of page.content">
+            <td><code>{{ e.code }}</code></td>
+            <td><strong>{{ e.name }}</strong></td>
+            <td><span class="badge badge-em">{{ e.sector }}</span></td>
+            <td>{{ e.entityManagerName || e.entityManagerId || '—' }}</td>
+            <td><span class="badge" [ngClass]="e.isActive ? 'badge-active' : 'badge-inactive'">{{ e.isActive ? 'Actif' : 'Inactif' }}</span></td>
+            <td>{{ e.creationDate | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(e)" title="Modifier">✏️</button>
+              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(e.code)" title="Supprimer">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="page.content.length === 0"><td colspan="7" class="empty-state"><span class="empty-state-icon">🏢</span><p>Aucune entité</p></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" *ngIf="page.totalPages > 1">
+        <button (click)="load(page.page-1)" [disabled]="page.page===0">◀</button>
+        <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="load(p)">{{ p+1 }}</button>
+        <button (click)="load(page.page+1)" [disabled]="page.last">▶</button>
+        <span class="page-info">Page {{ page.page+1 }}/{{ page.totalPages }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Créer' }} une Entité</h3>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <form [formGroup]="form">
+      <div class="form-group">
+        <label class="form-label">Nom *</label>
+        <input class="form-control" formControlName="name" placeholder="Nom de l'entité">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Secteur</label>
+          <select class="form-control" formControlName="sector">
+            <option value="">— Sélectionner —</option>
+            <option *ngFor="let s of sectors" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Entity Manager</label>
+          <select class="form-control" formControlName="entityManagerId">
+            <option value="">— Aucun —</option>
+            <option *ngFor="let m of managers" [value]="m.reference">{{ m.firstName }} {{ m.lastName }} ({{ m.reference }})</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Adresse</label>
+        <input class="form-control" formControlName="adresse" placeholder="Adresse">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" formControlName="description" rows="3" placeholder="Description"></textarea>
+      </div>
+    </form>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showModal=false">Annuler</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">{{ editMode ? 'Enregistrer' : 'Créer' }}</button>
+    </div>
+  </div>
+</div>

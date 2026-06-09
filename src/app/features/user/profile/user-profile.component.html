@@ -1,0 +1,52 @@
+<app-navbar title="Mon Profil"></app-navbar>
+<div class="page-content">
+  <div class="page-header">
+    <div><h2 class="page-title">Mon Profil</h2></div>
+    <button class="btn btn-secondary" *ngIf="!editMode" (click)="editMode=true">✏️ Modifier</button>
+    <div *ngIf="editMode" style="display:flex;gap:8px">
+      <button class="btn btn-secondary" (click)="editMode=false; initForm(profile!)">Annuler</button>
+      <button class="btn btn-primary" (click)="save()">Enregistrer</button>
+    </div>
+  </div>
+  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+  <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+  <div class="card" *ngIf="!loading && profile">
+    <div class="profile-header">
+      <div class="profile-avatar">{{ profile.firstName?.[0] ?? 'U' }}</div>
+      <div>
+        <div style="font-size:20px;font-weight:700">{{ profile.firstName }} {{ profile.lastName }}</div>
+        <code style="color:var(--gray-text)">{{ profile.reference }}</code>
+      </div>
+    </div>
+    <hr class="divider">
+    <ng-container *ngIf="!editMode">
+      <div class="info-row"><span class="info-label">Prénom</span><span>{{ profile.firstName }}</span></div>
+      <div class="info-row"><span class="info-label">Nom</span><span>{{ profile.lastName }}</span></div>
+      <div class="info-row"><span class="info-label">Email</span><span>{{ profile.email || '—' }}</span></div>
+      <div class="info-row"><span class="info-label">Téléphone</span><span>{{ profile.telephone || '—' }}</span></div>
+      <div class="info-row"><span class="info-label">Entité</span><code>{{ profile.entityCode }}</code></div>
+      <div class="info-row"><span class="info-label">Statut</span><span class="badge" [ngClass]="profile.isActive ? 'badge-active' : 'badge-inactive'">{{ profile.isActive ? 'Actif' : 'Inactif' }}</span></div>
+      <div class="info-row"><span class="info-label">Membre depuis</span><span>{{ profile.creationDate | date:'dd/MM/yyyy' }}</span></div>
+    </ng-container>
+    <ng-container *ngIf="editMode">
+      <form [formGroup]="form">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Prénom</label><input class="form-control" formControlName="firstName"></div>
+          <div class="form-group"><label class="form-label">Nom</label><input class="form-control" formControlName="lastName"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Email</label><input class="form-control" type="email" formControlName="email"></div>
+          <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" formControlName="telephone"></div>
+        </div>
+      </form>
+    </ng-container>
+  </div>
+</div>
+<style>
+.profile-header { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
+.profile-avatar { width:60px; height:60px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; }
+.info-row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--gray-border); }
+.info-row:last-child { border-bottom:none; }
+.info-label { font-weight:500; color:var(--gray-text); }
+</style>
