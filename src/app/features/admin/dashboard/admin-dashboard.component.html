@@ -1,6 +1,8 @@
 <app-navbar title="Dashboard Admin"></app-navbar>
 <div class="page-content">
-  <div class="page-header"><div><h2 class="page-title">Dashboard</h2><p class="page-subtitle">Vue d'ensemble de la plateforme</p></div></div>
+  <div class="page-header">
+    <div><h2 class="page-title">Dashboard</h2><p class="page-subtitle">Vue d'ensemble de la plateforme</p></div>
+  </div>
   <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
   <ng-container *ngIf="!loading && dashboard">
     <div class="stats-grid">
@@ -9,19 +11,42 @@
       <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">{{ dashboard.totalUsers }}</div><div class="stat-label">Utilisateurs</div></div>
       <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-value">{{ dashboard.totalDossiers }}</div><div class="stat-label">Dossiers Total</div></div>
     </div>
+
+    <!-- Activités récentes -->
     <div class="card">
-      <div class="card-header"><span class="card-title">Dossiers par statut</span></div>
-      <div class="status-grid">
-        <div class="status-item" *ngFor="let s of getStatusEntries()">
-          <span class="badge" [ngClass]="'badge-' + s[0].toLowerCase()">{{ s[0] }}</span>
-          <span class="status-count">{{ s[1] }}</span>
+      <div class="card-header"><span class="card-title">🕐 Activités récentes</span></div>
+      <div class="table-wrapper">
+        <table *ngIf="recentLogs.length > 0">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Acteur</th>
+              <th>Action</th>
+              <th>Objet</th>
+              <th>Description</th>
+              <th>Référence cible</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of recentLogs">
+              <td style="white-space:nowrap;font-size:12px;color:var(--text-muted)">{{ log.dateCreation | date:'dd/MM/yy HH:mm' }}</td>
+              <td><code style="font-size:11px">{{ log.userReference }}</code></td>
+              <td><span class="badge" [ngClass]="actionClass(log.action)">{{ actionLabel(log.action) }}</span></td>
+              <td style="font-size:12px">{{ log.object }}</td>
+              <td style="font-size:13px">{{ log.description }}</td>
+              <td><code style="font-size:11px">{{ log.value || '—' }}</code></td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="recentLogs.length === 0" class="empty-state">
+          <div class="empty-state-icon">📭</div>
+          <p>Aucune activité récente</p>
         </div>
       </div>
     </div>
   </ng-container>
 </div>
 <style>
-.status-grid { display: flex; flex-wrap: wrap; gap: 16px; padding: 8px 0; }
-.status-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--gray-light); border-radius: var(--radius-sm); }
-.status-count { font-size: 20px; font-weight: 700; color: var(--text-dark); }
+.card-header { padding: 16px 20px 0; }
+.card-title { font-size: 15px; font-weight: 600; color: var(--text-dark); }
 </style>

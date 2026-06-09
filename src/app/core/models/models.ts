@@ -100,6 +100,16 @@ export interface DashboardEm {
   dossiersByStatus: Record<string, number>;
 }
 
+export interface ActivityLog {
+  id: number;
+  userReference: string;
+  object: string;
+  action: string;
+  dateCreation: string;
+  description: string;
+  value?: string;
+}
+
 export interface PageResponse<T> {
   content: T[];
   page: number;

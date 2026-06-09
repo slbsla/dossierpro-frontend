@@ -170,4 +170,17 @@ export class ApiService {
   saveUserPrefs(data: Partial<UserPref>): Observable<UserPref> {
     return this.http.put<UserPref>(`${this.API}/user/preferences`, data);
   }
+
+  // ---- Activity Logs ----
+  getAdminActivityLogs(page = 0, size = 8): Observable<any> {
+    return this.http.get(`${this.API}/admin/activity-logs`, {
+      params: new HttpParams().set('page', page).set('size', size)
+    });
+  }
+
+  getEmActivityLogs(page = 0, size = 8): Observable<any> {
+    return this.http.get(`${this.API}/em/activity-logs`, {
+      params: new HttpParams().set('page', page).set('size', size)
+    });
+  }
 }
