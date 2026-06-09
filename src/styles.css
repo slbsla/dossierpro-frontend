@@ -189,6 +189,46 @@ tr:last-child td { border-bottom: none; }
 /* Divider */
 .divider { border: none; border-top: 1px solid var(--gray-border); margin: 20px 0; }
 
+/* Search bar */
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  background: var(--white);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.search-icon {
+  padding: 0 10px 0 14px;
+  color: var(--gray-text);
+  font-size: 20px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 10px 4px;
+  font-size: 14px;
+  background: transparent;
+  color: var(--text-dark);
+}
+.search-input::placeholder { color: #94a3b8; }
+.search-clear {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0 12px;
+  color: var(--gray-text);
+  display: flex;
+  align-items: center;
+}
+.search-clear:hover { color: var(--danger); }
+
 /* Checkbox toggle */
 .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
 .toggle input { opacity: 0; width: 0; height: 0; }

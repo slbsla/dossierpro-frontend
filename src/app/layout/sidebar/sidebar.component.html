@@ -1,6 +1,10 @@
 <aside class="sidebar" [attr.data-role]="user?.role?.toLowerCase()">
   <div class="sidebar-logo">
-    <div class="logo-icon"><span class="material-icons" style="font-size:18px">folder_open</span></div>
+    <div class="logo-icon">
+      <img *ngIf="user?.role === Role.ADMIN" src="assets/ADMIN.png" class="logo-img" alt="Admin">
+      <img *ngIf="user?.role === Role.ENTITY_MANAGER" src="assets/EM.png" class="logo-img" alt="EM">
+      <span *ngIf="user?.role === Role.USER || !user" class="material-icons" style="font-size:18px">folder_open</span>
+    </div>
     <span class="logo-text">DossierPro</span>
   </div>
 

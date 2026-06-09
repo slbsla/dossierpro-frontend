@@ -5,6 +5,16 @@
     <button class="btn btn-primary" (click)="openCreate()">+ Nouveau Dossier</button>
   </div>
   <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+
+  <!-- Search bar -->
+  <div class="search-bar">
+    <span class="material-icons search-icon">search</span>
+    <input class="search-input" type="text" placeholder="Rechercher par libellé ou référence…" [value]="searchTerm" (input)="onSearch($any($event.target).value)">
+    <button class="search-clear" *ngIf="searchTerm" (click)="onSearch('')" title="Effacer">
+      <span class="material-icons" style="font-size:16px">close</span>
+    </button>
+  </div>
+
   <div class="card">
     <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
     <div class="table-wrapper" *ngIf="!loading">
@@ -25,7 +35,7 @@
               <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(d.reference)" [disabled]="d.status === DossierStatus.VALIDATED" title="Supprimer"><span class="material-icons" style="font-size:16px">delete_forever</span></button>
             </td>
           </tr>
-          <tr *ngIf="page.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📋</div><p>Aucun dossier. Créez votre premier dossier !</p></div></td></tr>
+          <tr *ngIf="page.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📋</div><p>{{ searchTerm ? 'Aucun résultat pour "' + searchTerm + '"' : 'Aucun dossier. Créez votre premier dossier !' }}</p></div></td></tr>
         </tbody>
       </table>
       <div class="pagination" *ngIf="page.totalPages>1">

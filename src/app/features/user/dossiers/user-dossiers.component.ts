@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { Dossier, DossierStatus, DossierType, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({ selector: 'app-user-dossiers', templateUrl: './user-dossiers.component.html' })
-export class UserDossiersComponent implements OnInit {
+export class UserDossiersComponent implements OnInit, OnDestroy {
   page: PageResponse<Dossier> = { content: [], page: 0, size: 8, totalElements: 0, totalPages: 0, last: true };
   loading = false; showModal = false; editMode = false; selectedRef: string | null = null;
   form!: FormGroup; error = ''; success = '';
@@ -13,12 +14,25 @@ export class UserDossiersComponent implements OnInit {
   DossierStatus = DossierStatus;
   viewDossier: Dossier | null = null;
 
-  constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
-  ngOnInit() { this.load(); }
+  searchTerm = '';
+  private search$ = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
-  load(p = 0) {
+  constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
+
+  ngOnInit() {
+    this.search$.pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(term => this.load(0, term));
+    this.load();
+  }
+
+  ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }
+
+  onSearch(term: string) { this.searchTerm = term; this.search$.next(term); }
+
+  load(p = 0, search = this.searchTerm) {
     this.loading = true;
-    this.api.getUserDossiers(p, 8).subscribe({ next: r => { this.page = r; this.loading = false; }, error: () => this.loading = false });
+    this.api.getUserDossiers(p, 8, search).subscribe({ next: r => { this.page = r; this.loading = false; }, error: () => this.loading = false });
   }
 
   openCreate() {
@@ -37,7 +51,7 @@ export class UserDossiersComponent implements OnInit {
   save() {
     if (this.form.invalid) return;
     const obs = this.editMode ? this.api.updateDossier(this.selectedRef!, this.form.value) : this.api.createDossier(this.form.value);
-    obs.subscribe({ next: () => { this.showModal = false; this.load(this.page.page); this.success = this.editMode ? 'Dossier modifié' : 'Dossier créé'; setTimeout(() => this.success = '', 3000); }, error: (e) => this.error = e?.error?.message || 'Erreur' });
+    obs.subscribe({ next: () => { this.showModal = false; this.load(this.page.page, this.searchTerm); this.success = this.editMode ? 'Dossier modifié' : 'Dossier créé'; setTimeout(() => this.success = '', 3000); }, error: (e) => this.error = e?.error?.message || 'Erreur' });
   }
 
   async submit(ref: string) {

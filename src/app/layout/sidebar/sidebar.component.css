@@ -71,6 +71,7 @@
   display: flex; align-items: center; justify-content: center;
 }
 .logo-text { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -.3px; }
+.logo-img { width: 24px; height: 24px; object-fit: contain; display: block; }
 
 .sidebar-user {
   display: flex;
