@@ -120,6 +120,10 @@ export class ApiService {
     return this.http.post<Dossier>(`${this.API}/em/dossiers/${ref}/sign`, {});
   }
 
+  downloadEmPdf(ref: string): Observable<Blob> {
+    return this.http.get(`${this.API}/em/dossiers/${ref}/pdf`, { responseType: 'blob' });
+  }
+
   // ---- User ----
   getUserDossiers(page = 0, size = 8): Observable<PageResponse<Dossier>> {
     return this.http.get<PageResponse<Dossier>>(`${this.API}/user/dossiers`, {
@@ -145,6 +149,10 @@ export class ApiService {
 
   submitDossier(ref: string): Observable<Dossier> {
     return this.http.post<Dossier>(`${this.API}/user/dossiers/${ref}/submit`, {});
+  }
+
+  downloadUserPdf(ref: string): Observable<Blob> {
+    return this.http.get(`${this.API}/user/dossiers/${ref}/pdf`, { responseType: 'blob' });
   }
 
   getUserProfile(): Observable<EntityUser> {

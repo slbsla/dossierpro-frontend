@@ -21,6 +21,7 @@
             <td>
               <button class="btn btn-sm btn-secondary" (click)="openEdit(d)" [disabled]="d.status !== DossierStatus.DRAFT" title="Modifier">✏️</button>
               <button class="btn btn-sm btn-primary" style="margin-left:4px" (click)="submit(d.reference)" *ngIf="d.status===DossierStatus.DRAFT" title="Soumettre">📤</button>
+              <button class="btn btn-sm btn-success" style="margin-left:4px" (click)="downloadPdf(d.reference)" *ngIf="d.status==='VALIDATED' && d.hasPdf" title="Télécharger le PDF">📄</button>
               <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(d.reference)" [disabled]="d.status !== DossierStatus.DRAFT" title="Supprimer">🗑️</button>
             </td>
           </tr>

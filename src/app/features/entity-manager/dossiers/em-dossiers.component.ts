@@ -60,6 +60,20 @@ export class EmDossiersComponent implements OnInit {
     });
   }
 
+  downloadPdf(ref: string) {
+    this.api.downloadEmPdf(ref).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `dossier-${ref}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => alert('PDF non disponible pour ce dossier.')
+    });
+  }
+
   pages(p: PageResponse<any>) { return Array.from({ length: p.totalPages }, (_, i) => i); }
   statusClass(s: string) { return 'badge-' + s.toLowerCase(); }
 }

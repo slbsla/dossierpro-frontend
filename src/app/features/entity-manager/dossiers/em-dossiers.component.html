@@ -52,7 +52,10 @@
             <td>{{ d.amount | number:'1.2-2' }} €</td>
             <td>{{ d.userFullName || d.userReference }}</td>
             <td>{{ (d.validationDate || d.rejectDate) | date:'dd/MM/yyyy' }}</td>
-            <td><span *ngIf="d.hasPdf">📄</span><span *ngIf="!d.hasPdf">—</span></td>
+            <td>
+              <button *ngIf="d.hasPdf" class="btn btn-sm btn-success" (click)="downloadPdf(d.reference)" title="Télécharger le PDF signé">📄 PDF</button>
+              <span *ngIf="!d.hasPdf" style="color:var(--text-muted)">—</span>
+            </td>
           </tr>
           <tr *ngIf="validatedPage.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📋</div><p>Aucun dossier traité</p></div></td></tr>
         </tbody>

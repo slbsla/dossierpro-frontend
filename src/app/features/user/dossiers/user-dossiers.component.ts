@@ -49,6 +49,20 @@ export class UserDossiersComponent implements OnInit {
     this.api.deleteDossier(ref).subscribe({ next: () => { this.load(this.page.page); this.success = 'Dossier supprimé'; setTimeout(() => this.success = '', 3000); }, error: (e) => alert(e?.error?.message || 'Erreur') });
   }
 
+  downloadPdf(ref: string) {
+    this.api.downloadUserPdf(ref).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `dossier-${ref}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => alert('PDF non disponible pour ce dossier.')
+    });
+  }
+
   pages() { return Array.from({ length: this.page.totalPages }, (_, i) => i); }
   statusClass(s: string) { return 'badge-' + s.toLowerCase(); }
 }
