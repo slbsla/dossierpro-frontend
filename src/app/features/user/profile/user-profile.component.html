@@ -2,24 +2,50 @@
 <div class="page-content">
   <div class="page-header">
     <div><h2 class="page-title">Mon Profil</h2></div>
-    <button class="btn btn-secondary" *ngIf="!editMode" (click)="editMode=true">✏️ Modifier</button>
-    <div *ngIf="editMode" style="display:flex;gap:8px">
-      <button class="btn btn-secondary" (click)="editMode=false; initForm(profile!)">Annuler</button>
-      <button class="btn btn-primary" (click)="save()">Enregistrer</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary" *ngIf="!editMode" (click)="editMode=true">
+        <span class="material-icons" style="font-size:16px;vertical-align:middle">edit</span> Modifier
+      </button>
+      <ng-container *ngIf="editMode">
+        <button class="btn btn-secondary" (click)="editMode=false; initForm(profile!)">Annuler</button>
+        <button class="btn btn-primary" (click)="save()">Enregistrer</button>
+      </ng-container>
     </div>
   </div>
+
   <div class="alert alert-success" *ngIf="success">{{ success }}</div>
   <div class="alert alert-error" *ngIf="error">{{ error }}</div>
   <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+
   <div class="card" *ngIf="!loading && profile">
+
+    <!-- Photo + identité -->
     <div class="profile-header">
-      <div class="profile-avatar">{{ profile.firstName?.[0] ?? 'U' }}</div>
+
+      <!-- Avatar cliquable -->
+      <div class="avatar-wrapper" (click)="triggerPhotoInput()" title="Changer la photo">
+        <img *ngIf="photoUrl" [src]="photoUrl" class="avatar-img" alt="photo de profil">
+        <div *ngIf="!photoUrl" class="avatar-initials">{{ profile.firstName?.[0] ?? 'U' }}</div>
+        <div class="avatar-overlay">
+          <span class="material-icons" style="font-size:22px;color:#fff">photo_camera</span>
+        </div>
+        <div *ngIf="photoUploading" class="avatar-uploading">
+          <div class="spinner" style="width:24px;height:24px;border-width:3px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
+        </div>
+      </div>
+      <input id="photo-input" type="file" accept="image/*" style="display:none" (change)="onPhotoSelected($event)">
+
       <div>
-        <div style="font-size:20px;font-weight:700">{{ profile.firstName }} {{ profile.lastName }}</div>
-        <code style="color:var(--gray-text)">{{ profile.reference }}</code>
+        <div class="profile-name">{{ profile.firstName }} {{ profile.lastName }}</div>
+        <code class="profile-ref">{{ profile.reference }}</code>
+        <div *ngIf="photoError" style="color:var(--danger);font-size:12px;margin-top:4px">{{ photoError }}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px" *ngIf="!photoUrl">Cliquez sur l'avatar pour ajouter une photo</div>
       </div>
     </div>
+
     <hr class="divider">
+
+    <!-- Infos -->
     <ng-container *ngIf="!editMode">
       <div class="info-row"><span class="info-label">Prénom</span><span>{{ profile.firstName }}</span></div>
       <div class="info-row"><span class="info-label">Nom</span><span>{{ profile.lastName }}</span></div>
@@ -29,6 +55,7 @@
       <div class="info-row"><span class="info-label">Statut</span><span class="badge" [ngClass]="profile.isActive ? 'badge-active' : 'badge-inactive'">{{ profile.isActive ? 'Actif' : 'Inactif' }}</span></div>
       <div class="info-row"><span class="info-label">Membre depuis</span><span>{{ profile.creationDate | date:'dd/MM/yyyy' }}</span></div>
     </ng-container>
+
     <ng-container *ngIf="editMode">
       <form [formGroup]="form">
         <div class="form-row">
@@ -41,12 +68,6 @@
         </div>
       </form>
     </ng-container>
+
   </div>
 </div>
-<style>
-.profile-header { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
-.profile-avatar { width:60px; height:60px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; }
-.info-row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--gray-border); }
-.info-row:last-child { border-bottom:none; }
-.info-label { font-weight:500; color:var(--gray-text); }
-</style>

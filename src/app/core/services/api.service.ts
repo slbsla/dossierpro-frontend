@@ -163,6 +163,16 @@ export class ApiService {
     return this.http.put<EntityUser>(`${this.API}/user/profile`, data);
   }
 
+  uploadProfilePhoto(file: File): Observable<EntityUser> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<EntityUser>(`${this.API}/user/profile/photo`, formData);
+  }
+
+  getProfilePhotoUrl(): string {
+    return `${this.API}/user/profile/photo`;
+  }
+
   getUserPrefs(): Observable<UserPref> {
     return this.http.get<UserPref>(`${this.API}/user/preferences`);
   }
