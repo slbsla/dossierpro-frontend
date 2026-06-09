@@ -1,0 +1,59 @@
+.modal-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted, #64748b);
+  margin: -0.5rem 0 1rem 0;
+}
+
+.form-section {
+  margin-bottom: 1.5rem;
+}
+
+.form-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary, #2563eb);
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+.form-section-hint {
+  font-size: 0.82rem;
+  color: var(--text-muted, #64748b);
+  margin: -0.25rem 0 0.75rem 0;
+}
+
+.input-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-password-wrapper .form-control {
+  flex: 1;
+  padding-right: 2.5rem;
+}
+
+.btn-eye {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  line-height: 1;
+  color: var(--text-muted, #64748b);
+  transition: color 0.15s;
+}
+
+.btn-eye:hover {
+  color: var(--primary, #2563eb);
+}
+
+.form-hint-small {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--danger, #ef4444);
+}
