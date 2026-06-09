@@ -34,7 +34,17 @@ export class AuthService {
   }
 
   changePassword(currentPassword: string, newPassword: string): Observable<void> {
-    return this.http.put<void>(`${this.API}/auth/change-password`, { currentPassword, newPassword });
+    return this.http.put<void>(`${this.API}/auth/change-password`, { currentPassword, newPassword }).pipe(
+      tap(() => {
+        // Marquer isFirstConnexion = false dans la session locale
+        const user = this.userSubject.value;
+        if (user) {
+          const updated = { ...user, isFirstConnexion: false };
+          this.userSubject.next(updated);
+          sessionStorage.setItem('dp_user', JSON.stringify(updated));
+        }
+      })
+    );
   }
 
   get currentUser(): UserInfo | null { return this.userSubject.value; }

@@ -9,7 +9,7 @@
     <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
     <div class="table-wrapper" *ngIf="!loading">
       <table>
-        <thead><tr><th>Référence</th><th>Nom</th><th>Email</th><th>Téléphone</th><th>Statut</th><th>1ère cnx</th><th>Créé le</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Référence</th><th>Nom</th><th>Email</th><th>Téléphone</th><th>Actif</th><th>Créé le</th><th>Actions</th></tr></thead>
         <tbody>
           <tr *ngFor="let u of page.content">
             <td><code>{{ u.reference }}</code></td>
@@ -22,14 +22,17 @@
                 <span class="toggle-slider"></span>
               </label>
             </td>
-            <td><span class="badge" [ngClass]="u.isFirstConnexion ? 'badge-warning' : 'badge-active'">{{ u.isFirstConnexion ? 'Non' : 'Oui' }}</span></td>
             <td>{{ u.creationDate | date:'dd/MM/yyyy' }}</td>
             <td>
-              <button class="btn btn-sm btn-secondary" (click)="openEdit(u)">✏️</button>
-              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(u.reference)">🗑️</button>
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(u)" title="Modifier">
+                <span class="material-icons" style="font-size:16px">edit</span>
+              </button>
+              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(u.reference)" title="Supprimer">
+                <span class="material-icons" style="font-size:16px">delete_forever</span>
+              </button>
             </td>
           </tr>
-          <tr *ngIf="page.content.length===0"><td colspan="8"><div class="empty-state"><div class="empty-state-icon">👥</div><p>Aucun utilisateur</p></div></td></tr>
+          <tr *ngIf="page.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">👥</div><p>Aucun utilisateur</p></div></td></tr>
         </tbody>
       </table>
       <div class="pagination" *ngIf="page.totalPages > 1">
