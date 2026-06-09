@@ -6,7 +6,22 @@
       <p>Gestion de dossiers professionnels</p>
     </div>
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+      <!-- Mauvais identifiants -->
+      <div class="alert alert-error" *ngIf="errorType === 'credentials'">
+        <span class="material-icons alert-icon">error_outline</span>
+        <span>Identifiants invalides. Vérifiez votre login et mot de passe.</span>
+      </div>
+
+      <!-- Compte désactivé -->
+      <div class="alert alert-disabled" *ngIf="errorType === 'disabled'">
+        <span class="material-icons alert-icon">block</span>
+        <div>
+          <strong>Compte désactivé</strong>
+          <p>Votre compte a été suspendu. Contactez votre administrateur pour le réactiver.</p>
+        </div>
+      </div>
+
       <div class="form-group">
         <label class="form-label">Login</label>
         <input class="form-control" formControlName="username" placeholder="A00001 / M... / U..." autocomplete="username">
