@@ -11,6 +11,7 @@ export class EntitiesComponent implements OnInit {
   loading = false; showModal = false; editMode = false;
   selectedCode: string | null = null;
   form!: FormGroup; error = ''; success = '';
+  originalValues: any = {};
   sectors = Object.values(EntitySector);
 
   constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
@@ -34,9 +35,12 @@ export class EntitiesComponent implements OnInit {
 
   openEdit(e: EntityOrg) {
     this.editMode = true; this.selectedCode = e.code; this.error = '';
+    this.originalValues = { name: e.name, sector: e.sector, adresse: e.adresse, description: e.description, entityManagerId: e.entityManagerId };
     this.form = this.fb.group({ name: [e.name, Validators.required], sector: [e.sector], adresse: [e.adresse], description: [e.description], entityManagerId: [e.entityManagerId] });
     this.showModal = true;
   }
+
+  resetForm() { this.form.patchValue(this.originalValues); this.error = ''; }
 
   save() {
     if (this.form.invalid) return;

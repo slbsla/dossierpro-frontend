@@ -93,6 +93,7 @@ body {
 .btn-danger { background: var(--danger); color: #fff; }
 .btn-danger:hover:not(:disabled) { background: #b91c1c; }
 .btn-warning { background: var(--warning); color: #fff; }
+.btn-warning:hover:not(:disabled) { background: #b45309; }
 .btn-sm { padding: 5px 10px; font-size: 12px; }
 .btn-icon { padding: 6px; border-radius: var(--radius-sm); }
 

@@ -16,6 +16,7 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
 
   searchTerm = '';
   selectedType = '';
+  originalValues: any = {};
   private search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
 
@@ -46,9 +47,12 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
   openEdit(d: Dossier) {
     if (d.status === DossierStatus.VALIDATED) return;
     this.editMode = true; this.selectedRef = d.reference; this.error = '';
+    this.originalValues = { libelle: d.libelle, description: d.description, type: d.type, amount: d.amount };
     this.form = this.fb.group({ libelle: [d.libelle, Validators.required], description: [d.description], type: [d.type, Validators.required], amount: [d.amount, [Validators.required, Validators.min(0)]] });
     this.showModal = true;
   }
+
+  resetForm() { this.form.patchValue(this.originalValues); this.error = ''; }
 
   save() {
     if (this.form.invalid) return;

@@ -10,6 +10,7 @@ export class EmUsersComponent implements OnInit {
   loading = false; showModal = false; editMode = false; selectedRef: string | null = null;
   form!: FormGroup; error = ''; success = '';
   showPassword = false; showConfirmPassword = false;
+  originalValues: any = {};
 
   constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
   ngOnInit() { this.load(); }
@@ -35,6 +36,7 @@ export class EmUsersComponent implements OnInit {
 
   openEdit(u: EntityUser) {
     this.editMode = true; this.selectedRef = u.reference; this.error = '';
+    this.originalValues = { firstName: u.firstName, lastName: u.lastName, telephone: u.telephone, email: u.email };
     this.form = this.fb.group({
       firstName: [u.firstName, Validators.required],
       lastName:  [u.lastName,  Validators.required],
@@ -43,6 +45,8 @@ export class EmUsersComponent implements OnInit {
     });
     this.showModal = true;
   }
+
+  resetForm() { this.form.patchValue(this.originalValues); this.error = ''; }
 
   save() {
     if (this.form.invalid) return;

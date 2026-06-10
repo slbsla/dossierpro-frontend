@@ -6,8 +6,8 @@
   <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
   <ng-container *ngIf="!loading && dashboard">
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-icon">🏢</div><div class="stat-value">{{ dashboard.totalEntities }}</div><div class="stat-label">Entités</div></div>
-      <div class="stat-card"><div class="stat-icon">👔</div><div class="stat-value">{{ dashboard.totalEntityManagers }}</div><div class="stat-label">Entity Managers</div></div>
+      <a routerLink="/admin/entities" class="stat-card stat-card-link"><div class="stat-icon">🏢</div><div class="stat-value">{{ dashboard.totalEntities }}</div><div class="stat-label">Entités</div></a>
+      <a routerLink="/admin/entity-managers" class="stat-card stat-card-link"><div class="stat-icon"><span class="material-symbols-outlined" style="font-size:28px;color:var(--danger)">manage_accounts</span></div><div class="stat-value">{{ dashboard.totalEntityManagers }}</div><div class="stat-label">Entity Managers</div></a>
       <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">{{ dashboard.totalUsers }}</div><div class="stat-label">Utilisateurs</div></div>
       <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-value">{{ dashboard.totalDossiers }}</div><div class="stat-label">Dossiers Total</div></div>
     </div>

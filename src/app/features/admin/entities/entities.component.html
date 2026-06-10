@@ -73,6 +73,9 @@
     </form>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="showModal=false">Annuler</button>
+      <button *ngIf="editMode" class="btn btn-warning" (click)="resetForm()">
+        <span class="material-icons" style="font-size:15px;vertical-align:middle">restart_alt</span> Réinitialiser
+      </button>
       <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">{{ editMode ? 'Enregistrer' : 'Créer' }}</button>
     </div>
   </div>
