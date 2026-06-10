@@ -124,7 +124,7 @@ tr:last-child td { border-bottom: none; }
   display: inline-flex; align-items: center; padding: 3px 10px;
   border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .3px;
 }
-.badge-draft    { background: #e2e8f0; color: #475569; }
+.badge-draft    { background: #eff6ff; color: #2563eb; }
 .badge-submit   { background: var(--warning-light); color: var(--warning); }
 .badge-validated{ background: var(--success-light); color: var(--success); }
 .badge-rejected { background: var(--danger-light); color: var(--danger); }
@@ -145,6 +145,18 @@ tr:last-child td { border-bottom: none; }
 .table-footer { display: flex; align-items: center; justify-content: space-between; padding: 4px 16px 12px; }
 .table-footer .pagination { padding: 8px 0; }
 .table-footer:not(:has(.pagination)) { justify-content: flex-end; padding-top: 12px; }
+
+/* Duplicate icon button (no background) */
+.btn-icon-action {
+  background: transparent; border: none; padding: 4px; margin-right: 2px;
+  cursor: pointer; color: var(--gray-text, #64748b); border-radius: 6px;
+  display: inline-flex; align-items: center; line-height: 1;
+  transition: color .15s;
+}
+.btn-icon-action:hover { color: var(--primary, #2563eb); }
+.btn-icon-action.btn-icon-danger { color: #dc2626; }
+.btn-icon-action.btn-icon-danger:hover { color: #b91c1c; }
+.btn-icon-action:disabled { opacity: .4; cursor: not-allowed; }
 
 /* Excel export button */
 .btn-export-excel {

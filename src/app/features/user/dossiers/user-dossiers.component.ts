@@ -8,7 +8,7 @@ import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dia
 @Component({ selector: 'app-user-dossiers', templateUrl: './user-dossiers.component.html' })
 export class UserDossiersComponent implements OnInit, OnDestroy {
   page: PageResponse<Dossier> = { content: [], page: 0, size: 8, totalElements: 0, totalPages: 0, last: true };
-  loading = false; exporting = false; showModal = false; editMode = false; selectedRef: string | null = null;
+  loading = false; exporting = false; showModal = false; editMode = false; duplicateMode = false; selectedRef: string | null = null;
   form!: FormGroup; error = ''; success = '';
   dossierTypes = Object.values(DossierType);
   DossierStatus = DossierStatus;
@@ -39,14 +39,21 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
   }
 
   openCreate() {
-    this.editMode = false; this.selectedRef = null; this.error = '';
+    this.editMode = false; this.duplicateMode = false; this.selectedRef = null; this.error = '';
     this.form = this.fb.group({ libelle: ['', Validators.required], description: [''], type: ['', Validators.required], amount: [0, [Validators.required, Validators.min(0)]], submitNow: [false] });
     this.showModal = true;
   }
 
+  openDuplicate(d: Dossier) {
+    this.editMode = false; this.duplicateMode = true; this.selectedRef = null; this.error = '';
+    const copiedLibelle = `${d.libelle}_cp_${Date.now()}`;
+    this.form = this.fb.group({ libelle: [copiedLibelle, Validators.required], description: [d.description || ''], type: [d.type || '', Validators.required], amount: [d.amount ?? 0, [Validators.required, Validators.min(0)]], submitNow: [false] });
+    this.showModal = true;
+  }
+
   openEdit(d: Dossier) {
-    if (d.status === DossierStatus.VALIDATED) return;
-    this.editMode = true; this.selectedRef = d.reference; this.error = '';
+    if (d.status === DossierStatus.VALIDATED || d.status === 'EXPIRED') return;
+    this.editMode = true; this.duplicateMode = false; this.selectedRef = d.reference; this.error = '';
     this.originalValues = { libelle: d.libelle, description: d.description, type: d.type, amount: d.amount };
     this.form = this.fb.group({ libelle: [d.libelle, Validators.required], description: [d.description], type: [d.type, Validators.required], amount: [d.amount, [Validators.required, Validators.min(0)]] });
     this.showModal = true;

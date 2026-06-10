@@ -29,9 +29,12 @@
     <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
     <div class="table-wrapper" *ngIf="!loading">
       <table>
-        <thead><tr><th>Référence</th><th>Libellé</th><th>Type</th><th>Montant</th><th>Statut</th><th>Expiration</th><th>Actions</th></tr></thead>
+        <thead><tr><th style="width:36px"></th><th>Référence</th><th>Libellé</th><th>Type</th><th>Montant</th><th>Statut</th><th>Expiration</th><th>Actions</th></tr></thead>
         <tbody>
           <tr *ngFor="let d of page.content">
+            <td style="padding:0 4px;text-align:center">
+              <button class="btn-icon-action" (click)="openDuplicate(d)" *ngIf="d.status !== 'EXPIRED'" title="Dupliquer ce dossier"><span class="material-symbols-outlined" style="font-size:20px">content_copy</span></button>
+            </td>
             <td><code>{{ d.reference }}</code></td>
             <td><strong>{{ d.libelle }}</strong><div *ngIf="d.rejectMotif" style="font-size:11px;color:var(--danger);margin-top:2px">↳ {{ d.rejectMotif }}</div></td>
             <td><span class="badge badge-em" *ngIf="d.type">{{ d.type }}</span></td>
@@ -39,13 +42,13 @@
             <td><span class="badge" [ngClass]="statusClass(d.status)">{{ d.status }}</span></td>
             <td>{{ d.expirationDate | date:'dd/MM/yyyy' }}</td>
             <td>
-              <button class="btn btn-sm btn-secondary" (click)="openEdit(d)" [disabled]="d.status === DossierStatus.VALIDATED" title="Modifier"><span class="material-icons" style="font-size:16px">edit</span></button>
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(d)" [disabled]="d.status === DossierStatus.VALIDATED || d.status === 'EXPIRED'" title="Modifier"><span class="material-icons" style="font-size:16px">edit</span></button>
               <button class="btn btn-sm btn-primary" style="margin-left:4px" (click)="submit(d.reference)" *ngIf="d.status===DossierStatus.DRAFT" title="Soumettre"><span class="material-icons" style="font-size:16px">send</span></button>
               <button class="btn btn-sm btn-success" style="margin-left:4px" (click)="downloadPdf(d.reference)" *ngIf="d.status==='VALIDATED' && d.hasPdf" title="Télécharger le PDF"><span class="material-icons" style="font-size:16px">download</span></button>
-              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(d.reference)" [disabled]="d.status === DossierStatus.VALIDATED" title="Supprimer"><span class="material-icons" style="font-size:16px">delete_forever</span></button>
+              <button class="btn-icon-action btn-icon-danger" style="margin-left:2px" (click)="delete(d.reference)" [disabled]="d.status === DossierStatus.VALIDATED" title="Supprimer"><span class="material-symbols-outlined" style="font-size:20px">delete</span></button>
             </td>
           </tr>
-          <tr *ngIf="page.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📋</div><p>{{ searchTerm ? 'Aucun résultat pour "' + searchTerm + '"' : 'Aucun dossier. Créez votre premier dossier !' }}</p></div></td></tr>
+          <tr *ngIf="page.content.length===0"><td colspan="8"><div class="empty-state"><div class="empty-state-icon">📋</div><p>{{ searchTerm ? 'Aucun résultat pour "' + searchTerm + '"' : 'Aucun dossier. Créez votre premier dossier !' }}</p></div></td></tr>
         </tbody>
       </table>
       <div class="table-footer">
@@ -75,7 +78,7 @@
 
 <div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
   <div class="modal-box" (click)="$event.stopPropagation()">
-    <h3 class="modal-title">{{ editMode ? 'Modifier le Dossier' : 'Nouveau Dossier' }}</h3>
+    <h3 class="modal-title">{{ editMode ? 'Modifier le Dossier' : duplicateMode ? 'Dupliquer le Dossier' : 'Nouveau Dossier' }}</h3>
     <div class="alert alert-error" *ngIf="error">{{ error }}</div>
     <form [formGroup]="form">
       <div class="form-group"><label class="form-label">Libellé *</label><input class="form-control" formControlName="libelle" placeholder="Titre du dossier"></div>
