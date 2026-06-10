@@ -48,10 +48,26 @@
           <tr *ngIf="page.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📋</div><p>{{ searchTerm ? 'Aucun résultat pour "' + searchTerm + '"' : 'Aucun dossier. Créez votre premier dossier !' }}</p></div></td></tr>
         </tbody>
       </table>
-      <div class="pagination" *ngIf="page.totalPages>1">
-        <button (click)="load(page.page-1)" [disabled]="page.page===0">◀</button>
-        <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="load(p)">{{ p+1 }}</button>
-        <button (click)="load(page.page+1)" [disabled]="page.last">▶</button>
+      <div class="table-footer">
+        <div class="pagination" *ngIf="page.totalPages>1">
+          <button (click)="load(page.page-1)" [disabled]="page.page===0">◀</button>
+          <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="load(p)">{{ p+1 }}</button>
+          <button (click)="load(page.page+1)" [disabled]="page.last">▶</button>
+        </div>
+        <button class="btn-export-excel" (click)="exportExcel()" [disabled]="exporting" *ngIf="page.totalElements > 0">
+          <span *ngIf="!exporting">
+            <svg class="excel-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" style="vertical-align:middle;margin-right:4px">
+              <rect x="2" y="3" width="20" height="18" rx="2" fill="#217346"/>
+              <path d="M7 8l3 4-3 4h2l2-2.5L13 16h2l-3-4 3-4h-2l-2 2.5L9 8H7z" fill="white"/>
+              <rect x="14" y="8" width="5" height="1.5" rx=".5" fill="white" opacity=".7"/>
+              <rect x="14" y="11.25" width="5" height="1.5" rx=".5" fill="white" opacity=".7"/>
+              <rect x="14" y="14.5" width="5" height="1.5" rx=".5" fill="white" opacity=".7"/>
+            </svg>Exporter
+          </span>
+          <span *ngIf="exporting" style="display:inline-flex;align-items:center;gap:6px">
+            <span class="export-spinner"></span> Génération…
+          </span>
+        </button>
       </div>
     </div>
   </div>

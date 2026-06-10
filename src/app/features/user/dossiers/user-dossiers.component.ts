@@ -8,7 +8,7 @@ import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dia
 @Component({ selector: 'app-user-dossiers', templateUrl: './user-dossiers.component.html' })
 export class UserDossiersComponent implements OnInit, OnDestroy {
   page: PageResponse<Dossier> = { content: [], page: 0, size: 8, totalElements: 0, totalPages: 0, last: true };
-  loading = false; showModal = false; editMode = false; selectedRef: string | null = null;
+  loading = false; exporting = false; showModal = false; editMode = false; selectedRef: string | null = null;
   form!: FormGroup; error = ''; success = '';
   dossierTypes = Object.values(DossierType);
   DossierStatus = DossierStatus;
@@ -97,6 +97,22 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
         a.click(); URL.revokeObjectURL(url);
       },
       error: () => this.showError('PDF non disponible pour ce dossier.')
+    });
+  }
+
+  exportExcel() {
+    this.exporting = true;
+    this.api.exportUserDossiers(this.searchTerm, this.selectedType).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mes-dossiers-${new Date().toISOString().slice(0,10)}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.exporting = false;
+      },
+      error: () => { this.exporting = false; this.showError('Impossible de générer le fichier Excel.'); }
     });
   }
 

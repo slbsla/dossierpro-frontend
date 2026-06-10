@@ -156,6 +156,17 @@ export class ApiService {
     return this.http.get(`${this.API}/user/dossiers/${ref}/pdf`, { responseType: 'blob' });
   }
 
+  exportUserDossiers(search = '', type = ''): Observable<Blob> {
+    let params = new HttpParams();
+    if (search.trim()) params = params.set('search', search.trim());
+    if (type.trim())   params = params.set('type', type.trim());
+    return this.http.get(`${this.API}/user/dossiers/export`, { params, responseType: 'blob' });
+  }
+
+  deleteMyAccount(): Observable<void> {
+    return this.http.delete<void>(`${this.API}/user/dossiers/account`);
+  }
+
   getUserProfile(): Observable<EntityUser> {
     return this.http.get<EntityUser>(`${this.API}/user/profile`);
   }

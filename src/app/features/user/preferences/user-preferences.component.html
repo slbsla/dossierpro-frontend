@@ -47,10 +47,47 @@
       </button>
     </div>
   </div>
+
+  <!-- Danger zone -->
+  <div class="danger-zone-card" *ngIf="!loading">
+    <div class="danger-zone-header">
+      <span class="material-icons" style="color:var(--danger);font-size:20px;vertical-align:middle">dangerous</span>
+      Zone de danger
+    </div>
+    <div class="danger-zone-body">
+      <div>
+        <p class="danger-zone-title">Supprimer mon compte</p>
+        <p class="danger-zone-desc">Supprime définitivement votre compte et tous vos dossiers. Cette action est irréversible.</p>
+      </div>
+      <button class="btn btn-danger" (click)="deleteAccount()" [disabled]="deleting">
+        <span class="material-icons" style="font-size:16px;vertical-align:middle">delete_forever</span>
+        {{ deleting ? 'Suppression...' : 'Supprimer mon compte' }}
+      </button>
+    </div>
+  </div>
 </div>
 <style>
 .pref-options { display:flex; gap:10px; }
 .pref-option { display:flex; align-items:center; gap:8px; padding:10px 16px; border:2px solid var(--gray-border); border-radius:var(--radius-sm); cursor:pointer; font-size:14px; transition:.15s; }
 .pref-option.selected { border-color:var(--primary); background:var(--primary-light); color:var(--primary); font-weight:600; }
 .pref-option input { display:none; }
+
+/* Danger zone */
+.danger-zone-card {
+  max-width: 500px; margin-top: 24px;
+  border: 1.5px solid #fecaca; border-radius: 10px;
+  background: #fff5f5; overflow: hidden;
+}
+.danger-zone-header {
+  background: #fef2f2; padding: 10px 16px;
+  font-size: 13px; font-weight: 700; color: var(--danger);
+  border-bottom: 1px solid #fecaca;
+  display: flex; align-items: center; gap: 8px;
+}
+.danger-zone-body {
+  padding: 16px; display: flex; align-items: center;
+  justify-content: space-between; gap: 16px;
+}
+.danger-zone-title { font-weight: 600; font-size: 14px; color: #1e293b; margin: 0 0 4px; }
+.danger-zone-desc { font-size: 12px; color: #64748b; margin: 0; line-height: 1.5; }
 </style>
