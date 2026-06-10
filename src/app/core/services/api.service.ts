@@ -66,10 +66,11 @@ export class ApiService {
     return this.http.get<DashboardEm>(`${this.API}/em/dashboard`);
   }
 
-  getEmUsers(page = 0, size = 8, prospectOnly = false): Observable<PageResponse<EntityUser>> {
-    return this.http.get<PageResponse<EntityUser>>(`${this.API}/em/users`, {
-      params: new HttpParams().set('page', page).set('size', size).set('prospectOnly', prospectOnly)
-    });
+  getEmUsers(page = 0, size = 8, prospectOnly = false, sortBy = '', sortDir = ''): Observable<PageResponse<EntityUser>> {
+    let params = new HttpParams().set('page', page).set('size', size).set('prospectOnly', prospectOnly);
+    if (sortBy)  params = params.set('sortBy', sortBy);
+    if (sortDir) params = params.set('sortDir', sortDir);
+    return this.http.get<PageResponse<EntityUser>>(`${this.API}/em/users`, { params });
   }
 
   getEmUser(ref: string): Observable<EntityUser> {

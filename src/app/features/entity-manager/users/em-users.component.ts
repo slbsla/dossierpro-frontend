@@ -12,16 +12,37 @@ export class EmUsersComponent implements OnInit {
   showPassword = false; showConfirmPassword = false;
   originalValues: any = {};
   prospectOnly = false;
+  sortBy = '';
+  sortDir: 'asc' | 'desc' | '' = '';
 
   constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
   ngOnInit() { this.load(); }
 
   load(p = 0) {
     this.loading = true;
-    this.api.getEmUsers(p, 8, this.prospectOnly).subscribe({ next: r => { this.page = r; this.loading = false; }, error: () => this.loading = false });
+    this.api.getEmUsers(p, 8, this.prospectOnly, this.sortBy, this.sortDir).subscribe({
+      next: r => { this.page = r; this.loading = false; },
+      error: () => this.loading = false
+    });
   }
 
   toggleProspectFilter() { this.prospectOnly = !this.prospectOnly; this.load(0); }
+
+  sortBy3(field: string) {
+    if (this.sortBy !== field) {
+      this.sortBy = field; this.sortDir = 'asc';
+    } else if (this.sortDir === 'asc') {
+      this.sortDir = 'desc';
+    } else if (this.sortDir === 'desc') {
+      this.sortBy = ''; this.sortDir = '';
+    }
+    this.load(0);
+  }
+
+  sortIcon(field: string): string {
+    if (this.sortBy !== field) return 'unfold_more';
+    return this.sortDir === 'asc' ? 'arrow_upward' : 'arrow_downward';
+  }
 
   openCreate() {
     this.editMode = false; this.selectedRef = null; this.error = '';

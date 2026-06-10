@@ -21,7 +21,8 @@ export class EmDossiersComponent implements OnInit {
   constructor(private api: ApiService, private confirm: ConfirmDialogService, private route: ActivatedRoute) {}
   ngOnInit() {
     const tab = this.route.snapshot.queryParamMap.get('tab');
-    if (tab === 'validated' || tab === 'pending') this.activeTab = tab;
+    if (tab === 'pending') this.activeTab = 'pending';
+    else if (tab === 'validated' || tab === 'rejected') this.activeTab = 'validated';
     this.loadPending(); this.loadValidated();
   }
 

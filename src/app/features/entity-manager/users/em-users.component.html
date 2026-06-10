@@ -16,7 +16,30 @@
     <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
     <div class="table-wrapper" *ngIf="!loading">
       <table>
-        <thead><tr><th style="width:32px"></th><th>Référence</th><th>Nom</th><th>Email</th><th>Téléphone</th><th>Actif</th><th>Créé le</th><th>Actions</th></tr></thead>
+        <thead>
+          <tr>
+            <th style="width:32px"></th>
+            <th class="th-sort" (click)="sortBy3('reference')" [class.th-active]="sortBy==='reference'">
+              Référence <span class="material-icons sort-icon">{{ sortIcon('reference') }}</span>
+            </th>
+            <th class="th-sort" (click)="sortBy3('lastName')" [class.th-active]="sortBy==='lastName'">
+              Nom <span class="material-icons sort-icon">{{ sortIcon('lastName') }}</span>
+            </th>
+            <th class="th-sort" (click)="sortBy3('email')" [class.th-active]="sortBy==='email'">
+              Email <span class="material-icons sort-icon">{{ sortIcon('email') }}</span>
+            </th>
+            <th class="th-sort" (click)="sortBy3('telephone')" [class.th-active]="sortBy==='telephone'">
+              Téléphone <span class="material-icons sort-icon">{{ sortIcon('telephone') }}</span>
+            </th>
+            <th class="th-sort" (click)="sortBy3('isActive')" [class.th-active]="sortBy==='isActive'">
+              Actif <span class="material-icons sort-icon">{{ sortIcon('isActive') }}</span>
+            </th>
+            <th class="th-sort" (click)="sortBy3('creationDate')" [class.th-active]="sortBy==='creationDate'">
+              Créé le <span class="material-icons sort-icon">{{ sortIcon('creationDate') }}</span>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
         <tbody>
           <tr *ngFor="let u of page.content" [class.prospect-row]="u.isProspect">
             <td>

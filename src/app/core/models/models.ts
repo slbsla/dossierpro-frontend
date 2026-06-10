@@ -94,12 +94,21 @@ export interface DashboardAdmin {
 export interface DashboardEm {
   entityCode: string;
   entityName: string;
+  entitySector?: string;
+  entityAdresse?: string;
+  entityCreationDate?: string;
   totalUsers: number;
   totalDossiers: number;
   pendingDossiers: number;
   validatedDossiers: number;
   rejectedDossiers: number;
   dossiersByStatus: Record<string, number>;
+  emReference?: string;
+  emFirstName?: string;
+  emLastName?: string;
+  emTelephone?: string;
+  emFonction?: string;
+  emCreationDate?: string;
 }
 
 export interface ActivityLog {

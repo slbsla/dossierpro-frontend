@@ -1,26 +1,129 @@
 <app-navbar title="Mes Informations"></app-navbar>
 <div class="page-content">
   <div class="page-header"><h2 class="page-title">Mes Informations</h2></div>
-  <div class="form-row">
-    <div class="card" *ngIf="user">
-      <div class="card-header"><span class="card-title">Profil Entity Manager</span></div>
-      <div class="info-row"><span class="info-label">Référence</span><code>{{ user.uniqueReference }}</code></div>
-      <div class="info-row"><span class="info-label">Prénom</span><span>{{ user.firstName || '—' }}</span></div>
-      <div class="info-row"><span class="info-label">Nom</span><span>{{ user.lastName || '—' }}</span></div>
-      <div class="info-row"><span class="info-label">Téléphone</span><span>{{ user.telephone || '—' }}</span></div>
-      <div class="info-row"><span class="info-label">Entité</span><code>{{ user.entityCode || '—' }}</code></div>
+
+  <div class="info-grid" *ngIf="user && dashboard">
+
+    <!-- ── Card: Profil EM ── -->
+    <div class="info-card">
+      <div class="info-card-title">
+        <span class="material-symbols-outlined" style="font-size:22px;color:var(--primary)">manage_accounts</span>
+        Profil Entity Manager
+      </div>
+
+      <div class="info-row">
+        <span class="info-label"><span class="material-icons info-icon">badge</span>Référence</span>
+        <code class="info-code">{{ user.uniqueReference }}</code>
+      </div>
+      <div class="info-row">
+        <span class="info-label"><span class="material-icons info-icon">person</span>Nom complet</span>
+        <span>{{ (user.firstName || '') + ' ' + (user.lastName || '') }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label"><span class="material-icons info-icon">phone</span>Téléphone</span>
+        <span>{{ user.telephone || '—' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label"><span class="material-icons info-icon">domain</span>Entité</span>
+        <code class="info-code">{{ user.entityCode || '—' }}</code>
+      </div>
+      <div class="info-row" *ngIf="dashboard.emCreationDate">
+        <span class="info-label"><span class="material-icons info-icon">calendar_today</span>Membre depuis</span>
+        <span class="info-date">{{ dashboard.emCreationDate | date:'dd MMM yyyy' }}</span>
+      </div>
+      <div class="info-row" *ngIf="dashboard.emFonction">
+        <span class="info-label"><span class="material-icons info-icon">work</span>Fonction</span>
+        <span>{{ dashboard.emFonction }}</span>
+      </div>
     </div>
-    <div class="card" *ngIf="dashboard">
-      <div class="card-header"><span class="card-title">Mon Entité</span></div>
-      <div class="info-row"><span class="info-label">Code</span><code>{{ dashboard.entityCode }}</code></div>
-      <div class="info-row"><span class="info-label">Nom</span><span>{{ dashboard.entityName }}</span></div>
-      <div class="info-row"><span class="info-label">Utilisateurs</span><span>{{ dashboard.totalUsers }}</span></div>
-      <div class="info-row"><span class="info-label">Dossiers</span><span>{{ dashboard.totalDossiers }}</span></div>
+
+    <!-- ── Card: Mon Entité ── -->
+    <div class="info-card">
+      <div class="info-card-title">
+        <span class="material-icons" style="font-size:22px;color:var(--primary)">domain</span>
+        Mon Entité
+      </div>
+
+      <div class="info-row">
+        <span class="info-label"><span class="material-icons info-icon">tag</span>Code</span>
+        <code class="info-code">{{ dashboard.entityCode }}</code>
+      </div>
+      <div class="info-row">
+        <span class="info-label"><span class="material-icons info-icon">business</span>Nom</span>
+        <span>{{ dashboard.entityName }}</span>
+      </div>
+      <div class="info-row" *ngIf="dashboard.entitySector">
+        <span class="info-label"><span class="material-icons info-icon">category</span>Secteur</span>
+        <span class="info-badge">{{ dashboard.entitySector }}</span>
+      </div>
+      <div class="info-row" *ngIf="dashboard.entityAdresse">
+        <span class="info-label"><span class="material-icons info-icon">location_on</span>Adresse</span>
+        <span style="text-align:right;max-width:55%">{{ dashboard.entityAdresse }}</span>
+      </div>
+      <div class="info-row" *ngIf="dashboard.entityCreationDate">
+        <span class="info-label"><span class="material-icons info-icon">calendar_today</span>Créée le</span>
+        <span class="info-date">{{ dashboard.entityCreationDate | date:'dd MMM yyyy' }}</span>
+      </div>
+
+      <!-- Count links: Users + Total Dossiers only -->
+      <div class="info-counts">
+        <a routerLink="/em/users" class="info-count-card">
+          <span class="material-icons" style="font-size:28px;color:var(--primary)">group</span>
+          <span class="info-count-value">{{ dashboard.totalUsers }}</span>
+          <span class="info-count-label">Utilisateurs</span>
+        </a>
+        <a routerLink="/em/dossiers" class="info-count-card">
+          <span class="material-icons" style="font-size:28px;color:var(--gray-text)">folder_open</span>
+          <span class="info-count-value">{{ dashboard.totalDossiers }}</span>
+          <span class="info-count-label">Dossiers</span>
+        </a>
+      </div>
     </div>
+
   </div>
+
+  <div *ngIf="!user || !dashboard" class="loading"><div class="spinner"></div></div>
 </div>
+
 <style>
-.info-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--gray-border); }
-.info-row:last-child { border-bottom:none; }
-.info-label { font-weight:500; color:var(--gray-text); }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 768px) { .info-grid { grid-template-columns: 1fr; } }
+
+.info-card {
+  background: var(--white); border-radius: 12px;
+  box-shadow: var(--shadow-md, 0 2px 12px rgba(0,0,0,.08));
+  overflow: hidden;
+}
+.info-card-title {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 20px; font-size: 15px; font-weight: 700;
+  color: var(--text-dark);
+  border-bottom: 2px solid var(--gray-border, #e2e8f0);
+  background: var(--gray-light, #f8fafc);
+}
+.info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 20px; border-bottom: 1px solid var(--gray-border, #e2e8f0);
+  font-size: 14px;
+}
+.info-label {
+  display: flex; align-items: center; gap: 7px;
+  font-weight: 500; color: var(--gray-text, #64748b);
+}
+.info-icon { font-size: 17px; color: var(--gray-text, #94a3b8); }
+.info-code { font-family: monospace; font-size: 13px; background: var(--gray-light, #f1f5f9); padding: 2px 8px; border-radius: 5px; }
+.info-date { font-size: 13px; color: var(--gray-text); }
+.info-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; background: #eff6ff; color: #2563eb; border-radius: 20px; }
+
+.info-counts { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--gray-border, #e2e8f0); }
+.info-count-card {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 8px; text-decoration: none;
+  border-right: 1px solid var(--gray-border, #e2e8f0);
+  transition: background .15s; gap: 5px;
+}
+.info-count-card:last-child { border-right: none; }
+.info-count-card:hover { background: var(--gray-light, #f8fafc); }
+.info-count-value { font-size: 26px; font-weight: 700; color: var(--text-dark); line-height: 1; }
+.info-count-label { font-size: 12px; color: var(--gray-text); font-weight: 500; }
 </style>

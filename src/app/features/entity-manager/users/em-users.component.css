@@ -16,6 +16,21 @@
   color: #92400e; font-weight: 600;
 }
 
+/* ── Sortable column headers ── */
+.th-sort {
+  cursor: pointer; user-select: none;
+  white-space: nowrap;
+}
+.th-sort:hover { background: rgba(0,0,0,.04); }
+.th-sort.th-active { color: var(--primary); }
+.sort-icon {
+  font-size: 14px; vertical-align: middle;
+  margin-left: 2px; opacity: .5;
+  transition: opacity .15s;
+}
+.th-sort:hover .sort-icon,
+.th-active .sort-icon { opacity: 1; }
+
 /* ── Prospect row highlight ── */
 tr.prospect-row td { background: #fffbeb; }
 
