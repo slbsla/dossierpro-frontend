@@ -1,54 +1,106 @@
 <app-navbar title="Préférences"></app-navbar>
 <div class="page-content">
   <div class="page-header"><h2 class="page-title">Préférences</h2></div>
-  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
-  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
   <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
-  <div class="card" *ngIf="!loading && prefs" style="max-width:500px">
-    <div class="form-group">
-      <label class="form-label">Thème</label>
-      <div class="pref-options">
-        <label class="pref-option" [class.selected]="prefs.theme===Theme.LIGHT">
-          <input type="radio" name="theme" [value]="Theme.LIGHT" [(ngModel)]="prefs.theme"> ☀️ Clair
-        </label>
-        <label class="pref-option" [class.selected]="prefs.theme===Theme.DARK">
-          <input type="radio" name="theme" [value]="Theme.DARK" [(ngModel)]="prefs.theme"> 🌙 Sombre
-        </label>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Langue</label>
-      <div class="pref-options">
-        <label class="pref-option" [class.selected]="prefs.preferredLanguage===Language.FR">
-          <input type="radio" name="lang" [value]="Language.FR" [(ngModel)]="prefs.preferredLanguage"> 🇫🇷 Français
-        </label>
-        <label class="pref-option" [class.selected]="prefs.preferredLanguage===Language.EN">
-          <input type="radio" name="lang" [value]="Language.EN" [(ngModel)]="prefs.preferredLanguage"> 🇬🇧 English
-        </label>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Format de date</label>
-      <select class="form-control" [(ngModel)]="prefs.formatDate">
-        <option value="YYYY_MM_DD">YYYY-MM-DD (ex: 2026-06-09)</option>
-        <option value="DD_MM_YYYY">DD-MM-YYYY (ex: 09-06-2026)</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Format de montant</label>
-      <select class="form-control" [(ngModel)]="prefs.formatAmount">
-        <option value="FORMAT_DOT">1.000 (point)</option>
-        <option value="FORMAT_SPACE">1 000 (espace)</option>
-      </select>
-    </div>
-    <div style="margin-top:20px">
-      <button class="btn btn-primary" (click)="save()" [disabled]="saving">
-        {{ saving ? 'Enregistrement...' : '💾 Sauvegarder' }}
-      </button>
-    </div>
-  </div>
 
-  <!-- Danger zone -->
+  <!-- Two-column grid: prefs left, password right -->
+  <div class="prefs-grid" *ngIf="!loading">
+
+    <!-- Left: Preferences -->
+    <div class="card" *ngIf="prefs">
+      <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+      <div class="form-group">
+        <label class="form-label">Thème</label>
+        <div class="pref-options">
+          <label class="pref-option" [class.selected]="prefs.theme===Theme.LIGHT">
+            <input type="radio" name="theme" [value]="Theme.LIGHT" [(ngModel)]="prefs.theme"> ☀️ Clair
+          </label>
+          <label class="pref-option" [class.selected]="prefs.theme===Theme.DARK">
+            <input type="radio" name="theme" [value]="Theme.DARK" [(ngModel)]="prefs.theme"> 🌙 Sombre
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Langue</label>
+        <div class="pref-options">
+          <label class="pref-option" [class.selected]="prefs.preferredLanguage===Language.FR">
+            <input type="radio" name="lang" [value]="Language.FR" [(ngModel)]="prefs.preferredLanguage"> 🇫🇷 Français
+          </label>
+          <label class="pref-option" [class.selected]="prefs.preferredLanguage===Language.EN">
+            <input type="radio" name="lang" [value]="Language.EN" [(ngModel)]="prefs.preferredLanguage"> 🇬🇧 English
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Format de date</label>
+        <select class="form-control" [(ngModel)]="prefs.formatDate">
+          <option value="YYYY_MM_DD">YYYY-MM-DD (ex. 2026-06-09)</option>
+          <option value="DD_MM_YYYY">DD-MM-YYYY (ex. 09-06-2026)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Format de montant</label>
+        <select class="form-control" [(ngModel)]="prefs.formatAmount">
+          <option value="FORMAT_DOT">1.000 (point)</option>
+          <option value="FORMAT_SPACE">1 000 (espace)</option>
+        </select>
+      </div>
+      <div style="margin-top:20px">
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Enregistrement...' : '💾 Sauvegarder' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Change password -->
+    <div class="card pwd-card">
+      <div class="pwd-card-header">
+        <span class="material-symbols-outlined" style="font-size:20px;color:var(--primary)">lock_reset</span>
+        Changer le mot de passe
+      </div>
+      <div class="alert alert-success" *ngIf="pwdSuccess" style="margin:12px 16px 0">{{ pwdSuccess }}</div>
+      <div class="alert alert-error" *ngIf="pwdError" style="margin:12px 16px 0">{{ pwdError }}</div>
+      <form [formGroup]="pwdForm" style="padding:16px;display:flex;flex-direction:column;gap:14px">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Mot de passe actuel</label>
+          <div class="pwd-input-wrap">
+            <input class="form-control" [type]="showCurrentPwd ? 'text' : 'password'" formControlName="currentPassword" placeholder="••••••••">
+            <button type="button" class="pwd-eye" (click)="showCurrentPwd=!showCurrentPwd" tabindex="-1">
+              <span class="material-symbols-outlined" style="font-size:18px">{{ showCurrentPwd ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Nouveau mot de passe <span style="font-size:11px;color:var(--gray-text)">(min. 6 caractères)</span></label>
+          <div class="pwd-input-wrap">
+            <input class="form-control" [type]="showNewPwd ? 'text' : 'password'" formControlName="newPassword" placeholder="••••••••">
+            <button type="button" class="pwd-eye" (click)="showNewPwd=!showNewPwd" tabindex="-1">
+              <span class="material-symbols-outlined" style="font-size:18px">{{ showNewPwd ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Confirmer le nouveau mot de passe</label>
+          <div class="pwd-input-wrap">
+            <input class="form-control" [type]="showConfirmPwd ? 'text' : 'password'" formControlName="confirmPassword" placeholder="••••••••"
+              [class.input-error]="pwdForm.hasError('mismatch') && pwdForm.get('confirmPassword')?.dirty">
+            <button type="button" class="pwd-eye" (click)="showConfirmPwd=!showConfirmPwd" tabindex="-1">
+              <span class="material-symbols-outlined" style="font-size:18px">{{ showConfirmPwd ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          <span class="pwd-mismatch" *ngIf="pwdForm.hasError('mismatch') && pwdForm.get('confirmPassword')?.dirty">Les mots de passe ne correspondent pas</span>
+        </div>
+        <button class="btn btn-primary" style="align-self:flex-start" (click)="changePassword()" [disabled]="pwdForm.invalid || changingPwd">
+          <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle">lock_reset</span>
+          {{ changingPwd ? 'Modification...' : 'Modifier le mot de passe' }}
+        </button>
+      </form>
+    </div>
+
+  </div><!-- /prefs-grid -->
+
+  <!-- Danger zone — full width below the grid -->
   <div class="danger-zone-card" *ngIf="!loading">
     <div class="danger-zone-header">
       <span class="material-icons" style="color:var(--danger);font-size:20px;vertical-align:middle">dangerous</span>
@@ -66,15 +118,44 @@
     </div>
   </div>
 </div>
+
 <style>
-.pref-options { display:flex; gap:10px; }
+/* Two-column grid */
+.prefs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .prefs-grid { grid-template-columns: 1fr; }
+}
+
+.pref-options { display:flex; gap:10px; flex-wrap:wrap; }
 .pref-option { display:flex; align-items:center; gap:8px; padding:10px 16px; border:2px solid var(--gray-border); border-radius:var(--radius-sm); cursor:pointer; font-size:14px; transition:.15s; }
 .pref-option.selected { border-color:var(--primary); background:var(--primary-light); color:var(--primary); font-weight:600; }
 .pref-option input { display:none; }
 
+/* Password card */
+.pwd-card { overflow:hidden; }
+.pwd-card-header {
+  display:flex; align-items:center; gap:8px;
+  padding:10px 16px; font-size:14px; font-weight:700; color:var(--text-dark);
+  background:var(--gray-light,#f8fafc); border-bottom:1px solid var(--gray-border,#e2e8f0);
+}
+.pwd-input-wrap { position:relative; display:flex; align-items:center; }
+.pwd-input-wrap .form-control { padding-right:40px; }
+.pwd-eye {
+  position:absolute; right:8px; background:none; border:none; cursor:pointer;
+  color:var(--gray-text); padding:0; display:flex; align-items:center;
+}
+.pwd-eye:hover { color:var(--primary); }
+.pwd-mismatch { font-size:11px; color:var(--danger,#ef4444); margin-top:4px; display:block; }
+.input-error { border-color:var(--danger,#ef4444) !important; }
+
 /* Danger zone */
 .danger-zone-card {
-  max-width: 500px; margin-top: 24px;
+  margin-top: 20px;
   border: 1.5px solid #fecaca; border-radius: 10px;
   background: #fff5f5; overflow: hidden;
 }
@@ -86,7 +167,7 @@
 }
 .danger-zone-body {
   padding: 16px; display: flex; align-items: center;
-  justify-content: space-between; gap: 16px;
+  justify-content: space-between; gap: 16px; flex-wrap: wrap;
 }
 .danger-zone-title { font-weight: 600; font-size: 14px; color: #1e293b; margin: 0 0 4px; }
 .danger-zone-desc { font-size: 12px; color: #64748b; margin: 0; line-height: 1.5; }

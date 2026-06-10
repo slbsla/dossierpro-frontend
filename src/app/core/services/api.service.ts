@@ -164,6 +164,10 @@ export class ApiService {
     return this.http.get(`${this.API}/user/dossiers/export`, { params, responseType: 'blob' });
   }
 
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.http.put<void>(`${this.API}/auth/change-password`, { currentPassword, newPassword });
+  }
+
   deleteMyAccount(): Observable<void> {
     return this.http.delete<void>(`${this.API}/user/dossiers/account`);
   }
