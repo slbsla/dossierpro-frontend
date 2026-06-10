@@ -7,9 +7,11 @@ import { UserDossiersComponent } from './dossiers/user-dossiers.component';
 import { UserProfileComponent } from './profile/user-profile.component';
 import { UserPreferencesComponent } from './preferences/user-preferences.component';
 import { UserUploadComponent } from './upload/user-upload.component';
+import { UserDashboardComponent } from './dashboard/user-dashboard.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'dossiers', pathMatch: 'full' },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'dashboard', component: UserDashboardComponent },
   { path: 'dossiers', component: UserDossiersComponent },
   { path: 'upload', component: UserUploadComponent },
   { path: 'profile', component: UserProfileComponent },
@@ -17,7 +19,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [UserDossiersComponent, UserProfileComponent, UserPreferencesComponent, UserUploadComponent],
+  declarations: [UserDossiersComponent, UserProfileComponent, UserPreferencesComponent, UserUploadComponent, UserDashboardComponent],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, RouterModule.forChild(routes)]
 })
 export class UserModule {}

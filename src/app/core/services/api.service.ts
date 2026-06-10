@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
-  Dossier, UserPref, PageResponse, DossierUpload, UploadResult
+  Dossier, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -126,6 +126,10 @@ export class ApiService {
   }
 
   // ---- User ----
+  getUserDashboard(): Observable<UserDashboard> {
+    return this.http.get<UserDashboard>(`${this.API}/user/dossiers/dashboard`);
+  }
+
   getUserDossiers(page = 0, size = 8, search = '', type = ''): Observable<PageResponse<Dossier>> {
     let params = new HttpParams().set('page', page).set('size', size);
     if (search.trim()) params = params.set('search', search.trim());

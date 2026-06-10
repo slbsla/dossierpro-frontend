@@ -134,6 +134,13 @@ export interface PageResponse<T> {
   last: boolean;
 }
 
+export interface UserDashboard {
+  totalDossiers: number;
+  byStatus: Record<string, number>;
+  byType: Record<string, number>;
+  last10Days: { date: string; count: number }[];
+}
+
 export interface DossierUpload {
   id: number;
   fileName: string;

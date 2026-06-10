@@ -55,6 +55,9 @@
 
     <!-- USER -->
     <ng-container *ngIf="user?.role === Role.USER">
+      <a routerLink="/user/dashboard" routerLinkActive="active" class="nav-item">
+        <span class="material-icons nav-icon">dashboard</span> Dashboard
+      </a>
       <a routerLink="/user/dossiers" routerLinkActive="active" class="nav-item">
         <span class="material-icons nav-icon">folder_open</span> Mes Dossiers
       </a>

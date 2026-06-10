@@ -1,0 +1,68 @@
+<app-navbar title="Dashboard"></app-navbar>
+<div class="page-content">
+
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Mon Dashboard</h2>
+      <p class="page-subtitle" *ngIf="dashboard">{{ dashboard.totalDossiers }} dossier(s) au total</p>
+    </div>
+  </div>
+
+  <!-- Spinner -->
+  <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+
+  <!-- Contenu (masqué via CSS pendant loading, canvases restent dans le DOM) -->
+  <div [style.display]="loading ? 'none' : 'block'">
+
+    <!-- 2 Donuts -->
+    <div class="dash-grid-2">
+      <div class="dash-card">
+        <div class="dash-card-title">
+          <span class="material-icons" style="color:var(--primary);font-size:20px">donut_large</span>
+          Par statut
+        </div>
+        <div class="chart-wrap"><canvas #statusCanvas></canvas></div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-title">
+          <span class="material-icons" style="color:#8b5cf6;font-size:20px">donut_large</span>
+          Par type
+        </div>
+        <div class="chart-wrap"><canvas #typeCanvas></canvas></div>
+      </div>
+    </div>
+
+    <!-- Bar 10 jours -->
+    <div class="dash-card" style="margin-top:20px">
+      <div class="dash-card-title">
+        <span class="material-icons" style="color:#06b6d4;font-size:20px">bar_chart</span>
+        Dossiers créés — 10 derniers jours
+      </div>
+      <div class="chart-wrap-bar"><canvas #daysCanvas></canvas></div>
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+
+.dash-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:768px){ .dash-grid-2 { grid-template-columns:1fr; } }
+
+.dash-card {
+  background:var(--white); border-radius:12px;
+  box-shadow:var(--shadow-md,0 2px 12px rgba(0,0,0,.08)); overflow:hidden;
+}
+.dash-card-title {
+  display:flex; align-items:center; gap:8px; padding:14px 18px;
+  font-size:14px; font-weight:700; color:var(--text-dark);
+  border-bottom:1px solid var(--gray-border,#e2e8f0);
+  background:var(--gray-light,#f8fafc);
+}
+.chart-wrap { padding:20px; display:flex; align-items:center; justify-content:center; height:280px; }
+.chart-wrap canvas { max-height:240px; }
+.chart-wrap-bar { padding:20px 24px; }
+.chart-wrap-bar canvas { width:100% !important; height:220px !important; }
+</style>
