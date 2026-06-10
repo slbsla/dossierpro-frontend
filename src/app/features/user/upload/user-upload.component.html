@@ -1,0 +1,227 @@
+<app-navbar title="Upload de masse"></app-navbar>
+<div class="page-content">
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
+    <h2 class="page-title">Uploads</h2>
+    <button class="btn btn-primary" (click)="openModal()">
+      <span class="material-icons" style="font-size:18px;vertical-align:middle;margin-right:6px">upload_file</span>
+      Procéder à un upload de masse de dossiers
+    </button>
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+  <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+
+  <div class="card" *ngIf="!loading">
+    <div *ngIf="uploads.length === 0" class="empty-state">
+      <span class="material-icons" style="font-size:40px;color:var(--gray-text)">upload_file</span>
+      <p style="color:var(--gray-text);margin-top:8px">Aucun upload réalisé pour l'instant.</p>
+    </div>
+
+    <table class="data-table" *ngIf="uploads.length > 0">
+      <thead>
+        <tr>
+          <th>Date de réalisation</th>
+          <th>Nom du fichier</th>
+          <th style="text-align:center">✅ Dossiers créés</th>
+          <th style="text-align:center">❌ Dossiers rejetés</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of uploads">
+          <td>{{ formatDate(u.uploadDate) }}</td>
+          <td>
+            <span class="material-icons" style="font-size:16px;vertical-align:middle;color:var(--primary);margin-right:4px">description</span>
+            {{ u.fileName }}
+          </td>
+          <td style="text-align:center">
+            <span class="badge badge-active">{{ u.successCount }}</span>
+          </td>
+          <td style="text-align:center">
+            <span class="badge" [ngClass]="u.rejectedCount > 0 ? 'badge-error' : 'badge-neutral'">{{ u.rejectedCount }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ MODAL ═══════════════════════ -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <span class="material-icons" style="font-size:20px;color:var(--primary)">upload_file</span>
+      Upload de masse de dossiers
+      <button class="modal-close" (click)="closeModal()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- Step indicators -->
+    <div class="step-bar" *ngIf="step !== 'loading' && step !== 'result'">
+      <div class="step-item" [class.active]="step === 'template'" [class.done]="step === 'pick'">
+        <div class="step-circle">1</div>
+        <span class="step-label">Template</span>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" [class.active]="step === 'pick'">
+        <div class="step-circle">2</div>
+        <span class="step-label">Fichier</span>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <div class="step-circle">3</div>
+        <span class="step-label">Chargement</span>
+      </div>
+    </div>
+
+    <!-- ── Step 1: template ── -->
+    <div class="modal-body" *ngIf="step === 'template'">
+      <div class="step-icon-wrap">
+        <span class="material-icons step-icon">table_chart</span>
+      </div>
+      <h3 class="step-title">Télécharger le template</h3>
+      <p class="step-desc">
+        Téléchargez le fichier Excel modèle pour préparer vos dossiers.
+        Remplissez les colonnes : <strong>Libellé</strong>, <strong>Description</strong>,
+        <strong>Type</strong> (SINISTRE / EER / ADHESION), <strong>Montant</strong>.
+      </p>
+      <p class="step-desc" style="color:var(--gray-text);font-size:12px">Cette étape est facultative. Vous pouvez passer directement à l'étape suivante.</p>
+      <div class="step-actions">
+        <button class="btn btn-secondary" (click)="downloadTemplate()">
+          <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px">download</span>
+          Télécharger le template
+        </button>
+        <button class="btn btn-primary" (click)="goToPickStep()">
+          Continuer <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-left:4px">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Step 2: pick file ── -->
+    <div class="modal-body" *ngIf="step === 'pick'">
+      <div class="step-icon-wrap">
+        <span class="material-icons step-icon">folder_open</span>
+      </div>
+      <h3 class="step-title">Choisir un fichier</h3>
+      <p class="step-desc">Sélectionnez le fichier Excel (.xlsx) contenant vos dossiers à importer.</p>
+
+      <div class="file-drop-zone" (click)="fileInput.click()">
+        <span class="material-icons" style="font-size:36px;color:var(--primary);margin-bottom:8px">cloud_upload</span>
+        <p *ngIf="!selectedFile" style="margin:0;color:var(--gray-text)">Cliquez pour choisir un fichier .xlsx</p>
+        <p *ngIf="selectedFile" style="margin:0;font-weight:600;color:var(--primary)">
+          <span class="material-icons" style="font-size:16px;vertical-align:middle">check_circle</span>
+          {{ selectedFile.name }}
+        </p>
+        <input #fileInput type="file" accept=".xlsx,.xls" style="display:none" (change)="onFileChange($event)">
+      </div>
+
+      <div class="alert alert-error" *ngIf="uploadError">{{ uploadError }}</div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" (click)="step = 'template'">
+          <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px">arrow_back</span>
+          Retour
+        </button>
+        <button class="btn btn-primary" [disabled]="!selectedFile" (click)="processUpload()">
+          <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px">rocket_launch</span>
+          Procéder au chargement
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Step 3: loading ── -->
+    <div class="modal-body loading-body" *ngIf="step === 'loading'">
+      <div class="spinner" style="width:48px;height:48px;margin:0 auto 20px"></div>
+      <h3 class="step-title">Traitement en cours…</h3>
+      <p class="step-desc" style="color:var(--gray-text)">Vos dossiers sont en cours de création, veuillez patienter.</p>
+    </div>
+
+    <!-- ── Step 4: result ── -->
+    <div class="modal-body" *ngIf="step === 'result' && result">
+      <div class="result-summary">
+        <div class="result-card result-success">
+          <span class="material-icons" style="font-size:32px">check_circle</span>
+          <div class="result-number">{{ result.successCount }}</div>
+          <div class="result-label">Dossier(s) créé(s)</div>
+        </div>
+        <div class="result-card result-rejected">
+          <span class="material-icons" style="font-size:32px">cancel</span>
+          <div class="result-number">{{ result.rejectedCount }}</div>
+          <div class="result-label">Dossier(s) rejeté(s)</div>
+        </div>
+      </div>
+
+      <div *ngIf="result.rejectedReasons?.length" class="rejected-reasons">
+        <p style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--danger)">Détail des rejets :</p>
+        <ul style="margin:0;padding-left:18px;font-size:12px;color:var(--gray-text)">
+          <li *ngFor="let r of result.rejectedReasons">{{ r }}</li>
+        </ul>
+      </div>
+
+      <div class="step-actions" style="justify-content:center">
+        <button class="btn btn-primary" (click)="closeModal()">Fermer</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* ── Table ── */
+.data-table { width:100%; border-collapse:collapse; font-size:14px; }
+.data-table th { text-align:left; padding:10px 12px; font-size:12px; font-weight:600; color:var(--gray-text); border-bottom:2px solid var(--gray-border); }
+.data-table td { padding:12px; border-bottom:1px solid var(--gray-border); vertical-align:middle; }
+.data-table tr:last-child td { border-bottom:none; }
+.data-table tr:hover td { background:var(--gray-light,#f8fafc); }
+.badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600; }
+.badge-active { background:#d1fae5; color:#065f46; }
+.badge-error  { background:#fee2e2; color:#991b1b; }
+.badge-neutral { background:#f3f4f6; color:#6b7280; }
+.empty-state { display:flex; flex-direction:column; align-items:center; padding:40px 20px; }
+
+/* ── Modal ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:1000; }
+.modal-box { background:#fff; border-radius:12px; width:100%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,0.2); overflow:hidden; }
+.modal-header { display:flex; align-items:center; gap:8px; padding:14px 20px; font-size:15px; font-weight:700; border-bottom:1px solid var(--gray-border); color:var(--text-dark); position:relative; }
+.modal-close { position:absolute; right:12px; background:none; border:none; cursor:pointer; color:var(--gray-text); padding:4px; display:flex; }
+.modal-close:hover { color:var(--danger); }
+.modal-body { padding:24px 28px; }
+.loading-body { display:flex; flex-direction:column; align-items:center; padding:40px 28px; }
+
+/* ── Step bar ── */
+.step-bar { display:flex; align-items:center; padding:16px 28px 0; gap:0; }
+.step-item { display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; }
+.step-circle { width:28px; height:28px; border-radius:50%; border:2px solid var(--gray-border); background:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--gray-text); }
+.step-item.active .step-circle { border-color:var(--primary); background:var(--primary); color:#fff; }
+.step-item.done .step-circle { border-color:#10b981; background:#10b981; color:#fff; }
+.step-label { font-size:11px; color:var(--gray-text); }
+.step-item.active .step-label { color:var(--primary); font-weight:600; }
+.step-connector { flex:1; height:2px; background:var(--gray-border); margin-bottom:16px; }
+
+/* ── Step content ── */
+.step-icon-wrap { text-align:center; margin-bottom:12px; }
+.step-icon { font-size:44px; color:var(--primary); opacity:0.8; }
+.step-title { font-size:16px; font-weight:700; text-align:center; margin:0 0 10px; color:var(--text-dark); }
+.step-desc { font-size:14px; color:var(--gray-text,#64748b); text-align:center; margin:0 0 16px; line-height:1.6; }
+.step-actions { display:flex; justify-content:space-between; gap:12px; margin-top:20px; }
+
+/* ── File drop zone ── */
+.file-drop-zone {
+  border:2px dashed var(--gray-border); border-radius:10px;
+  padding:28px 20px; text-align:center; cursor:pointer; transition:.15s;
+  background:var(--gray-light,#f8fafc); margin-bottom:16px;
+  display:flex; flex-direction:column; align-items:center;
+}
+.file-drop-zone:hover { border-color:var(--primary); background:var(--primary-light,#eff6ff); }
+
+/* ── Result ── */
+.result-summary { display:flex; gap:16px; justify-content:center; margin-bottom:20px; }
+.result-card { flex:1; border-radius:10px; padding:20px 12px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.result-success { background:#d1fae5; color:#065f46; }
+.result-rejected { background:#fee2e2; color:#991b1b; }
+.result-number { font-size:32px; font-weight:700; }
+.result-label { font-size:13px; font-weight:600; }
+.rejected-reasons { background:#fff5f5; border:1px solid #fecaca; border-radius:8px; padding:12px 16px; margin-bottom:12px; max-height:160px; overflow-y:auto; }
+</style>

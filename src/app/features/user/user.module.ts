@@ -6,16 +6,18 @@ import { LayoutModule } from '../../layout/layout.module';
 import { UserDossiersComponent } from './dossiers/user-dossiers.component';
 import { UserProfileComponent } from './profile/user-profile.component';
 import { UserPreferencesComponent } from './preferences/user-preferences.component';
+import { UserUploadComponent } from './upload/user-upload.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dossiers', pathMatch: 'full' },
   { path: 'dossiers', component: UserDossiersComponent },
+  { path: 'upload', component: UserUploadComponent },
   { path: 'profile', component: UserProfileComponent },
   { path: 'preferences', component: UserPreferencesComponent }
 ];
 
 @NgModule({
-  declarations: [UserDossiersComponent, UserProfileComponent, UserPreferencesComponent],
+  declarations: [UserDossiersComponent, UserProfileComponent, UserPreferencesComponent, UserUploadComponent],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, RouterModule.forChild(routes)]
 })
 export class UserModule {}

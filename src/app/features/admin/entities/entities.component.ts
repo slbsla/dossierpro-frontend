@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { ApiService } from '../../../core/services/api.service';
 import { EntityOrg, EntityMng, EntitySector, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
@@ -14,7 +15,18 @@ export class EntitiesComponent implements OnInit {
   originalValues: any = {};
   sectors = Object.values(EntitySector);
 
-  constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
+  // Autocomplete adresse
+  suggestions: any[] = [];
+  showSuggestions = false;
+  addressLinked = false;       // true = champs remplis via API
+  private searchTimer: any;
+
+  constructor(
+    private api: ApiService,
+    private fb: FormBuilder,
+    private confirm: ConfirmDialogService,
+    private http: HttpClient
+  ) {}
 
   ngOnInit() { this.load(); this.loadManagers(); }
 
@@ -29,18 +41,98 @@ export class EntitiesComponent implements OnInit {
 
   openCreate() {
     this.editMode = false; this.selectedCode = null; this.error = '';
-    this.form = this.fb.group({ name: ['', Validators.required], sector: [''], adresse: [''], description: [''], entityManagerId: [''] });
+    this.form = this.fb.group({
+      name:            ['', Validators.required],
+      sector:          [''],
+      adresse:         ['', Validators.required],
+      numero:          ['', Validators.required],
+      ligne:           ['', Validators.required],
+      postcode:        ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+      ville:           ['', Validators.required],
+      description:     [''],
+      entityManagerId: ['']
+    });
     this.showModal = true;
   }
 
   openEdit(e: EntityOrg) {
     this.editMode = true; this.selectedCode = e.code; this.error = '';
-    this.originalValues = { name: e.name, sector: e.sector, adresse: e.adresse, description: e.description, entityManagerId: e.entityManagerId };
-    this.form = this.fb.group({ name: [e.name, Validators.required], sector: [e.sector], adresse: [e.adresse], description: [e.description], entityManagerId: [e.entityManagerId] });
+    this.originalValues = {
+      name: e.name, sector: e.sector,
+      adresse: e.adresse, numero: e.numero, ligne: e.ligne, postcode: e.postcode, ville: e.ville,
+      description: e.description, entityManagerId: e.entityManagerId
+    };
+    this.form = this.fb.group({
+      name:            [e.name, Validators.required],
+      sector:          [e.sector],
+      adresse:         [e.adresse, Validators.required],
+      numero:          [e.numero, Validators.required],
+      ligne:           [e.ligne, Validators.required],
+      postcode:        [e.postcode, [Validators.required, Validators.pattern(/^\d{5}$/)]],
+      ville:           [e.ville, Validators.required],
+      description:     [e.description],
+      entityManagerId: [e.entityManagerId]
+    });
     this.showModal = true;
   }
 
-  resetForm() { this.form.patchValue(this.originalValues); this.error = ''; }
+  resetForm() {
+    this.form.patchValue(this.originalValues);
+    this.suggestions = []; this.showSuggestions = false; this.addressLinked = false;
+    this.error = '';
+  }
+
+  // ── Autocomplete ──────────────────────────────────────────────────────────
+
+  onAdresseInput(event: Event) {
+    const q = (event.target as HTMLInputElement).value.trim();
+    this.addressLinked = false;
+    this.clearStructuredFields();
+    clearTimeout(this.searchTimer);
+    if (q.length < 3) { this.suggestions = []; this.showSuggestions = false; return; }
+    this.searchTimer = setTimeout(() => this.searchAdresse(q), 350);
+  }
+
+  searchAdresse(q: string) {
+    this.http.get<any>(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(q)}&limit=5&countrycodes=fr`)
+      .subscribe({
+        next: res => {
+          this.suggestions = (res.features || []).slice(0, 5);
+          this.showSuggestions = this.suggestions.length > 0;
+        },
+        error: () => { this.suggestions = []; this.showSuggestions = false; }
+      });
+  }
+
+  selectSuggestion(f: any) {
+    const p = f.properties;
+    this.form.patchValue({
+      adresse:  p.label        || '',
+      numero:   p.housenumber  || '',
+      ligne:    p.street       || p.name || '',
+      postcode: p.postcode     || '',
+      ville:    p.city         || ''
+    });
+    this.suggestions = []; this.showSuggestions = false;
+    this.addressLinked = true;
+  }
+
+  onStructuredFieldChange() {
+    if (this.addressLinked) {
+      // L'utilisateur modifie manuellement un champ structuré → tout vider
+      this.form.patchValue({ adresse: '', numero: '', ligne: '', postcode: '', ville: '' });
+      this.addressLinked = false;
+      this.suggestions = []; this.showSuggestions = false;
+    }
+  }
+
+  closeSuggestions() {
+    setTimeout(() => { this.showSuggestions = false; }, 200);
+  }
+
+  private clearStructuredFields() {
+    this.form.patchValue({ numero: '', ligne: '', postcode: '', ville: '' }, { emitEvent: false });
+  }
 
   save() {
     if (this.form.invalid) return;

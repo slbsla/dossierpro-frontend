@@ -62,14 +62,95 @@
           </select>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Adresse</label>
-        <input class="form-control" formControlName="adresse" placeholder="Adresse">
+      <!-- Adresse avec autocomplete -->
+      <div class="addr-card">
+        <p class="addr-title">
+          <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px">location_on</span>Adresse *
+        </p>
+
+        <!-- Aide utilisateur -->
+        <div class="addr-hint">
+          <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:5px;color:#2563eb">info</span>
+          Tapez une adresse française dans le champ de recherche pour obtenir des suggestions.
+          Sélectionnez-en une pour remplir automatiquement les champs.
+          Toute modification manuelle des champs vidangera la sélection.
+        </div>
+
+        <!-- Champ de recherche + dropdown -->
+        <div class="form-group" style="position:relative;margin-bottom:8px">
+          <label class="form-label">Recherche d'adresse *</label>
+          <div style="position:relative">
+            <span class="material-icons addr-search-icon">search</span>
+            <input class="form-control addr-search-input" formControlName="adresse"
+              placeholder="ex : 8 Boulevard du Port Amiens"
+              [class.input-error]="form.get('adresse')?.invalid && form.get('adresse')?.touched"
+              [class.addr-linked]="addressLinked"
+              (input)="onAdresseInput($event)"
+              (blur)="closeSuggestions()"
+              autocomplete="off">
+            <span class="material-icons addr-linked-icon" *ngIf="addressLinked" title="Adresse vérifiée">check_circle</span>
+          </div>
+
+          <!-- Dropdown suggestions -->
+          <ul class="addr-dropdown" *ngIf="showSuggestions && suggestions.length > 0">
+            <li *ngFor="let s of suggestions" class="addr-option" (mousedown)="selectSuggestion(s)">
+              <span class="material-icons" style="font-size:15px;color:#6b7280;flex-shrink:0;margin-right:6px">location_on</span>
+              <span>{{ s.properties.label }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 4 champs structurés -->
+        <div class="form-row">
+          <div class="form-group" style="flex:0 0 110px">
+            <label class="form-label">N° *</label>
+            <input class="form-control" formControlName="numero" placeholder="8"
+              [class.input-error]="form.get('numero')?.invalid && form.get('numero')?.touched"
+              (input)="onStructuredFieldChange()">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Voie *</label>
+            <input class="form-control" formControlName="ligne" placeholder="Boulevard du Port"
+              [class.input-error]="form.get('ligne')?.invalid && form.get('ligne')?.touched"
+              (input)="onStructuredFieldChange()">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:0 0 140px">
+            <label class="form-label">Code postal *</label>
+            <input class="form-control" formControlName="postcode" placeholder="80000" maxlength="5"
+              [class.input-error]="form.get('postcode')?.invalid && form.get('postcode')?.touched"
+              (input)="onStructuredFieldChange()">
+            <span class="field-error" *ngIf="form.get('postcode')?.hasError('pattern') && form.get('postcode')?.touched">5 chiffres requis</span>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Ville *</label>
+            <input class="form-control" formControlName="ville" placeholder="Amiens"
+              [class.input-error]="form.get('ville')?.invalid && form.get('ville')?.touched"
+              (input)="onStructuredFieldChange()">
+          </div>
+        </div>
       </div>
+
       <div class="form-group">
         <label class="form-label">Description</label>
         <textarea class="form-control" formControlName="description" rows="3" placeholder="Description"></textarea>
       </div>
+
+<style>
+.addr-card { border:1px solid var(--gray-border,#e2e8f0); border-radius:8px; padding:14px 16px; margin-bottom:12px; }
+.addr-title { font-size:12px; font-weight:700; color:var(--gray-text); margin:0 0 10px; text-transform:uppercase; letter-spacing:.05em; }
+.addr-hint { font-size:12px; color:#374151; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:8px 10px; margin-bottom:12px; line-height:1.6; }
+.addr-search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); font-size:18px; color:var(--gray-text); pointer-events:none; }
+.addr-search-input { padding-left:34px !important; }
+.addr-linked-icon { position:absolute; right:9px; top:50%; transform:translateY(-50%); font-size:18px; color:#16a34a; pointer-events:none; }
+.addr-linked { border-color:#16a34a !important; background:#f0fdf4 !important; }
+.addr-dropdown { position:absolute; top:calc(100% + 2px); left:0; right:0; background:#fff; border:1px solid var(--gray-border,#e2e8f0); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.12); list-style:none; margin:0; padding:4px 0; z-index:300; max-height:220px; overflow-y:auto; }
+.addr-option { display:flex; align-items:center; padding:9px 12px; cursor:pointer; font-size:13px; transition:background .1s; }
+.addr-option:hover { background:#f1f5f9; }
+.input-error { border-color:var(--danger,#ef4444) !important; }
+.field-error { font-size:11px; color:var(--danger,#ef4444); margin-top:3px; display:block; }
+</style>
     </form>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="showModal=false">Annuler</button>

@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
-  Dossier, UserPref, PageResponse
+  Dossier, UserPref, PageResponse, DossierUpload, UploadResult
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -170,6 +170,21 @@ export class ApiService {
 
   deleteMyAccount(): Observable<void> {
     return this.http.delete<void>(`${this.API}/user/dossiers/account`);
+  }
+
+  // ---- Upload de masse ----
+  getLastUploads(): Observable<DossierUpload[]> {
+    return this.http.get<DossierUpload[]>(`${this.API}/user/uploads`);
+  }
+
+  downloadUploadTemplate(): Observable<Blob> {
+    return this.http.get(`${this.API}/user/uploads/template`, { responseType: 'blob' });
+  }
+
+  uploadDossierFile(file: File): Observable<UploadResult> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<UploadResult>(`${this.API}/user/uploads`, form);
   }
 
   getUserProfile(): Observable<EntityUser> {

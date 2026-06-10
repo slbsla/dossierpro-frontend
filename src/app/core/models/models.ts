@@ -21,6 +21,10 @@ export interface EntityOrg {
   name: string;
   sector: EntitySector;
   adresse?: string;
+  numero?: string;
+  ligne?: string;
+  postcode?: string;
+  ville?: string;
   description?: string;
   entityManagerId?: string;
   entityManagerName?: string;
@@ -128,4 +132,18 @@ export interface PageResponse<T> {
   totalElements: number;
   totalPages: number;
   last: boolean;
+}
+
+export interface DossierUpload {
+  id: number;
+  fileName: string;
+  uploadDate: string;
+  successCount: number;
+  rejectedCount: number;
+}
+
+export interface UploadResult {
+  successCount: number;
+  rejectedCount: number;
+  rejectedReasons: string[];
 }
