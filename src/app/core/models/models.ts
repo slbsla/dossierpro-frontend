@@ -48,6 +48,7 @@ export interface EntityUser {
   entityCode?: string;
   isActive: boolean;
   isFirstConnexion: boolean;
+  isProspect?: boolean;
   hasPhoto?: boolean;
   creationDate?: string;
 }

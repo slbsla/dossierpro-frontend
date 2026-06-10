@@ -11,14 +11,17 @@ export class EmUsersComponent implements OnInit {
   form!: FormGroup; error = ''; success = '';
   showPassword = false; showConfirmPassword = false;
   originalValues: any = {};
+  prospectOnly = false;
 
   constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
   ngOnInit() { this.load(); }
 
   load(p = 0) {
     this.loading = true;
-    this.api.getEmUsers(p, 8).subscribe({ next: r => { this.page = r; this.loading = false; }, error: () => this.loading = false });
+    this.api.getEmUsers(p, 8, this.prospectOnly).subscribe({ next: r => { this.page = r; this.loading = false; }, error: () => this.loading = false });
   }
+
+  toggleProspectFilter() { this.prospectOnly = !this.prospectOnly; this.load(0); }
 
   openCreate() {
     this.editMode = false; this.selectedRef = null; this.error = '';

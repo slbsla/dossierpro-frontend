@@ -66,9 +66,9 @@ export class ApiService {
     return this.http.get<DashboardEm>(`${this.API}/em/dashboard`);
   }
 
-  getEmUsers(page = 0, size = 8): Observable<PageResponse<EntityUser>> {
+  getEmUsers(page = 0, size = 8, prospectOnly = false): Observable<PageResponse<EntityUser>> {
     return this.http.get<PageResponse<EntityUser>>(`${this.API}/em/users`, {
-      params: new HttpParams().set('page', page).set('size', size)
+      params: new HttpParams().set('page', page).set('size', size).set('prospectOnly', prospectOnly)
     });
   }
 
@@ -180,6 +180,17 @@ export class ApiService {
 
   saveUserPrefs(data: Partial<UserPref>): Observable<UserPref> {
     return this.http.put<UserPref>(`${this.API}/user/preferences`, data);
+  }
+
+  // ---- Public (no auth) ----
+  searchPublicEntities(name: string): Observable<{code: string; name: string}[]> {
+    return this.http.get<{code: string; name: string}[]>(`${this.API}/public/entities/search`, {
+      params: new HttpParams().set('name', name)
+    });
+  }
+
+  registerProspect(data: {firstName: string; lastName: string; telephone: string; email: string; entityCode: string; password: string}): Observable<any> {
+    return this.http.post(`${this.API}/public/register`, data);
   }
 
   // ---- Activity Logs ----

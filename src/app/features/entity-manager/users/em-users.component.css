@@ -1,3 +1,51 @@
+/* ── Prospect filter toggle ── */
+.header-actions { display: flex; align-items: center; gap: 12px; }
+
+.prospect-filter-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--gray-text);
+  border: 1.5px solid var(--border-color, #e2e8f0);
+  background: var(--white); user-select: none;
+  transition: all .15s;
+}
+.prospect-filter-toggle input { display: none; }
+.prospect-filter-toggle:hover { border-color: var(--warning); color: var(--warning); }
+.prospect-filter-toggle.active {
+  background: #fff7ed; border-color: var(--warning);
+  color: #92400e; font-weight: 600;
+}
+
+/* ── Prospect row highlight ── */
+tr.prospect-row td { background: #fffbeb; }
+
+/* ── Prospect warning icon + tooltip ── */
+.prospect-icon-wrap {
+  position: relative; display: inline-flex;
+  align-items: center; justify-content: center;
+}
+.prospect-icon {
+  font-size: 18px; color: #f59e0b; cursor: default;
+  vertical-align: middle;
+}
+.prospect-tooltip {
+  display: none;
+  position: absolute; left: 28px; top: 50%; transform: translateY(-50%);
+  background: #1e293b; color: #fff;
+  font-size: 12px; white-space: nowrap;
+  padding: 5px 10px; border-radius: 6px; z-index: 100;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+.prospect-tooltip::before {
+  content: ''; position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
+  border: 5px solid transparent; border-right-color: #1e293b;
+}
+.prospect-icon-wrap:hover .prospect-tooltip { display: block; }
+
+/* ── Disabled edit button ── */
+.btn-disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+
 .modal-subtitle {
   font-size: 0.85rem;
   color: var(--text-muted, #64748b);

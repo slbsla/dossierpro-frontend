@@ -1,0 +1,194 @@
+<div class="register-page">
+  <div class="register-box">
+
+    <!-- ── Confirmation screen ── -->
+    <ng-container *ngIf="done">
+      <div class="confirm-screen">
+        <div class="confirm-icon">
+          <span class="material-icons">check_circle</span>
+        </div>
+        <h2>Inscription enregistrée !</h2>
+
+        <div class="confirm-ref-box" *ngIf="registeredRef">
+          <p class="confirm-ref-label">Votre identifiant de connexion</p>
+          <div class="confirm-ref-value">{{ registeredRef }}</div>
+          <p class="confirm-ref-hint">Conservez cet identifiant, il vous sera demandé lors de votre première connexion.</p>
+        </div>
+
+        <p class="confirm-msg">
+          Votre inscription a bien été transmise.<br>
+          Elle sera <strong>validée par votre Entity Manager</strong> dans les meilleurs délais.<br>
+          Vous recevrez une confirmation dès que votre compte est activé.
+        </p>
+        <button class="btn btn-primary btn-full" (click)="goLogin()">
+          <span class="material-icons" style="font-size:16px;vertical-align:middle">arrow_back</span>
+          Retour à la connexion
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ── Multi-step form ── -->
+    <ng-container *ngIf="!done">
+
+      <!-- Header -->
+      <div class="register-header">
+        <div class="login-logo">📁</div>
+        <h1>DossierPro</h1>
+        <p>Créer un compte</p>
+      </div>
+
+      <!-- Stepper -->
+      <div class="stepper">
+        <div class="step-item" *ngFor="let s of [1,2,3,4]" [class.active]="step===s" [class.done]="step>s">
+          <div class="step-circle">
+            <span class="material-icons" *ngIf="step>s" style="font-size:14px">check</span>
+            <span *ngIf="step<=s">{{ s }}</span>
+          </div>
+          <span class="step-label">{{ ['Identité','Entité','Sécurité','Validation'][s-1] }}</span>
+        </div>
+      </div>
+
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+      <!-- ── Step 1: Personal info ── -->
+      <div *ngIf="step===1" class="step-content">
+        <h3 class="step-title">Informations personnelles</h3>
+        <form [formGroup]="infoForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Nom *</label>
+              <input class="form-control" formControlName="lastName" placeholder="Dupont">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prénom *</label>
+              <input class="form-control" formControlName="firstName" placeholder="Marc">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Téléphone</label>
+              <input class="form-control" formControlName="telephone" placeholder="06 12 34 56 78">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-control" type="email" formControlName="email" placeholder="marc@email.com">
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── Step 2: Entity search ── -->
+      <div *ngIf="step===2" class="step-content">
+        <h3 class="step-title">Sélectionner votre entité</h3>
+        <p class="step-hint">Tapez au moins 2 lettres pour rechercher votre organisation.</p>
+        <div class="form-group autocomplete-wrapper">
+          <label class="form-label">Nom de l'entité *</label>
+          <div class="autocomplete-field">
+            <span class="material-icons ac-icon">domain</span>
+            <input class="form-control ac-input" type="text" [value]="entitySearch"
+              (input)="onEntityInput($any($event.target).value)"
+              placeholder="Ex : Assurance Nationale…"
+              autocomplete="off">
+            <span class="material-icons ac-spinner" *ngIf="entitySearching">autorenew</span>
+            <span class="material-icons ac-check" *ngIf="selectedEntity">check_circle</span>
+          </div>
+          <ul class="autocomplete-list" *ngIf="entitySuggestions.length > 0">
+            <li *ngFor="let e of entitySuggestions" (click)="selectEntity(e)">
+              <span class="material-icons" style="font-size:15px;color:var(--primary)">domain</span>
+              {{ e.name }}
+            </li>
+          </ul>
+          <div class="ac-no-result" *ngIf="entitySearch.length>=2 && !entitySearching && entitySuggestions.length===0 && !selectedEntity">
+            Aucune entité trouvée pour « {{ entitySearch }} »
+          </div>
+          <div class="ac-selected" *ngIf="selectedEntity">
+            <span class="material-icons" style="font-size:15px">check_circle</span>
+            <strong>{{ selectedEntity.name }}</strong> sélectionnée
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step 3: Security ── -->
+      <div *ngIf="step===3" class="step-content">
+        <h3 class="step-title">Informations de sécurité</h3>
+        <form [formGroup]="secForm">
+          <div class="form-group">
+            <label class="form-label">Mot de passe *</label>
+            <div class="input-password-wrapper">
+              <input class="form-control" [type]="showPass ? 'text' : 'password'" formControlName="password" placeholder="••••••">
+              <button type="button" class="eye-btn" (click)="showPass=!showPass">
+                <span class="material-icons">{{ showPass ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+            <small class="form-hint">Minimum 4 caractères</small>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmer le mot de passe *</label>
+            <div class="input-password-wrapper">
+              <input class="form-control" [type]="showConfirm ? 'text' : 'password'" formControlName="confirmPassword" placeholder="••••••">
+              <button type="button" class="eye-btn" (click)="showConfirm=!showConfirm">
+                <span class="material-icons">{{ showConfirm ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── Step 4: CGU ── -->
+      <div *ngIf="step===4" class="step-content">
+        <h3 class="step-title">Conditions générales</h3>
+        <p class="step-hint">Veuillez lire et accepter les conditions avant de confirmer votre inscription.</p>
+
+        <div class="cgu-box">
+          <div class="cgu-title">
+            <span class="material-icons" style="font-size:16px;color:var(--primary)">description</span>
+            Conditions Générales d'Utilisation — DossierPro
+          </div>
+          <div class="cgu-text">
+            En utilisant DossierPro, vous acceptez que vos données personnelles (nom, prénom, coordonnées) soient collectées et traitées dans le cadre de la gestion de vos dossiers professionnels. Ces données sont hébergées de manière sécurisée et ne sont pas partagées avec des tiers sans votre consentement. Vous disposez d'un droit d'accès, de rectification et de suppression de vos données.
+          </div>
+          <label class="cgu-check">
+            <input type="checkbox" [(ngModel)]="acceptCguApp">
+            <span>J'accepte les CGU générales de DossierPro *</span>
+          </label>
+        </div>
+
+        <div class="cgu-box">
+          <div class="cgu-title">
+            <span class="material-icons" style="font-size:16px;color:var(--primary)">domain</span>
+            Conditions générales — {{ selectedEntity?.name }}
+          </div>
+          <div class="cgu-text">
+            En rejoignant l'entité <strong>{{ selectedEntity?.name }}</strong>, vous acceptez que vos informations soient partagées avec l'Entity Manager de cette organisation afin de traiter vos demandes de dossiers. L'entité s'engage à respecter la confidentialité de vos données conformément à la réglementation en vigueur.
+          </div>
+          <label class="cgu-check">
+            <input type="checkbox" [(ngModel)]="acceptCguEntity">
+            <span>J'accepte les conditions de <strong>{{ selectedEntity?.name }}</strong> *</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- ── Navigation buttons ── -->
+      <div class="register-actions">
+        <button class="btn btn-secondary" (click)="back()" *ngIf="step > 1">
+          <span class="material-icons" style="font-size:16px;vertical-align:middle">arrow_back</span> Précédent
+        </button>
+        <a class="btn btn-secondary login-link" routerLink="/login" *ngIf="step === 1">
+          Déjà un compte ? Connexion
+        </a>
+        <button class="btn btn-primary" (click)="next()" *ngIf="step < 4"
+          [disabled]="(step===1 && infoForm.invalid) || (step===2 && !selectedEntity) || (step===3 && secForm.invalid)">
+          Suivant <span class="material-icons" style="font-size:16px;vertical-align:middle">arrow_forward</span>
+        </button>
+        <button class="btn btn-primary" (click)="confirm()" *ngIf="step===4"
+          [disabled]="!canConfirm || loading">
+          <span *ngIf="!loading">
+            <span class="material-icons" style="font-size:16px;vertical-align:middle">how_to_reg</span> Confirmer l'inscription
+          </span>
+          <span *ngIf="loading"><span class="spinner" style="width:16px;height:16px;border-width:2px"></span></span>
+        </button>
+      </div>
+
+    </ng-container>
+  </div>
+</div>
