@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
-  Dossier, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard
+  Dossier, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -215,6 +215,19 @@ export class ApiService {
 
   saveUserPrefs(data: Partial<UserPref>): Observable<UserPref> {
     return this.http.put<UserPref>(`${this.API}/user/preferences`, data);
+  }
+
+  // ---- Infos Bancaires ----
+  getBankInfo(): Observable<UserBankInfo> {
+    return this.http.get<UserBankInfo>(`${this.API}/user/bank-info`);
+  }
+
+  saveBankInfo(data: Partial<UserBankInfo>): Observable<UserBankInfo> {
+    return this.http.put<UserBankInfo>(`${this.API}/user/bank-info`, data);
+  }
+
+  deleteBankInfo(): Observable<void> {
+    return this.http.delete<void>(`${this.API}/user/bank-info`);
   }
 
   // ---- Public (no auth) ----

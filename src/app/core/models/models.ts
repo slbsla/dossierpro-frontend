@@ -141,6 +141,20 @@ export interface UserDashboard {
   last10Days: { date: string; count: number }[];
 }
 
+export interface UserBankInfo {
+  id?: number;
+  userReference?: string;
+  pays: string;
+  nomBanque: string;
+  adresseTitulaire?: string;
+  nomTitulaire: string;
+  iban: string;
+  bicSwift: string;
+  acceptedStorage: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface DossierUpload {
   id: number;
   fileName: string;

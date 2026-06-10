@@ -8,6 +8,7 @@ import { UserProfileComponent } from './profile/user-profile.component';
 import { UserPreferencesComponent } from './preferences/user-preferences.component';
 import { UserUploadComponent } from './upload/user-upload.component';
 import { UserDashboardComponent } from './dashboard/user-dashboard.component';
+import { UserBankComponent } from './bank/user-bank.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -15,11 +16,12 @@ const routes: Routes = [
   { path: 'dossiers', component: UserDossiersComponent },
   { path: 'upload', component: UserUploadComponent },
   { path: 'profile', component: UserProfileComponent },
-  { path: 'preferences', component: UserPreferencesComponent }
+  { path: 'preferences', component: UserPreferencesComponent },
+  { path: 'paiement', component: UserBankComponent }
 ];
 
 @NgModule({
-  declarations: [UserDossiersComponent, UserProfileComponent, UserPreferencesComponent, UserUploadComponent, UserDashboardComponent],
+  declarations: [UserDossiersComponent, UserProfileComponent, UserPreferencesComponent, UserUploadComponent, UserDashboardComponent, UserBankComponent],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, RouterModule.forChild(routes)]
 })
 export class UserModule {}
