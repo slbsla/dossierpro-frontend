@@ -4,8 +4,31 @@ import { ApiService } from '../../../core/services/api.service';
 import { EntityUser, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
+export interface EmGroup {
+  groupReference: string;
+  groupName: string;
+  icon: string;
+  memberCount: number;
+}
+export interface GroupMember {
+  userReference: string;
+  firstName: string;
+  lastName: string;
+}
+
+const GROUP_ICONS = [
+  'group', 'groups', 'folder_shared', 'star', 'work', 'school',
+  'home', 'favorite', 'flag', 'label', 'category', 'hub',
+  'diversity_3', 'badge', 'apartment', 'business_center'
+];
+
 @Component({ selector: 'app-em-users', templateUrl: './em-users.component.html', styleUrls: ['./em-users.component.css'] })
 export class EmUsersComponent implements OnInit {
+
+  // ── Tab ──
+  activeTab: 'users' | 'groups' | 'members' = 'users';
+
+  // ── Users tab ──
   page: PageResponse<EntityUser> = { content: [], page: 0, size: 8, totalElements: 0, totalPages: 0, last: true };
   loading = false; showModal = false; editMode = false; selectedRef: string | null = null;
   form!: FormGroup; error = ''; success = '';
@@ -15,9 +38,43 @@ export class EmUsersComponent implements OnInit {
   sortBy = '';
   sortDir: 'asc' | 'desc' | '' = '';
 
+  // ── Groups shared state (tabs 2 & 3) ──
+  groups: EmGroup[] = [];
+  groupsLoading = false;
+  selectedGroup: EmGroup | null = null;
+
+  // ── Tab 2: group members ──
+  groupMembers: GroupMember[] = [];
+  membersLoading = false;
+
+  // ── Tab 3: all users (flat list for assignment) ──
+  allUsers: EntityUser[] = [];
+  allUsersLoading = false;
+  memberRefs = new Set<string>();   // refs already in selectedGroup
+  assignBusy = new Set<string>();   // refs with in-flight request
+
+  // ── Group create modal ──
+  showGroupModal = false;
+  groupForm!: FormGroup;
+  groupIcons = GROUP_ICONS;
+  groupError = '';
+
   constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
+
   ngOnInit() { this.load(); }
 
+  // ──────────── Tab switch ────────────────────────────────────────────────
+  switchTab(tab: 'users' | 'groups' | 'members') {
+    this.activeTab = tab;
+    if ((tab === 'groups' || tab === 'members') && this.groups.length === 0) {
+      this.loadGroups();
+    }
+    if (tab === 'members' && this.allUsers.length === 0) {
+      this.loadAllUsers();
+    }
+  }
+
+  // ──────────── Users tab ─────────────────────────────────────────────────
   load(p = 0) {
     this.loading = true;
     this.api.getEmUsers(p, 8, this.prospectOnly, this.sortBy, this.sortDir).subscribe({
@@ -29,13 +86,9 @@ export class EmUsersComponent implements OnInit {
   toggleProspectFilter() { this.prospectOnly = !this.prospectOnly; this.load(0); }
 
   sortBy3(field: string) {
-    if (this.sortBy !== field) {
-      this.sortBy = field; this.sortDir = 'asc';
-    } else if (this.sortDir === 'asc') {
-      this.sortDir = 'desc';
-    } else if (this.sortDir === 'desc') {
-      this.sortBy = ''; this.sortDir = '';
-    }
+    if (this.sortBy !== field) { this.sortBy = field; this.sortDir = 'asc'; }
+    else if (this.sortDir === 'asc') { this.sortDir = 'desc'; }
+    else { this.sortBy = ''; this.sortDir = ''; }
     this.load(0);
   }
 
@@ -80,18 +133,13 @@ export class EmUsersComponent implements OnInit {
     const { confirmPassword, ...payload } = this.form.value;
     const obs = this.editMode ? this.api.updateEmUser(this.selectedRef!, payload) : this.api.createEmUser(payload);
     obs.subscribe({
-      next: () => { this.showModal = false; this.load(this.page.page); this.success = this.editMode ? 'Utilisateur modifié avec succès.' : 'Utilisateur créé avec succès.'; setTimeout(() => this.success = '', 5000); },
+      next: () => { this.showModal = false; this.load(this.page.page); this.success = this.editMode ? 'Utilisateur modifié.' : 'Utilisateur créé.'; setTimeout(() => this.success = '', 5000); },
       error: (e) => this.error = e?.error?.message || 'Erreur'
     });
   }
 
   async delete(ref: string) {
-    const ok = await this.confirm.open({
-      title: 'Supprimer l\'utilisateur',
-      message: 'L\'utilisateur et tous ses dossiers seront supprimés définitivement.',
-      confirmLabel: 'Supprimer',
-      type: 'danger'
-    });
+    const ok = await this.confirm.open({ title: 'Supprimer l\'utilisateur', message: 'L\'utilisateur et tous ses dossiers seront supprimés définitivement.', confirmLabel: 'Supprimer', type: 'danger' });
     if (!ok) return;
     this.api.deleteEmUser(ref).subscribe({
       next: () => { this.load(this.page.page); this.success = 'Utilisateur supprimé'; setTimeout(() => this.success = '', 3000); },
@@ -107,4 +155,102 @@ export class EmUsersComponent implements OnInit {
   }
 
   pages() { return Array.from({ length: this.page.totalPages }, (_, i) => i); }
+
+  // ──────────── Groups shared ──────────────────────────────────────────────
+  loadGroups() {
+    this.groupsLoading = true;
+    this.api.getEmGroups().subscribe({
+      next: gs => { this.groups = gs; this.groupsLoading = false; },
+      error: () => this.groupsLoading = false
+    });
+  }
+
+  selectGroup(g: EmGroup) {
+    this.selectedGroup = g;
+    this.membersLoading = true;
+    this.api.getGroupMembers(g.groupReference).subscribe({
+      next: ms => {
+        this.groupMembers = ms;
+        this.memberRefs = new Set(ms.map(m => m.userReference));
+        this.membersLoading = false;
+      },
+      error: () => this.membersLoading = false
+    });
+  }
+
+  async deleteGroup(g: EmGroup) {
+    const ok = await this.confirm.open({ title: 'Supprimer le groupe', message: `Supprimer "${g.groupName}" et retirer tous ses membres ?`, confirmLabel: 'Supprimer', type: 'danger' });
+    if (!ok) return;
+    this.api.deleteEmGroup(g.groupReference).subscribe({
+      next: () => {
+        this.groups = this.groups.filter(x => x.groupReference !== g.groupReference);
+        if (this.selectedGroup?.groupReference === g.groupReference) {
+          this.selectedGroup = null; this.groupMembers = []; this.memberRefs.clear();
+        }
+      }
+    });
+  }
+
+  // ── Group create modal ──
+  openGroupModal() {
+    this.groupError = '';
+    this.groupForm = this.fb.group({
+      groupName: ['', Validators.required],
+      icon: ['group']
+    });
+    this.showGroupModal = true;
+  }
+
+  selectIcon(icon: string) { this.groupForm.patchValue({ icon }); }
+
+  saveGroup() {
+    if (this.groupForm.invalid) return;
+    this.api.createEmGroup(this.groupForm.value).subscribe({
+      next: g => {
+        this.groups.push(g);
+        this.showGroupModal = false;
+      },
+      error: (e) => this.groupError = e?.error?.message || 'Erreur'
+    });
+  }
+
+  // ──────────── Tab 3: member assignment ──────────────────────────────────
+  loadAllUsers() {
+    this.allUsersLoading = true;
+    this.api.getEmUsers(0, 999).subscribe({
+      next: r => { this.allUsers = r.content; this.allUsersLoading = false; },
+      error: () => this.allUsersLoading = false
+    });
+  }
+
+  isMember(userRef: string): boolean { return this.memberRefs.has(userRef); }
+  isBusy(userRef: string): boolean { return this.assignBusy.has(userRef); }
+
+  toggleMembership(userRef: string) {
+    if (!this.selectedGroup || this.assignBusy.has(userRef)) return;
+    this.assignBusy.add(userRef);
+    const obs = this.isMember(userRef)
+      ? this.api.removeGroupMember(this.selectedGroup.groupReference, userRef)
+      : this.api.addGroupMember(this.selectedGroup.groupReference, userRef);
+
+    obs.subscribe({
+      next: () => {
+        if (this.isMember(userRef)) {
+          this.memberRefs.delete(userRef);
+          this.groupMembers = this.groupMembers.filter(m => m.userReference !== userRef);
+          this.selectedGroup!.memberCount--;
+        } else {
+          this.memberRefs.add(userRef);
+          const u = this.allUsers.find(x => x.reference === userRef)!;
+          this.groupMembers.push({ userReference: userRef, firstName: u.firstName, lastName: u.lastName });
+          this.selectedGroup!.memberCount++;
+        }
+        this.assignBusy.delete(userRef);
+        // sync group list count
+        const g = this.groups.find(x => x.groupReference === this.selectedGroup?.groupReference);
+        if (g) g.memberCount = this.selectedGroup!.memberCount;
+      },
+      error: () => this.assignBusy.delete(userRef)
+    });
+  }
 }

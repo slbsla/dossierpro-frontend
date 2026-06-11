@@ -1,95 +1,235 @@
 <app-navbar title="Utilisateurs"></app-navbar>
 <div class="page-content">
-  <div class="page-header">
-    <div><h2 class="page-title">Utilisateurs</h2><p class="page-subtitle">{{ page.totalElements }} utilisateur(s)</p></div>
-    <div class="header-actions">
-      <label class="prospect-filter-toggle" [class.active]="prospectOnly">
-        <input type="checkbox" [checked]="prospectOnly" (change)="toggleProspectFilter()">
-        <span class="material-icons" style="font-size:16px;vertical-align:middle;color:var(--warning)">warning</span>
-        Prospects uniquement
-      </label>
-      <button class="btn btn-primary" (click)="openCreate()">+ Nouvel Utilisateur</button>
-    </div>
+
+  <!-- Tab bar -->
+  <div class="tabs-bar">
+    <button class="tab-btn" [class.active]="activeTab==='users'" (click)="switchTab('users')">
+      <span class="material-icons tab-icon">group</span> Utilisateurs
+    </button>
+    <button class="tab-btn" [class.active]="activeTab==='groups'" (click)="switchTab('groups')">
+      <span class="material-icons tab-icon">folder_shared</span> Groupes d'utilisateurs
+    </button>
+    <button class="tab-btn" [class.active]="activeTab==='members'" (click)="switchTab('members')">
+      <span class="material-icons tab-icon">people_alt</span> Membres de groupe
+    </button>
   </div>
-  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
-  <div class="card">
-    <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
-    <div class="table-wrapper" *ngIf="!loading">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:32px"></th>
-            <th class="th-sort" (click)="sortBy3('reference')" [class.th-active]="sortBy==='reference'">
-              Référence <span class="material-icons sort-icon">{{ sortIcon('reference') }}</span>
-            </th>
-            <th class="th-sort" (click)="sortBy3('lastName')" [class.th-active]="sortBy==='lastName'">
-              Nom <span class="material-icons sort-icon">{{ sortIcon('lastName') }}</span>
-            </th>
-            <th class="th-sort" (click)="sortBy3('email')" [class.th-active]="sortBy==='email'">
-              Email <span class="material-icons sort-icon">{{ sortIcon('email') }}</span>
-            </th>
-            <th class="th-sort" (click)="sortBy3('telephone')" [class.th-active]="sortBy==='telephone'">
-              Téléphone <span class="material-icons sort-icon">{{ sortIcon('telephone') }}</span>
-            </th>
-            <th class="th-sort" (click)="sortBy3('isActive')" [class.th-active]="sortBy==='isActive'">
-              Actif <span class="material-icons sort-icon">{{ sortIcon('isActive') }}</span>
-            </th>
-            <th class="th-sort" (click)="sortBy3('creationDate')" [class.th-active]="sortBy==='creationDate'">
-              Créé le <span class="material-icons sort-icon">{{ sortIcon('creationDate') }}</span>
-            </th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let u of page.content" [class.prospect-row]="u.isProspect">
-            <td>
-              <span *ngIf="u.isProspect" class="prospect-icon-wrap">
-                <span class="material-icons prospect-icon">warning</span>
-                <span class="prospect-tooltip">Nouveau prospect — en attente de première connexion</span>
-              </span>
-            </td>
-            <td><code>{{ u.reference }}</code></td>
-            <td><strong>{{ u.firstName }} {{ u.lastName }}</strong></td>
-            <td>{{ u.email || '—' }}</td>
-            <td>{{ u.telephone || '—' }}</td>
-            <td>
-              <label class="toggle">
-                <input type="checkbox" [checked]="u.isActive" (change)="toggleActive(u.reference)">
-                <span class="toggle-slider"></span>
-              </label>
-            </td>
-            <td>{{ u.creationDate | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <button class="btn btn-sm btn-secondary" (click)="openEdit(u)" title="Modifier"
-                [disabled]="u.isProspect" [class.btn-disabled]="u.isProspect"
-                [title]="u.isProspect ? 'Modification disponible après la première connexion du prospect' : 'Modifier'">
-                <span class="material-icons" style="font-size:16px">edit</span>
-              </button>
-              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(u.reference)" title="Supprimer">
-                <span class="material-icons" style="font-size:16px">delete_forever</span>
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="page.content.length===0"><td colspan="8"><div class="empty-state"><div class="empty-state-icon">👥</div><p>{{ prospectOnly ? 'Aucun prospect en attente' : 'Aucun utilisateur' }}</p></div></td></tr>
-        </tbody>
-      </table>
-      <div class="pagination" *ngIf="page.totalPages > 1">
-        <button (click)="load(page.page-1)" [disabled]="page.page===0">◀</button>
-        <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="load(p)">{{ p+1 }}</button>
-        <button (click)="load(page.page+1)" [disabled]="page.last">▶</button>
+
+  <!-- ══ TAB 1 : Users ══ -->
+  <ng-container *ngIf="activeTab==='users'">
+    <div class="page-header">
+      <div><h2 class="page-title">Utilisateurs</h2><p class="page-subtitle">{{ page.totalElements }} utilisateur(s)</p></div>
+      <div class="header-actions">
+        <label class="prospect-filter-toggle" [class.active]="prospectOnly">
+          <input type="checkbox" [checked]="prospectOnly" (change)="toggleProspectFilter()">
+          <span class="material-icons" style="font-size:16px;vertical-align:middle;color:var(--warning)">warning</span>
+          Prospects uniquement
+        </label>
+        <button class="btn btn-primary" (click)="openCreate()">+ Nouvel Utilisateur</button>
       </div>
     </div>
-  </div>
+    <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+    <div class="card">
+      <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+      <div class="table-wrapper" *ngIf="!loading">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:32px"></th>
+              <th class="th-sort" (click)="sortBy3('reference')" [class.th-active]="sortBy==='reference'">Référence <span class="material-icons sort-icon">{{ sortIcon('reference') }}</span></th>
+              <th class="th-sort" (click)="sortBy3('lastName')" [class.th-active]="sortBy==='lastName'">Nom <span class="material-icons sort-icon">{{ sortIcon('lastName') }}</span></th>
+              <th class="th-sort" (click)="sortBy3('email')" [class.th-active]="sortBy==='email'">Email <span class="material-icons sort-icon">{{ sortIcon('email') }}</span></th>
+              <th class="th-sort" (click)="sortBy3('telephone')" [class.th-active]="sortBy==='telephone'">Téléphone <span class="material-icons sort-icon">{{ sortIcon('telephone') }}</span></th>
+              <th class="th-sort" (click)="sortBy3('isActive')" [class.th-active]="sortBy==='isActive'">Actif <span class="material-icons sort-icon">{{ sortIcon('isActive') }}</span></th>
+              <th class="th-sort" (click)="sortBy3('creationDate')" [class.th-active]="sortBy==='creationDate'">Créé le <span class="material-icons sort-icon">{{ sortIcon('creationDate') }}</span></th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of page.content" [class.prospect-row]="u.isProspect">
+              <td>
+                <span *ngIf="u.isProspect" class="prospect-icon-wrap">
+                  <span class="material-icons prospect-icon">warning</span>
+                  <span class="prospect-tooltip">Nouveau prospect — en attente de première connexion</span>
+                </span>
+              </td>
+              <td><code>{{ u.reference }}</code></td>
+              <td><strong>{{ u.firstName }} {{ u.lastName }}</strong></td>
+              <td>{{ u.email || '—' }}</td>
+              <td>{{ u.telephone || '—' }}</td>
+              <td>
+                <label class="toggle">
+                  <input type="checkbox" [checked]="u.isActive" (change)="toggleActive(u.reference)">
+                  <span class="toggle-slider"></span>
+                </label>
+              </td>
+              <td>{{ u.creationDate | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <button class="btn btn-sm btn-secondary" (click)="openEdit(u)" [disabled]="u.isProspect" [class.btn-disabled]="u.isProspect" [title]="u.isProspect ? 'Modification disponible après la première connexion' : 'Modifier'">
+                  <span class="material-icons" style="font-size:16px">edit</span>
+                </button>
+                <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(u.reference)">
+                  <span class="material-icons" style="font-size:16px">delete_forever</span>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="page.content.length===0"><td colspan="8"><div class="empty-state"><div class="empty-state-icon">👥</div><p>{{ prospectOnly ? 'Aucun prospect en attente' : 'Aucun utilisateur' }}</p></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination" *ngIf="page.totalPages > 1">
+          <button (click)="load(page.page-1)" [disabled]="page.page===0">◀</button>
+          <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="load(p)">{{ p+1 }}</button>
+          <button (click)="load(page.page+1)" [disabled]="page.last">▶</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══ TAB 2 : User Groups ══ -->
+  <ng-container *ngIf="activeTab==='groups'">
+    <div class="page-header">
+      <div><h2 class="page-title">Groupes d'utilisateurs</h2><p class="page-subtitle">{{ groups.length }} groupe(s)</p></div>
+      <button class="btn btn-primary" (click)="openGroupModal()">+ Nouveau groupe</button>
+    </div>
+
+    <div class="split-panel">
+      <!-- Left: group list -->
+      <div class="split-left">
+        <div *ngIf="groupsLoading" class="loading"><div class="spinner"></div></div>
+        <ng-container *ngIf="!groupsLoading">
+          <div class="group-card" *ngFor="let g of groups"
+               [class.selected]="selectedGroup?.groupReference===g.groupReference"
+               (click)="selectGroup(g)">
+            <div class="group-card-icon">
+              <span class="material-icons">{{ g.icon }}</span>
+            </div>
+            <div class="group-card-info">
+              <span class="group-card-name">{{ g.groupName }}</span>
+              <span class="group-card-count">{{ g.memberCount }} membre(s)</span>
+            </div>
+            <button class="group-delete-btn" (click)="deleteGroup(g); $event.stopPropagation()" title="Supprimer">
+              <span class="material-icons" style="font-size:16px">delete</span>
+            </button>
+          </div>
+          <div class="empty-state" *ngIf="groups.length===0" style="padding:40px 0">
+            <div class="empty-state-icon">📂</div>
+            <p>Aucun groupe — créez-en un !</p>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Right: members of selected group -->
+      <div class="split-right">
+        <ng-container *ngIf="!selectedGroup">
+          <div class="empty-state" style="padding:60px 0">
+            <div class="empty-state-icon">👈</div>
+            <p>Sélectionnez un groupe pour voir ses membres</p>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="selectedGroup">
+          <div class="split-right-header">
+            <span class="material-icons" style="color:var(--primary)">{{ selectedGroup.icon }}</span>
+            <strong>{{ selectedGroup.groupName }}</strong>
+            <span class="badge-count">{{ groupMembers.length }} membre(s)</span>
+          </div>
+          <div *ngIf="membersLoading" class="loading"><div class="spinner"></div></div>
+          <div class="members-list" *ngIf="!membersLoading">
+            <div class="member-row" *ngFor="let m of groupMembers">
+              <span class="member-avatar">{{ m.firstName?.[0] | uppercase }}{{ m.lastName?.[0] | uppercase }}</span>
+              <div class="member-info">
+                <span class="member-name">{{ m.firstName }} {{ m.lastName }}</span>
+                <code class="member-ref">{{ m.userReference }}</code>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="groupMembers.length===0" style="padding:30px 0">
+              <p>Aucun membre dans ce groupe</p>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══ TAB 3 : Members ══ -->
+  <ng-container *ngIf="activeTab==='members'">
+    <div class="page-header">
+      <div><h2 class="page-title">Membres de groupe</h2><p class="page-subtitle">Affectez des utilisateurs aux groupes</p></div>
+    </div>
+
+    <div class="split-panel">
+      <!-- Left: group list -->
+      <div class="split-left">
+        <div *ngIf="groupsLoading" class="loading"><div class="spinner"></div></div>
+        <ng-container *ngIf="!groupsLoading">
+          <div class="group-card" *ngFor="let g of groups"
+               [class.selected]="selectedGroup?.groupReference===g.groupReference"
+               (click)="selectGroup(g)">
+            <div class="group-card-icon">
+              <span class="material-icons">{{ g.icon }}</span>
+            </div>
+            <div class="group-card-info">
+              <span class="group-card-name">{{ g.groupName }}</span>
+              <span class="group-card-count">{{ g.memberCount }} membre(s)</span>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="groups.length===0" style="padding:40px 0">
+            <div class="empty-state-icon">📂</div>
+            <p>Aucun groupe disponible</p>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Right: all users with add/remove -->
+      <div class="split-right">
+        <ng-container *ngIf="!selectedGroup">
+          <div class="empty-state" style="padding:60px 0">
+            <div class="empty-state-icon">👈</div>
+            <p>Sélectionnez un groupe pour gérer ses membres</p>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="selectedGroup">
+          <div class="split-right-header">
+            <span class="material-icons" style="color:var(--primary)">{{ selectedGroup.icon }}</span>
+            <strong>{{ selectedGroup.groupName }}</strong>
+            <span class="badge-count">{{ selectedGroup.memberCount }} membre(s)</span>
+          </div>
+          <div *ngIf="allUsersLoading" class="loading"><div class="spinner"></div></div>
+          <div class="members-list" *ngIf="!allUsersLoading">
+            <div class="member-row assign-row" *ngFor="let u of allUsers" [class.is-member]="isMember(u.reference)">
+              <span class="member-avatar" [class.avatar-member]="isMember(u.reference)">
+                {{ u.firstName?.[0] | uppercase }}{{ u.lastName?.[0] | uppercase }}
+              </span>
+              <div class="member-info">
+                <span class="member-name">{{ u.firstName }} {{ u.lastName }}</span>
+                <code class="member-ref">{{ u.reference }}</code>
+              </div>
+              <span class="member-badge" *ngIf="isMember(u.reference)">Membre</span>
+              <button class="btn btn-sm assign-btn"
+                      [class.btn-danger]="isMember(u.reference)"
+                      [class.btn-primary]="!isMember(u.reference)"
+                      [disabled]="isBusy(u.reference)"
+                      (click)="toggleMembership(u.reference)">
+                <span class="material-icons" style="font-size:15px">{{ isMember(u.reference) ? 'remove' : 'add' }}</span>
+                {{ isMember(u.reference) ? 'Retirer' : 'Ajouter' }}
+              </button>
+            </div>
+            <div class="empty-state" *ngIf="allUsers.length===0" style="padding:30px 0">
+              <p>Aucun utilisateur dans cette entité</p>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </ng-container>
+
 </div>
 
+<!-- ══ Modal create/edit user ══ -->
 <div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
   <div class="modal-box" (click)="$event.stopPropagation()">
     <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Nouvel utilisateur' }}</h3>
     <p class="modal-subtitle" *ngIf="!editMode">Remplissez les informations pour créer un nouvel utilisateur</p>
     <div class="alert alert-error" *ngIf="error">{{ error }}</div>
     <form [formGroup]="form">
-
-      <!-- Section 1 : Informations personnelles -->
       <div class="form-section">
         <h4 class="form-section-title">Informations personnelles</h4>
         <div class="form-row">
@@ -101,8 +241,6 @@
           <div class="form-group"><label class="form-label">Email</label><input class="form-control" type="email" formControlName="email" placeholder="marc.dupont@dossierpro.com"></div>
         </div>
       </div>
-
-      <!-- Section 2 : Mot de passe (création uniquement) -->
       <div class="form-section" *ngIf="!editMode">
         <h4 class="form-section-title">Mot de passe</h4>
         <p class="form-section-hint">Le mot de passe doit contenir au moins 4 caractères.</p>
@@ -111,26 +249,18 @@
             <label class="form-label">Mot de passe *</label>
             <div class="input-password-wrapper">
               <input class="form-control" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••••">
-              <button type="button" class="btn-eye" (click)="showPassword=!showPassword" tabindex="-1">
-                {{ showPassword ? '🙈' : '👁️' }}
-              </button>
+              <button type="button" class="btn-eye" (click)="showPassword=!showPassword" tabindex="-1">{{ showPassword ? '🙈' : '👁️' }}</button>
             </div>
-            <small class="form-hint-small" *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
-              Minimum 4 caractères requis.
-            </small>
           </div>
           <div class="form-group">
-            <label class="form-label">Confirmation du mot de passe *</label>
+            <label class="form-label">Confirmation *</label>
             <div class="input-password-wrapper">
               <input class="form-control" [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="••••••••••">
-              <button type="button" class="btn-eye" (click)="showConfirmPassword=!showConfirmPassword" tabindex="-1">
-                {{ showConfirmPassword ? '🙈' : '👁️' }}
-              </button>
+              <button type="button" class="btn-eye" (click)="showConfirmPassword=!showConfirmPassword" tabindex="-1">{{ showConfirmPassword ? '🙈' : '👁️' }}</button>
             </div>
           </div>
         </div>
       </div>
-
     </form>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="showModal=false">✕ Annuler</button>
@@ -140,6 +270,36 @@
       <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">
         {{ editMode ? 'Enregistrer' : '🖊️ Créer l\'utilisateur' }}
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal create group ══ -->
+<div class="modal-overlay" *ngIf="showGroupModal" (click)="showGroupModal=false">
+  <div class="modal-box modal-box-sm" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">Nouveau groupe</h3>
+    <div class="alert alert-error" *ngIf="groupError">{{ groupError }}</div>
+    <form [formGroup]="groupForm">
+      <div class="form-group" style="margin-bottom:20px">
+        <label class="form-label">Nom du groupe *</label>
+        <input class="form-control" formControlName="groupName" placeholder="ex : Équipe commerciale" autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Icône</label>
+        <div class="icon-picker">
+          <button type="button" class="icon-option"
+                  *ngFor="let ic of groupIcons"
+                  [class.icon-selected]="groupForm.value.icon===ic"
+                  (click)="selectIcon(ic)"
+                  [title]="ic">
+            <span class="material-icons">{{ ic }}</span>
+          </button>
+        </div>
+      </div>
+    </form>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showGroupModal=false">Annuler</button>
+      <button class="btn btn-primary" (click)="saveGroup()" [disabled]="groupForm.invalid">Créer le groupe</button>
     </div>
   </div>
 </div>

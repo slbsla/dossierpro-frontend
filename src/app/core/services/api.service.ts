@@ -258,4 +258,29 @@ export class ApiService {
       params: new HttpParams().set('page', page).set('size', size)
     });
   }
+
+  // ---- EM Groups ----
+  getEmGroups(): Observable<{groupReference: string; groupName: string; icon: string; memberCount: number}[]> {
+    return this.http.get<any[]>(`${this.API}/em/groups`);
+  }
+
+  createEmGroup(data: {groupName: string; icon: string}): Observable<any> {
+    return this.http.post(`${this.API}/em/groups`, data);
+  }
+
+  deleteEmGroup(ref: string): Observable<void> {
+    return this.http.delete<void>(`${this.API}/em/groups/${ref}`);
+  }
+
+  getGroupMembers(ref: string): Observable<{userReference: string; firstName: string; lastName: string}[]> {
+    return this.http.get<any[]>(`${this.API}/em/groups/${ref}/members`);
+  }
+
+  addGroupMember(groupRef: string, userRef: string): Observable<void> {
+    return this.http.post<void>(`${this.API}/em/groups/${groupRef}/members/${userRef}`, {});
+  }
+
+  removeGroupMember(groupRef: string, userRef: string): Observable<void> {
+    return this.http.delete<void>(`${this.API}/em/groups/${groupRef}/members/${userRef}`);
+  }
 }
