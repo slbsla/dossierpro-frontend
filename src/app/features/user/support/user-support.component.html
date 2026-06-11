@@ -1,0 +1,174 @@
+<app-navbar title="Support"></app-navbar>
+<div class="page-content">
+
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Support</h2>
+      <p class="page-subtitle">Contactez votre manager, suivez vos messages envoyés</p>
+    </div>
+    <button class="btn btn-primary" (click)="openContactModal()" [disabled]="emailLoading">
+      <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px">mail</span>
+      Contacter le manager
+    </button>
+  </div>
+
+  <!-- No-email warning banner -->
+  <div class="alert-banner alert-banner-warning" *ngIf="!emailLoading && !hasEmail">
+    <span class="material-icons" style="font-size:18px">warning</span>
+    Aucun email enregistré sur votre profil. Veuillez
+    <a routerLink="/user/profile" class="alert-link">mettre à jour votre profil</a>
+    avant de contacter le manager.
+  </div>
+
+  <!-- Messages list -->
+  <div class="card">
+    <div *ngIf="listLoading" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!listLoading">
+      <table>
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Objet</th>
+            <th>Date d'envoi</th>
+            <th style="width:90px">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of messages">
+            <td><code>{{ m.reference }}</code></td>
+            <td>
+              <div class="subject-cell">
+                <span class="material-icons subject-icon">mail_outline</span>
+                {{ m.subject }}
+              </div>
+            </td>
+            <td>{{ m.sentAt | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <button class="btn btn-sm btn-secondary" (click)="viewMsg(m.reference)">
+                <span class="material-icons" style="font-size:15px;vertical-align:middle">visibility</span>
+                Voir
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="messages.length === 0">
+            <td colspan="4">
+              <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p>Aucun message envoyé pour l'instant</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ Contact modal ══ -->
+<div class="modal-overlay" *ngIf="showContactModal" (click)="showContactModal=false">
+  <div class="modal-box modal-support" (click)="$event.stopPropagation()">
+    <div class="modal-support-header">
+      <span class="modal-support-icon material-icons">support_agent</span>
+      <div>
+        <h3 class="modal-title" style="margin:0">Contacter le manager</h3>
+        <p class="modal-subtitle" style="margin:4px 0 0">Votre message sera transmis à votre responsable</p>
+      </div>
+    </div>
+
+    <div class="alert alert-success" *ngIf="sendSuccess">
+      <span class="material-icons" style="font-size:16px;vertical-align:middle">check_circle</span>
+      Message envoyé avec succès !
+    </div>
+    <div class="alert alert-error" *ngIf="sendError">{{ sendError }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="send()">
+
+      <!-- Email (always disabled) -->
+      <div class="form-group">
+        <label class="form-label">Email de contact *</label>
+        <div class="email-field-wrap">
+          <input class="form-control email-input"
+                 [value]="hasEmail ? userEmail : ''"
+                 [placeholder]="hasEmail ? '' : 'Aucun email — mettez à jour votre profil'"
+                 disabled>
+          <span class="email-status email-ok"  *ngIf="hasEmail">
+            <span class="material-icons" style="font-size:14px">check_circle</span> Email vérifié
+          </span>
+          <span class="email-status email-warn" *ngIf="!hasEmail">
+            <span class="material-icons" style="font-size:14px">warning</span> Email manquant
+          </span>
+        </div>
+        <small class="form-hint-small" *ngIf="!hasEmail">
+          <a routerLink="/user/profile" (click)="showContactModal=false">Cliquez ici pour ajouter votre email</a>
+        </small>
+      </div>
+
+      <!-- Subject -->
+      <div class="form-group">
+        <label class="form-label">Objet *</label>
+        <input class="form-control" formControlName="subject"
+               placeholder="ex : Problème de dossier, demande d'information...">
+        <small class="form-hint-small" *ngIf="subjectCtrl.invalid && subjectCtrl.touched">
+          L'objet est requis (max 120 caractères).
+        </small>
+      </div>
+
+      <!-- Message -->
+      <div class="form-group">
+        <label class="form-label">Message *</label>
+        <textarea class="form-control support-textarea" formControlName="message"
+                  placeholder="Décrivez votre demande en détail..."
+                  rows="5"></textarea>
+        <div class="textarea-footer">
+          <small class="form-hint-small" *ngIf="messageCtrl.invalid && messageCtrl.touched">
+            Le message est requis (min 10, max 2000 caractères).
+          </small>
+          <span class="char-count" [class.over-limit]="messageCtrl.value?.length > 2000">
+            {{ messageCtrl.value?.length || 0 }} / 2000
+          </span>
+        </div>
+      </div>
+
+    </form>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showContactModal=false">Annuler</button>
+      <button class="btn btn-primary" (click)="send()"
+              [disabled]="formInvalid || submitting">
+        <span class="material-icons" style="font-size:15px;vertical-align:middle" *ngIf="!submitting">send</span>
+        <span *ngIf="submitting">Envoi...</span>
+        <span *ngIf="!submitting">Envoyer</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ View message modal ══ -->
+<div class="modal-overlay" *ngIf="showViewModal && viewMessage" (click)="showViewModal=false">
+  <div class="modal-box modal-support" (click)="$event.stopPropagation()">
+    <div class="modal-support-header">
+      <span class="modal-support-icon material-icons">mail</span>
+      <div>
+        <h3 class="modal-title" style="margin:0">{{ viewMessage.subject }}</h3>
+        <p class="modal-subtitle" style="margin:4px 0 0">
+          Envoyé le {{ viewMessage.sentAt | date:'dd/MM/yyyy à HH:mm' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="view-meta">
+      <span class="view-meta-label">De :</span>
+      <span class="view-meta-value">{{ viewMessage.email }}</span>
+      <span class="view-meta-ref">
+        <code>{{ viewMessage.reference }}</code>
+      </span>
+    </div>
+
+    <div class="view-message-body">{{ viewMessage.message }}</div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showViewModal=false">Fermer</button>
+    </div>
+  </div>
+</div>

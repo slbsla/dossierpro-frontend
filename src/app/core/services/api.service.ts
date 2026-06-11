@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
-  Dossier, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo
+  Dossier, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -257,6 +257,19 @@ export class ApiService {
     return this.http.get(`${this.API}/em/activity-logs`, {
       params: new HttpParams().set('page', page).set('size', size)
     });
+  }
+
+  // ---- User Support ----
+  getSupportMessages(): Observable<SupportMessage[]> {
+    return this.http.get<SupportMessage[]>(`${this.API}/user/support`);
+  }
+
+  getSupportMessage(ref: string): Observable<SupportMessage> {
+    return this.http.get<SupportMessage>(`${this.API}/user/support/${ref}`);
+  }
+
+  sendSupportMessage(data: {subject: string; email: string; message: string}): Observable<SupportMessage> {
+    return this.http.post<SupportMessage>(`${this.API}/user/support`, data);
   }
 
   // ---- EM Groups ----

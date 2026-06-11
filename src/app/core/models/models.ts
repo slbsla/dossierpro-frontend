@@ -163,6 +163,15 @@ export interface DossierUpload {
   rejectedCount: number;
 }
 
+export interface SupportMessage {
+  reference: string;
+  subject: string;
+  email: string;
+  message: string;
+  sentAt: string;
+  entityCode?: string;
+}
+
 export interface UploadResult {
   successCount: number;
   rejectedCount: number;
