@@ -6,5 +6,43 @@
   align-items: center;
   padding: 0 24px;
   box-shadow: var(--shadow-sm);
+  gap: 12px;
 }
-.navbar-title { font-size: 16px; font-weight: 600; color: var(--text-dark); }
+
+.navbar-title { font-size: 16px; font-weight: 600; color: var(--text-dark); flex: 1; }
+
+/* EM entity chip */
+.em-entity-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 6px 10px 6px 8px;
+  flex-shrink: 0;
+}
+
+.chip-icon { font-size: 15px; color: #2563eb; }
+
+.chip-info { display: flex; flex-direction: column; line-height: 1.2; }
+.chip-name { font-size: 12px; font-weight: 600; color: #1e3a8a; white-space: nowrap; }
+.chip-code { font-size: 11px; color: #3b82f6; }
+
+.chip-change-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+  margin-left: 4px;
+}
+.chip-change-btn:hover { background: #1d4ed8; }

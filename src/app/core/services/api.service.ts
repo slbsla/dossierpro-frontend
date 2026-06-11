@@ -62,6 +62,11 @@ export class ApiService {
   }
 
   // ---- EM ----
+  getEmMyEntities(q = ''): Observable<{code: string; name: string; sector: string}[]> {
+    const params = q.length >= 2 ? new HttpParams().set('q', q) : new HttpParams();
+    return this.http.get<{code: string; name: string; sector: string}[]>(`${this.API}/em/my-entities`, { params });
+  }
+
   getEmDashboard(): Observable<DashboardEm> {
     return this.http.get<DashboardEm>(`${this.API}/em/dashboard`);
   }

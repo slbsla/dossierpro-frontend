@@ -1,3 +1,17 @@
 <header class="navbar">
   <h1 class="navbar-title">{{ title }}</h1>
+
+  <!-- EM entity chip — top right -->
+  <div class="em-entity-chip"
+       *ngIf="role === Role.ENTITY_MANAGER && emSession.isSelected">
+    <span class="material-icons chip-icon">corporate_fare</span>
+    <div class="chip-info">
+      <span class="chip-name">{{ emSession.entity?.name }}</span>
+      <span class="chip-code">{{ emSession.entity?.code }}</span>
+    </div>
+    <button class="chip-change-btn" (click)="changeEntity()" title="Changer d'entité">
+      <span class="material-icons" style="font-size:15px">swap_horiz</span>
+      Changer
+    </button>
+  </div>
 </header>

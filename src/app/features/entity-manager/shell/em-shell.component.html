@@ -1,0 +1,8 @@
+<!-- Blocking entity picker overlay -->
+<app-em-entity-picker
+  *ngIf="!emSession.isSelected"
+  (entitySelected)="onEntitySelected()">
+</app-em-entity-picker>
+
+<!-- Main EM content once entity is selected -->
+<router-outlet *ngIf="emSession.isSelected"></router-outlet>

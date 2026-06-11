@@ -7,17 +7,32 @@ import { EmDashboardComponent } from './dashboard/em-dashboard.component';
 import { EmInfoComponent } from './info/em-info.component';
 import { EmUsersComponent } from './users/em-users.component';
 import { EmDossiersComponent } from './dossiers/em-dossiers.component';
+import { EmShellComponent } from './shell/em-shell.component';
+import { EmEntityPickerComponent } from './entity-picker/em-entity-picker.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'dashboard', component: EmDashboardComponent },
-  { path: 'info', component: EmInfoComponent },
-  { path: 'users', component: EmUsersComponent },
-  { path: 'dossiers', component: EmDossiersComponent }
+  {
+    path: '',
+    component: EmShellComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: EmDashboardComponent },
+      { path: 'info', component: EmInfoComponent },
+      { path: 'users', component: EmUsersComponent },
+      { path: 'dossiers', component: EmDossiersComponent }
+    ]
+  }
 ];
 
 @NgModule({
-  declarations: [EmDashboardComponent, EmInfoComponent, EmUsersComponent, EmDossiersComponent],
+  declarations: [
+    EmDashboardComponent,
+    EmInfoComponent,
+    EmUsersComponent,
+    EmDossiersComponent,
+    EmShellComponent,
+    EmEntityPickerComponent
+  ],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, RouterModule.forChild(routes)]
 })
 export class EmModule {}

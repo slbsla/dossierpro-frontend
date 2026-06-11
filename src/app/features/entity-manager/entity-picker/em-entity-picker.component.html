@@ -1,0 +1,53 @@
+<div class="picker-overlay">
+  <div class="picker-card">
+    <div class="picker-header">
+      <div class="picker-icon">🏢</div>
+      <h2 class="picker-title">Sélectionnez votre entité</h2>
+      <p class="picker-subtitle">Choisissez l'entité que vous souhaitez gérer pour cette session.</p>
+    </div>
+
+    <!-- No entity assigned at all -->
+    <div *ngIf="noEntityAssigned" class="picker-empty-state">
+      <div class="empty-icon">⚠️</div>
+      <p class="empty-text">Aucune entité ne vous est affectée.<br>Contactez votre administrateur.</p>
+    </div>
+
+    <!-- Normal state: search + list -->
+    <ng-container *ngIf="!noEntityAssigned">
+      <div class="picker-search-wrap">
+        <input
+          type="text"
+          class="picker-search"
+          placeholder="Rechercher par nom ou référence (min. 2 caractères)..."
+          [(ngModel)]="query"
+          (ngModelChange)="onQueryChange()"
+          autocomplete="off"
+        />
+        <span class="picker-search-icon" *ngIf="!loading">🔍</span>
+        <span class="picker-loader" *ngIf="loading">⏳</span>
+      </div>
+
+      <!-- Results -->
+      <div class="picker-list" *ngIf="results.length > 0">
+        <button
+          class="picker-item"
+          *ngFor="let e of results"
+          (click)="select(e)"
+          type="button"
+        >
+          <div class="picker-item-main">
+            <span class="picker-item-name">{{ e.name }}</span>
+            <span class="picker-item-code">{{ e.code }}</span>
+          </div>
+          <span class="picker-item-sector">{{ e.sector }}</span>
+          <span class="picker-item-arrow">→</span>
+        </button>
+      </div>
+
+      <!-- No results after search -->
+      <div class="picker-no-results" *ngIf="searched && results.length === 0 && !loading">
+        <p>Aucune entité trouvée pour « {{ query }} ».</p>
+      </div>
+    </ng-container>
+  </div>
+</div>
