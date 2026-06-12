@@ -1,3 +1,9 @@
+.em-search-bar { display:flex; align-items:center; gap:8px; padding:10px 16px; border-bottom:1px solid var(--gray-border,#e2e8f0); background:var(--gray-light,#f8fafc); }
+.em-search-bar .search-icon { color:var(--gray-text); font-size:18px; }
+.em-search-bar .search-input { flex:1; border:none; background:transparent; font-size:14px; outline:none; color:var(--text-main); }
+.em-search-bar .search-clear { background:none; border:none; cursor:pointer; color:var(--gray-text); padding:2px; display:flex; align-items:center; }
+.em-search-bar .search-divider { width:1px; height:20px; background:var(--gray-border,#e2e8f0); }
+.em-search-bar .search-type-select { border:none; background:transparent; font-size:13px; color:var(--text-main); outline:none; cursor:pointer; }
 .tabs { display:flex; gap:4px; margin-bottom:16px; border-bottom:2px solid var(--gray-border); }
 .tab-btn { padding:10px 20px; border:none; background:none; cursor:pointer; font-size:14px; font-weight:500; color:var(--gray-text); border-bottom:2px solid transparent; margin-bottom:-2px; }
 .tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); }

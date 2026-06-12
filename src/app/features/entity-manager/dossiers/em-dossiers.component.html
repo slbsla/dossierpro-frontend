@@ -10,10 +10,21 @@
     <button class="tab-btn" [class.active]="activeTab==='validated'" (click)="activeTab='validated'">
       Traités <span class="tab-badge">{{ validatedPage.totalElements }}</span>
     </button>
+    <button class="tab-btn" [class.active]="activeTab==='archived'" (click)="activeTab='archived'">
+      Archivés <span class="tab-badge">{{ archivedPage.totalElements }}</span>
+    </button>
   </div>
 
   <!-- Pending -->
   <div class="card" *ngIf="activeTab==='pending'">
+    <div class="em-search-bar">
+      <span class="material-icons search-icon">search</span>
+      <input class="search-input" type="text" placeholder="Rechercher par libellé ou référence…"
+        [value]="searchPending" (input)="onSearchPending($any($event.target).value)">
+      <button class="search-clear" *ngIf="searchPending" (click)="onSearchPending('')">
+        <span class="material-icons" style="font-size:16px">close</span>
+      </button>
+    </div>
     <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
     <div class="table-wrapper" *ngIf="!loading">
       <table>
@@ -41,9 +52,24 @@
 
   <!-- Validated -->
   <div class="card" *ngIf="activeTab==='validated'">
-    <div class="table-wrapper">
+    <div class="em-search-bar">
+      <span class="material-icons search-icon">search</span>
+      <input class="search-input" type="text" placeholder="Rechercher par libellé ou référence…"
+        [value]="searchValidated" (input)="onSearchValidated($any($event.target).value)">
+      <button class="search-clear" *ngIf="searchValidated" (click)="onSearchValidated('')">
+        <span class="material-icons" style="font-size:16px">close</span>
+      </button>
+      <div class="search-divider"></div>
+      <select class="search-type-select" [value]="statusFilter" (change)="onStatusFilter($any($event.target).value)">
+        <option value="">Tous</option>
+        <option value="VALIDATED">Validés</option>
+        <option value="REJECTED">Rejetés</option>
+      </select>
+    </div>
+    <div *ngIf="loadingValidated" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loadingValidated">
       <table>
-        <thead><tr><th>Référence</th><th>Libellé</th><th>Statut</th><th>Montant</th><th>Auteur</th><th>Date</th><th>PDF</th></tr></thead>
+        <thead><tr><th>Référence</th><th>Libellé</th><th>Statut</th><th>Montant</th><th>Auteur</th><th>Date</th><th>PDF</th><th>Actions</th></tr></thead>
         <tbody>
           <tr *ngFor="let d of validatedPage.content">
             <td><code>{{ d.reference }}</code></td>
@@ -56,10 +82,86 @@
               <button *ngIf="d.hasPdf" class="btn btn-sm btn-success" (click)="downloadPdf(d.reference)" title="Télécharger le PDF signé"><span class="material-icons" style="font-size:16px;vertical-align:middle">download</span> PDF</button>
               <span *ngIf="!d.hasPdf" style="color:var(--text-muted)">—</span>
             </td>
+            <td>
+              <button *ngIf="d.status==='VALIDATED'" class="btn btn-sm btn-secondary" (click)="archiveDossier(d)" title="Archiver ce dossier">
+                <span class="material-icons" style="font-size:15px;vertical-align:middle">archive</span> Archiver
+              </button>
+            </td>
           </tr>
-          <tr *ngIf="validatedPage.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📋</div><p>Aucun dossier traité</p></div></td></tr>
+          <tr *ngIf="validatedPage.content.length===0"><td colspan="8"><div class="empty-state"><div class="empty-state-icon">📋</div><p>Aucun dossier traité</p></div></td></tr>
         </tbody>
       </table>
+      <div class="pagination" *ngIf="validatedPage.totalPages > 1">
+        <button (click)="loadValidated(validatedPage.page-1)" [disabled]="validatedPage.page===0">◀</button>
+        <button *ngFor="let p of pages(validatedPage)" [class.active]="p===validatedPage.page" (click)="loadValidated(p)">{{ p+1 }}</button>
+        <button (click)="loadValidated(validatedPage.page+1)" [disabled]="validatedPage.last">▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Archived -->
+  <div class="card" *ngIf="activeTab==='archived'">
+    <div *ngIf="loadingArchived" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loadingArchived">
+      <table>
+        <thead><tr><th>Référence dossier</th><th>Libellé</th><th>Utilisateur</th><th>Archivé le</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let a of archivedPage.content">
+            <td><code>{{ a.referenceDossier }}</code></td>
+            <td>{{ a.libelle }}</td>
+            <td><code>{{ a.referenceUser }}</code></td>
+            <td>{{ a.timestamp | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <button class="btn btn-sm btn-secondary" (click)="openHash(a)">
+                <span class="material-icons" style="font-size:15px;vertical-align:middle">fingerprint</span> Afficher
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="archivedPage.content.length===0"><td colspan="5"><div class="empty-state"><div class="empty-state-icon">🗄️</div><p>Aucune archive</p></div></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" *ngIf="archivedPage.totalPages > 1">
+        <button (click)="loadArchived(archivedPage.page-1)" [disabled]="archivedPage.page===0">◀</button>
+        <button *ngFor="let p of pages(archivedPage)" [class.active]="p===archivedPage.page" (click)="loadArchived(p)">{{ p+1 }}</button>
+        <button (click)="loadArchived(archivedPage.page+1)" [disabled]="archivedPage.last">▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hash Modal -->
+<div class="modal-overlay" *ngIf="showHashModal">
+  <div class="modal-box" style="max-width:600px">
+    <h3 class="modal-title">
+      <span class="material-icons" style="vertical-align:middle;margin-right:6px">fingerprint</span>
+      Hash d'archive — {{ hashLibelle }}
+    </h3>
+    <p style="color:var(--gray-text);font-size:13px;margin-bottom:12px">
+      Ce hash est une représentation Base64 du JSON de tous les champs fonctionnels du dossier au moment de l'archivage (hors PDF).
+      Il permet de vérifier l'intégrité des données archivées.
+    </p>
+    <div style="position:relative">
+      <textarea
+        class="form-control"
+        [value]="hashValue"
+        readonly
+        rows="12"
+        style="background:var(--gray-light,#f8fafc);color:var(--gray-text);font-family:monospace;font-size:12px;resize:vertical;padding-right:44px;word-break:break-all">
+      </textarea>
+      <button
+        (click)="copyHash()"
+        title="Copier le hash"
+        style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;color:var(--primary);display:flex;align-items:center">
+        <span class="material-icons" style="font-size:20px">{{ hashCopied ? 'check_circle' : 'content_copy' }}</span>
+      </button>
+    </div>
+    <p style="margin-top:12px;font-size:13px">
+      <span class="material-icons" style="font-size:14px;vertical-align:middle;color:var(--primary)">open_in_new</span>
+      <a href="https://www.base64decode.org/" target="_blank" rel="noopener"
+         style="color:var(--primary);margin-left:4px">Décoder le Base64 en ligne (base64decode.org)</a>
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showHashModal=false">Fermer</button>
     </div>
   </div>
 </div>

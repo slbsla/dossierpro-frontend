@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
-  Dossier, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage
+  Dossier, DossierArchive, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -102,16 +102,17 @@ export class ApiService {
     return this.http.patch<EntityUser>(`${this.API}/em/users/${ref}/toggle-active`, {});
   }
 
-  getPendingDossiers(page = 0, size = 8): Observable<PageResponse<Dossier>> {
-    return this.http.get<PageResponse<Dossier>>(`${this.API}/em/dossiers/pending`, {
-      params: new HttpParams().set('page', page).set('size', size)
-    });
+  getPendingDossiers(page = 0, size = 8, search = ''): Observable<PageResponse<Dossier>> {
+    let p = new HttpParams().set('page', page).set('size', size);
+    if (search) p = p.set('search', search);
+    return this.http.get<PageResponse<Dossier>>(`${this.API}/em/dossiers/pending`, { params: p });
   }
 
-  getValidatedDossiers(page = 0, size = 8): Observable<PageResponse<Dossier>> {
-    return this.http.get<PageResponse<Dossier>>(`${this.API}/em/dossiers/validated`, {
-      params: new HttpParams().set('page', page).set('size', size)
-    });
+  getValidatedDossiers(page = 0, size = 8, search = '', statusFilter = ''): Observable<PageResponse<Dossier>> {
+    let p = new HttpParams().set('page', page).set('size', size);
+    if (search) p = p.set('search', search);
+    if (statusFilter) p = p.set('statusFilter', statusFilter);
+    return this.http.get<PageResponse<Dossier>>(`${this.API}/em/dossiers/validated`, { params: p });
   }
 
   getEmDossier(ref: string): Observable<Dossier> {
@@ -132,6 +133,16 @@ export class ApiService {
 
   downloadEmPdf(ref: string): Observable<Blob> {
     return this.http.get(`${this.API}/em/dossiers/${ref}/pdf`, { responseType: 'blob' });
+  }
+
+  archiveDossier(ref: string): Observable<DossierArchive> {
+    return this.http.post<DossierArchive>(`${this.API}/em/dossiers/${ref}/archive`, {});
+  }
+
+  getArchives(page = 0, size = 8): Observable<PageResponse<DossierArchive>> {
+    return this.http.get<PageResponse<DossierArchive>>(`${this.API}/em/archives`, {
+      params: new HttpParams().set('page', page).set('size', size)
+    });
   }
 
   // ---- User ----

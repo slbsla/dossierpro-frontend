@@ -1,15 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
-import { Dossier, DossierStatus, PageResponse } from '../../../core/models/models';
+import { Dossier, DossierArchive, DossierStatus, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({ selector: 'app-em-dossiers', templateUrl: './em-dossiers.component.html', styleUrls: ['./em-dossiers.component.css'] })
 export class EmDossiersComponent implements OnInit {
-  activeTab: 'pending' | 'validated' = 'pending';
+  activeTab: 'pending' | 'validated' | 'archived' = 'pending';
   pendingPage: PageResponse<Dossier> = { content: [], page: 0, size: 8, totalElements: 0, totalPages: 0, last: true };
   validatedPage: PageResponse<Dossier> = { content: [], page: 0, size: 8, totalElements: 0, totalPages: 0, last: true };
-  loading = false;
+  archivedPage: PageResponse<DossierArchive> = { content: [], page: 0, size: 8, totalElements: 0, totalPages: 0, last: true };
+  loading = false; loadingValidated = false; loadingArchived = false;
+  searchPending = ''; searchValidated = ''; statusFilter = '';
 
   // Validation workflow
   selectedDossier: Dossier | null = null;
@@ -18,21 +20,68 @@ export class EmDossiersComponent implements OnInit {
   workflowLoading = false; workflowError = '';
   DossierStatus = DossierStatus;
 
+  // Archive hash modal
+  showHashModal = false;
+  hashValue = '';
+  hashLibelle = '';
+  hashCopied = false;
+
   constructor(private api: ApiService, private confirm: ConfirmDialogService, private route: ActivatedRoute) {}
   ngOnInit() {
     const tab = this.route.snapshot.queryParamMap.get('tab');
     if (tab === 'pending') this.activeTab = 'pending';
     else if (tab === 'validated' || tab === 'rejected') this.activeTab = 'validated';
-    this.loadPending(); this.loadValidated();
+    else if (tab === 'archived') this.activeTab = 'archived';
+    this.loadPending(); this.loadValidated(); this.loadArchived();
   }
 
   loadPending(p = 0) {
     this.loading = true;
-    this.api.getPendingDossiers(p, 8).subscribe({ next: r => { this.pendingPage = r; this.loading = false; }, error: () => this.loading = false });
+    this.api.getPendingDossiers(p, 8, this.searchPending)
+      .subscribe({ next: r => { this.pendingPage = r; this.loading = false; }, error: () => this.loading = false });
   }
 
   loadValidated(p = 0) {
-    this.api.getValidatedDossiers(p, 8).subscribe({ next: r => this.validatedPage = r });
+    this.loadingValidated = true;
+    this.api.getValidatedDossiers(p, 8, this.searchValidated, this.statusFilter)
+      .subscribe({ next: r => { this.validatedPage = r; this.loadingValidated = false; }, error: () => this.loadingValidated = false });
+  }
+
+  loadArchived(p = 0) {
+    this.loadingArchived = true;
+    this.api.getArchives(p, 8)
+      .subscribe({ next: r => { this.archivedPage = r; this.loadingArchived = false; }, error: () => this.loadingArchived = false });
+  }
+
+  onSearchPending(v: string)   { this.searchPending = v;   this.loadPending(0); }
+  onSearchValidated(v: string) { this.searchValidated = v; this.loadValidated(0); }
+  onStatusFilter(v: string)    { this.statusFilter = v;    this.loadValidated(0); }
+
+  async archiveDossier(d: Dossier) {
+    const ok = await this.confirm.open({
+      title: 'Archiver le dossier',
+      message: `Archiver le dossier <strong>${d.libelle}</strong> (<code>${d.reference}</code>) ? Cette action crée une archive et est irréversible.`,
+      confirmLabel: 'Archiver', type: 'warning'
+    });
+    if (!ok) return;
+    this.api.archiveDossier(d.reference).subscribe({
+      next: () => { this.loadValidated(); this.loadArchived(); },
+      error: (e) => this.confirm.open({ title: 'Erreur', message: e?.error?.message || 'Erreur lors de l\'archivage', confirmLabel: 'OK', cancelLabel: ' ', type: 'danger' })
+    });
+  }
+
+  openHash(a: DossierArchive) {
+    this.hashValue = a.hash;
+    this.hashLibelle = a.libelle || a.referenceDossier;
+    this.hashCopied = false;
+    this.showHashModal = true;
+  }
+
+  copyHash() {
+    navigator.clipboard.writeText(this.hashValue).then(() => {
+      this.hashCopied = true;
+      setTimeout(() => this.hashCopied = false, 2000);
+    });
   }
 
   openValidation(d: Dossier) {

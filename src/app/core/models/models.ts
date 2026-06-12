@@ -123,6 +123,17 @@ export interface DashboardEm {
   emCreationDate?: string;
 }
 
+export interface DossierArchive {
+  id: number;
+  timestamp: string;
+  referenceDossier: string;
+  referenceUser: string;
+  referenceManager: string;
+  referenceEntity: string;
+  libelle: string;
+  hash: string;
+}
+
 export interface ActivityLog {
   id: number;
   userReference: string;
