@@ -13,6 +13,10 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   // ---- Admin ----
+  getAppVersion(): Observable<{ version: string }> {
+    return this.http.get<{ version: string }>(`${this.API}/public/version`);
+  }
+
   getAdminDashboard(): Observable<DashboardAdmin> {
     return this.http.get<DashboardAdmin>(`${this.API}/admin/dashboard`);
   }

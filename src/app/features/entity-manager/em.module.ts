@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { LayoutModule } from '../../layout/layout.module';
+import { SharedModule } from '../../shared/shared.module';
 import { EmDashboardComponent } from './dashboard/em-dashboard.component';
 import { EmInfoComponent } from './info/em-info.component';
 import { EmUsersComponent } from './users/em-users.component';
@@ -33,6 +34,6 @@ const routes: Routes = [
     EmShellComponent,
     EmEntityPickerComponent
   ],
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, RouterModule.forChild(routes)]
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, SharedModule, RouterModule.forChild(routes)]
 })
 export class EmModule {}

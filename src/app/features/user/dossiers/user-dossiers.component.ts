@@ -22,7 +22,7 @@ function buildFormControls(fb: FormBuilder, d?: Partial<Dossier>) {
 @Component({ selector: 'app-user-dossiers', templateUrl: './user-dossiers.component.html' })
 export class UserDossiersComponent implements OnInit, OnDestroy {
   page: PageResponse<Dossier> = { content: [], page: 0, size: 8, totalElements: 0, totalPages: 0, last: true };
-  loading = false; exporting = false; showModal = false; editMode = false; duplicateMode = false; selectedRef: string | null = null;
+  loading = false; exporting = false; showModal = false; editMode = false; duplicateMode = false; readOnlyMode = false; selectedRef: string | null = null;
   form!: FormGroup; error = ''; success = '';
   dossierTypes = Object.values(DossierType);
   DossierStatus = DossierStatus;
@@ -53,14 +53,14 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
   }
 
   openCreate() {
-    this.editMode = false; this.duplicateMode = false; this.selectedRef = null;
+    this.editMode = false; this.duplicateMode = false; this.readOnlyMode = false; this.selectedRef = null;
     this.viewDossier = null; this.error = '';
     this.form = this.fb.group({ ...buildFormControls(this.fb), submitNow: [false] });
     this.showModal = true;
   }
 
   openDuplicate(d: Dossier) {
-    this.editMode = false; this.duplicateMode = true; this.selectedRef = null;
+    this.editMode = false; this.duplicateMode = true; this.readOnlyMode = false; this.selectedRef = null;
     this.viewDossier = null; this.error = '';
     const base = { ...d, libelle: d.libelle.substring(0, 17) + '_cp' };
     this.form = this.fb.group({ ...buildFormControls(this.fb, base), submitNow: [false] });
@@ -68,9 +68,15 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
   }
 
   openEdit(d: Dossier) {
-    if (d.status === DossierStatus.VALIDATED || d.status === 'EXPIRED') return;
-    this.editMode = true; this.duplicateMode = false; this.selectedRef = d.reference;
     this.viewDossier = d; this.error = '';
+    this.readOnlyMode = (d.status === DossierStatus.SUBMIT || d.status === DossierStatus.VALIDATED || d.status === DossierStatus.EXPIRED);
+    if (this.readOnlyMode) {
+      this.editMode = false; this.duplicateMode = false; this.selectedRef = null;
+      this.form = this.fb.group(buildFormControls(this.fb, d));
+      this.showModal = true;
+      return;
+    }
+    this.editMode = true; this.duplicateMode = false; this.selectedRef = d.reference;
     this.originalValues = { libelle: d.libelle, description: d.description, type: d.type, amount: d.amount,
       motif: d.motif, budgetDepart: d.budgetDepart, nombrePart: d.nombrePart, immatriculation: d.immatriculation };
     this.form = this.fb.group(buildFormControls(this.fb, d));

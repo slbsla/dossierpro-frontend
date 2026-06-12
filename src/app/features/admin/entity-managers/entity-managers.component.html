@@ -15,7 +15,7 @@
             <td><code>{{ m.reference }}</code></td>
             <td><strong>{{ m.firstName }} {{ m.lastName }}</strong></td>
             <td>{{ m.fonction || '—' }}</td>
-            <td>{{ m.telephone || '—' }}</td>
+            <td>{{ m.telephone | phone }}</td>
             <td><span *ngIf="m.entityName" class="badge badge-em">{{ m.entityName }}</span><span *ngIf="!m.entityName">—</span></td>
             <td style="text-align:center">
               <span class="entity-count-badge" [class.has-entities]="(m.entityCount || 0) > 0">{{ m.entityCount || 0 }}</span>
@@ -52,7 +52,7 @@
           <div class="form-group"><label class="form-label">Nom *</label><input class="form-control" formControlName="lastName" placeholder="Nom de famille"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" formControlName="telephone" placeholder="+213 ..."></div>
+          <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" formControlName="telephone" appPhoneFormat placeholder="06 12 34 56 78"></div>
           <div class="form-group"><label class="form-label">Fonction</label><input class="form-control" formControlName="fonction" placeholder="Ex: Directeur régional"></div>
         </div>
       </div>

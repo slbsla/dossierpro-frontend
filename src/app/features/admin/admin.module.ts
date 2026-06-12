@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { LayoutModule } from '../../layout/layout.module';
+import { SharedModule } from '../../shared/shared.module';
 import { AdminDashboardComponent } from './dashboard/admin-dashboard.component';
 import { EntitiesComponent } from './entities/entities.component';
 import { EntityManagersComponent } from './entity-managers/entity-managers.component';
@@ -16,6 +17,6 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [AdminDashboardComponent, EntitiesComponent, EntityManagersComponent],
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, RouterModule.forChild(routes)]
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, SharedModule, RouterModule.forChild(routes)]
 })
 export class AdminModule {}

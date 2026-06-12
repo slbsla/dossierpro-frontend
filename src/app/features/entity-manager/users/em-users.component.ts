@@ -138,10 +138,18 @@ export class EmUsersComponent implements OnInit {
     });
   }
 
-  async delete(ref: string) {
-    const ok = await this.confirm.open({ title: 'Supprimer l\'utilisateur', message: 'L\'utilisateur et tous ses dossiers seront supprimés définitivement.', confirmLabel: 'Supprimer', type: 'danger' });
+  async delete(u: import('../../../core/models/models').EntityUser) {
+    const count = u.dossierCount ?? 0;
+    const dossierInfo = count > 0
+      ? ` Cet utilisateur possède <strong>${count} dossier(s)</strong> qui seront également supprimés.`
+      : ' Cet utilisateur n\'a aucun dossier associé.';
+    const ok = await this.confirm.open({
+      title: 'Supprimer l\'utilisateur',
+      message: `Supprimer <strong>${u.firstName} ${u.lastName}</strong> définitivement ?${dossierInfo}`,
+      confirmLabel: 'Supprimer', type: 'danger'
+    });
     if (!ok) return;
-    this.api.deleteEmUser(ref).subscribe({
+    this.api.deleteEmUser(u.reference).subscribe({
       next: () => { this.load(this.page.page); this.success = 'Utilisateur supprimé'; setTimeout(() => this.success = '', 3000); },
       error: (e) => this.confirm.open({ title: 'Erreur', message: e?.error?.message || 'Erreur', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
     });

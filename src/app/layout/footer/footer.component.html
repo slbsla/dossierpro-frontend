@@ -1,0 +1,39 @@
+<footer class="app-footer">
+  <div class="footer-left">
+    <span>© {{ year }} DossierPro — Tous droits réservés.</span>
+    <span class="footer-sep">|</span>
+    <button class="footer-link" (click)="showCgu = true">Conditions Générales d'Utilisation</button>
+  </div>
+  <div class="footer-right">
+    <span class="footer-version">
+      <span class="material-icons" style="font-size:13px;vertical-align:middle">info_outline</span>
+      v{{ version }}
+    </span>
+  </div>
+</footer>
+
+<!-- Modal CGU -->
+<div class="cgu-overlay" *ngIf="showCgu" (click)="showCgu = false">
+  <div class="cgu-box" (click)="$event.stopPropagation()">
+    <div class="cgu-header">
+      <h3>Conditions Générales d'Utilisation</h3>
+      <button class="cgu-close" (click)="showCgu = false">✕</button>
+    </div>
+    <div class="cgu-body">
+      <p><strong>DossierPro</strong> est une application de gestion de dossiers réservée aux utilisateurs autorisés.</p>
+      <h4>1. Utilisation</h4>
+      <p>L'accès à cette application est strictement réservé aux personnes disposant d'un compte valide. Toute utilisation frauduleuse ou non autorisée est interdite et pourra faire l'objet de poursuites.</p>
+      <h4>2. Données personnelles</h4>
+      <p>Les données saisies dans DossierPro sont confidentielles. Elles sont stockées de manière sécurisée et ne sont accessibles qu'aux personnes habilitées conformément à leur rôle.</p>
+      <h4>3. Responsabilité</h4>
+      <p>L'utilisateur est responsable de la confidentialité de ses identifiants. Toute action effectuée depuis son compte lui est imputable.</p>
+      <h4>4. Disponibilité</h4>
+      <p>DossierPro s'efforce d'assurer une disponibilité maximale du service. Des interruptions ponctuelles pour maintenance peuvent intervenir sans préavis.</p>
+      <h4>5. Contact</h4>
+      <p>Pour toute question, contactez votre administrateur système.</p>
+    </div>
+    <div class="cgu-footer">
+      <button class="btn btn-primary" (click)="showCgu = false">Fermer</button>
+    </div>
+  </div>
+</div>

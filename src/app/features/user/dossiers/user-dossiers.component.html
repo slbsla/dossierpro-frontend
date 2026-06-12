@@ -36,16 +36,46 @@
               <button class="btn-icon-action" (click)="openDuplicate(d)" *ngIf="d.status !== 'EXPIRED'" title="Dupliquer ce dossier"><span class="material-symbols-outlined" style="font-size:20px">content_copy</span></button>
             </td>
             <td><code>{{ d.reference }}</code></td>
-            <td><strong>{{ d.libelle }}</strong><div *ngIf="d.rejectMotif" style="font-size:11px;color:var(--danger);margin-top:2px">↳ {{ d.rejectMotif }}</div></td>
+            <td><strong>{{ d.libelle }}</strong><div *ngIf="d.rejectMotif && d.status===DossierStatus.REJECTED" style="font-size:11px;color:var(--danger);margin-top:2px">↳ {{ d.rejectMotif }}</div></td>
             <td><span class="badge badge-em" *ngIf="d.type">{{ d.type }}</span></td>
             <td>{{ d.amount | number:'1.2-2' }} €</td>
             <td><span class="badge" [ngClass]="statusClass(d.status)">{{ d.status }}</span></td>
             <td>{{ d.expirationDate | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <button class="btn btn-sm btn-secondary" (click)="openEdit(d)" [disabled]="d.status === DossierStatus.VALIDATED || d.status === 'EXPIRED'" title="Modifier"><span class="material-icons" style="font-size:16px">edit</span></button>
-              <button class="btn btn-sm btn-primary" style="margin-left:4px" (click)="submit(d.reference)" *ngIf="d.status===DossierStatus.DRAFT" title="Soumettre"><span class="material-icons" style="font-size:16px">send</span></button>
-              <button class="btn btn-sm btn-success" style="margin-left:4px" (click)="downloadPdf(d.reference)" *ngIf="d.status==='VALIDATED' && d.hasPdf" title="Télécharger le PDF"><span class="material-icons" style="font-size:16px">download</span></button>
-              <button class="btn-icon-action btn-icon-danger" style="margin-left:2px" (click)="delete(d.reference)" [disabled]="d.status === DossierStatus.VALIDATED" title="Supprimer"><span class="material-symbols-outlined" style="font-size:20px">delete</span></button>
+            <td class="actions-cell">
+              <!-- DRAFT / REJECTED : édition normale -->
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(d)"
+                *ngIf="d.status===DossierStatus.DRAFT || d.status===DossierStatus.REJECTED"
+                title="Modifier"><span class="material-icons" style="font-size:16px">edit</span></button>
+              <!-- VALIDATED / EXPIRED : lecture seule -->
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(d)"
+                *ngIf="d.status===DossierStatus.VALIDATED || d.status===DossierStatus.EXPIRED"
+                title="Voir en lecture seule"><span class="material-icons" style="font-size:16px">visibility</span></button>
+              <!-- SUBMIT : lecture seule -->
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(d)"
+                *ngIf="d.status===DossierStatus.SUBMIT"
+                title="Dossier soumis — voir en lecture seule"><span class="material-icons" style="font-size:16px">hourglass_top</span></button>
+
+              <!-- Soumettre (DRAFT) -->
+              <button class="btn btn-sm btn-primary" style="margin-left:4px" (click)="submit(d.reference)"
+                *ngIf="d.status===DossierStatus.DRAFT" title="Soumettre au manager">
+                <span class="material-icons" style="font-size:16px">send</span>
+              </button>
+              <!-- Retransmettre (REJECTED) -->
+              <button class="btn btn-sm btn-warning" style="margin-left:4px" (click)="submit(d.reference)"
+                *ngIf="d.status===DossierStatus.REJECTED" title="Retransmettre au manager">
+                <span class="material-icons" style="font-size:16px">replay</span>
+              </button>
+
+              <!-- PDF (VALIDATED) -->
+              <button class="btn btn-sm btn-success" style="margin-left:4px" (click)="downloadPdf(d.reference)"
+                *ngIf="d.status===DossierStatus.VALIDATED && d.hasPdf" title="Télécharger le PDF">
+                <span class="material-icons" style="font-size:16px">download</span>
+              </button>
+
+              <!-- Supprimer : uniquement DRAFT ou REJECTED -->
+              <button class="btn-icon-action btn-icon-danger" style="margin-left:2px" (click)="delete(d.reference)"
+                *ngIf="d.status===DossierStatus.DRAFT || d.status===DossierStatus.REJECTED"
+                title="Supprimer"><span class="material-symbols-outlined" style="font-size:20px">delete</span></button>
             </td>
           </tr>
           <tr *ngIf="page.content.length===0"><td colspan="8"><div class="empty-state"><div class="empty-state-icon">📋</div><p>{{ searchTerm ? 'Aucun résultat pour "' + searchTerm + '"' : 'Aucun dossier. Créez votre premier dossier !' }}</p></div></td></tr>
@@ -78,58 +108,68 @@
 
 <div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
   <div class="modal-box" (click)="$event.stopPropagation()">
-    <h3 class="modal-title">{{ editMode ? 'Modifier le Dossier' : duplicateMode ? 'Dupliquer le Dossier' : 'Nouveau Dossier' }}</h3>
+    <h3 class="modal-title">
+      <ng-container *ngIf="readOnlyMode">
+        <span class="material-icons" style="font-size:18px;vertical-align:middle;margin-right:6px;color:var(--gray-text)">visibility</span>
+        Détail du dossier
+        <span class="badge" [ngClass]="statusClass(viewDossier!.status)" style="margin-left:8px;font-size:11px;vertical-align:middle">{{ viewDossier!.status }}</span>
+      </ng-container>
+      <ng-container *ngIf="!readOnlyMode">{{ editMode ? 'Modifier le Dossier' : duplicateMode ? 'Dupliquer le Dossier' : 'Nouveau Dossier' }}</ng-container>
+    </h3>
     <div class="alert alert-error" *ngIf="error">{{ error }}</div>
     <form [formGroup]="form">
 
-      <!-- Libellé (max 20) -->
+      <!-- Libellé -->
       <div class="form-group">
-        <label class="form-label">Libellé * <span class="field-hint">{{form.get('libelle')?.value?.length || 0}}/30</span></label>
-        <input class="form-control" formControlName="libelle" placeholder="Titre du dossier" maxlength="30">
-        <div class="field-error" *ngIf="form.get('libelle')?.errors?.['maxlength']">Maximum 30 caractères</div>
+        <label class="form-label">Libellé <span class="field-hint" *ngIf="!readOnlyMode">{{form.get('libelle')?.value?.length || 0}}/30</span></label>
+        <input class="form-control" formControlName="libelle" placeholder="Titre du dossier" maxlength="30" [attr.readonly]="readOnlyMode || null">
+        <div class="field-error" *ngIf="!readOnlyMode && form.get('libelle')?.errors?.['maxlength']">Maximum 30 caractères</div>
       </div>
 
       <!-- Type + Montant -->
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Type *</label>
-          <select class="form-control" formControlName="type">
+          <label class="form-label">Type</label>
+          <select class="form-control" formControlName="type" [attr.disabled]="readOnlyMode || null">
             <option value="">— Sélectionner —</option>
             <option *ngFor="let t of dossierTypes" [value]="t">{{ t }}</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Montant (€) *</label><input class="form-control" type="number" formControlName="amount" min="0" step="0.01"></div>
+        <div class="form-group">
+          <label class="form-label">Montant (€)</label>
+          <input class="form-control" type="number" formControlName="amount" min="0" step="0.01" [attr.readonly]="readOnlyMode || null">
+        </div>
       </div>
 
-      <!-- Motif (max 20) -->
+      <!-- Motif -->
       <div class="form-group">
-        <label class="form-label">Motif du dossier <span class="field-hint">{{form.get('motif')?.value?.length || 0}}/30</span></label>
-        <input class="form-control" formControlName="motif" placeholder="Motif (optionnel)" maxlength="30">
-        <div class="field-error" *ngIf="form.get('motif')?.errors?.['maxlength']">Maximum 30 caractères</div>
+        <label class="form-label">Motif <span class="field-hint" *ngIf="!readOnlyMode">{{form.get('motif')?.value?.length || 0}}/30</span></label>
+        <input class="form-control" formControlName="motif" placeholder="Motif (optionnel)" maxlength="30" [attr.readonly]="readOnlyMode || null">
       </div>
 
       <!-- Budget départ + Nombre de parts -->
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Budget de départ (€)</label>
-          <input class="form-control" type="number" formControlName="budgetDepart" min="0" step="0.01" placeholder="0.00">
+          <input class="form-control" type="number" formControlName="budgetDepart" min="0" step="0.01" [attr.readonly]="readOnlyMode || null">
         </div>
         <div class="form-group">
-          <label class="form-label">Nombre de parts <span class="field-hint">0–9</span></label>
-          <input class="form-control" type="number" formControlName="nombrePart" min="0" max="9" step="1" placeholder="—">
-          <div class="field-error" *ngIf="form.get('nombrePart')?.errors">Chiffre unique (0–9)</div>
+          <label class="form-label">Nombre de parts</label>
+          <input class="form-control" type="number" formControlName="nombrePart" min="0" max="9" step="1" [attr.readonly]="readOnlyMode || null">
         </div>
       </div>
 
-      <!-- Immatriculation (max 10) -->
+      <!-- Immatriculation -->
       <div class="form-group">
-        <label class="form-label">Immatriculation <span class="field-hint">{{form.get('immatriculation')?.value?.length || 0}}/10</span></label>
-        <input class="form-control" formControlName="immatriculation" placeholder="Ex : AB-123-CD" maxlength="10" style="text-transform:uppercase">
-        <div class="field-error" *ngIf="form.get('immatriculation')?.errors?.['maxlength']">Maximum 10 caractères</div>
+        <label class="form-label">Immatriculation</label>
+        <input class="form-control" formControlName="immatriculation" maxlength="10" style="text-transform:uppercase" [attr.readonly]="readOnlyMode || null">
       </div>
 
       <!-- Description -->
-      <div class="form-group"><label class="form-label">Description</label><textarea class="form-control" formControlName="description" rows="3" placeholder="Détails du dossier..."></textarea></div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" formControlName="description" rows="3" [attr.readonly]="readOnlyMode || null"></textarea>
+      </div>
 
       <!-- Dates grises en mode édition -->
       <div *ngIf="editMode && viewDossier" class="form-dates-readonly">
@@ -148,18 +188,20 @@
       </div>
 
       <!-- Soumettre immédiatement (création / duplication uniquement) -->
-      <div class="form-group" *ngIf="!editMode" style="display:flex;align-items:center;gap:10px;margin-top:4px">
+      <div class="form-group" *ngIf="!editMode && !readOnlyMode" style="display:flex;align-items:center;gap:10px;margin-top:4px">
         <label class="toggle"><input type="checkbox" formControlName="submitNow"><span class="toggle-slider"></span></label>
         <span class="form-label" style="margin:0">Soumettre immédiatement au manager</span>
       </div>
 
     </form>
     <div class="modal-actions">
-      <button class="btn btn-secondary" (click)="showModal=false">Annuler</button>
-      <button *ngIf="editMode" class="btn btn-warning" (click)="resetForm()">
-        <span class="material-icons" style="font-size:15px;vertical-align:middle">restart_alt</span> Réinitialiser
-      </button>
-      <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">{{ editMode ? 'Enregistrer' : 'Créer' }}</button>
+      <button class="btn btn-secondary" (click)="showModal=false">{{ readOnlyMode ? 'Fermer' : 'Annuler' }}</button>
+      <ng-container *ngIf="!readOnlyMode">
+        <button *ngIf="editMode" class="btn btn-warning" (click)="resetForm()">
+          <span class="material-icons" style="font-size:15px;vertical-align:middle">restart_alt</span> Réinitialiser
+        </button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">{{ editMode ? 'Enregistrer' : 'Créer' }}</button>
+      </ng-container>
     </div>
   </div>
 </div>

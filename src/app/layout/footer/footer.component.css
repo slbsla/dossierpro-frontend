@@ -1,0 +1,131 @@
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 6px 24px;
+  background: #334155;
+  border-top: none;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.footer-sep {
+  color: #334155;
+}
+
+.footer-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #93c5fd;
+  font-size: 12px;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer-link:hover {
+  color: #bfdbfe;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+}
+
+.footer-version {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--primary, #2563eb);
+  border-radius: 12px;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.04em;
+  box-shadow: 0 1px 4px rgba(37,99,235,.25);
+}
+
+/* CGU Modal */
+.cgu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.cgu-box {
+  background: #fff;
+  border-radius: 12px;
+  width: min(600px, 94vw);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+}
+
+.cgu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--gray-border, #e2e8f0);
+}
+
+.cgu-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary, #2563eb);
+}
+
+.cgu-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--gray-text, #64748b);
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background .15s;
+}
+
+.cgu-close:hover { background: var(--gray-light, #f8fafc); }
+
+.cgu-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-main, #1e293b);
+}
+
+.cgu-body h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary, #2563eb);
+  margin: 16px 0 6px;
+}
+
+.cgu-body p {
+  margin: 0 0 8px;
+}
+
+.cgu-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--gray-border, #e2e8f0);
+  display: flex;
+  justify-content: flex-end;
+}

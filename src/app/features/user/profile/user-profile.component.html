@@ -50,7 +50,7 @@
       <div class="info-row"><span class="info-label">Prénom</span><span>{{ profile.firstName }}</span></div>
       <div class="info-row"><span class="info-label">Nom</span><span>{{ profile.lastName }}</span></div>
       <div class="info-row"><span class="info-label">Email</span><span>{{ profile.email || '—' }}</span></div>
-      <div class="info-row"><span class="info-label">Téléphone</span><span>{{ profile.telephone || '—' }}</span></div>
+      <div class="info-row"><span class="info-label">Téléphone</span><span>{{ profile.telephone | phone }}</span></div>
       <div class="info-row"><span class="info-label">Entité</span><code>{{ profile.entityCode }}</code></div>
       <div class="info-row"><span class="info-label">Statut</span><span class="badge" [ngClass]="profile.isActive ? 'badge-active' : 'badge-inactive'">{{ profile.isActive ? 'Actif' : 'Inactif' }}</span></div>
       <div class="info-row"><span class="info-label">Membre depuis</span><span>{{ profile.creationDate | date:'dd/MM/yyyy' }}</span></div>
@@ -64,7 +64,7 @@
         </div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Email</label><input class="form-control" type="email" formControlName="email"></div>
-          <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" formControlName="telephone"></div>
+          <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" formControlName="telephone" appPhoneFormat placeholder="06 12 34 56 78"></div>
         </div>
       </form>
     </ng-container>

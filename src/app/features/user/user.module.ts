@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { LayoutModule } from '../../layout/layout.module';
+import { SharedModule } from '../../shared/shared.module';
 import { UserDossiersComponent } from './dossiers/user-dossiers.component';
 import { UserProfileComponent } from './profile/user-profile.component';
 import { UserPreferencesComponent } from './preferences/user-preferences.component';
@@ -28,6 +29,6 @@ const routes: Routes = [
     UserUploadComponent, UserDashboardComponent, UserBankComponent,
     UserSupportComponent
   ],
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, RouterModule.forChild(routes)]
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, SharedModule, RouterModule.forChild(routes)]
 })
 export class UserModule {}

@@ -58,6 +58,7 @@ export interface EntityUser {
   isProspect?: boolean;
   hasPhoto?: boolean;
   creationDate?: string;
+  dossierCount?: number;
 }
 
 export interface Dossier {

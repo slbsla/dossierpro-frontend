@@ -52,7 +52,7 @@
                     <div class="em-inline-field highlight"><span class="em-inline-label">Référence</span><code>{{ selectedEmDetail.reference }}</code></div>
                     <div class="em-inline-field"><span class="em-inline-label">Nom complet</span><span>{{ selectedEmDetail.firstName }} {{ selectedEmDetail.lastName }}</span></div>
                     <div class="em-inline-field"><span class="em-inline-label">Fonction</span><span>{{ selectedEmDetail.fonction || '—' }}</span></div>
-                    <div class="em-inline-field"><span class="em-inline-label">Téléphone</span><span>{{ selectedEmDetail.telephone || '—' }}</span></div>
+                    <div class="em-inline-field"><span class="em-inline-label">Téléphone</span><span>{{ selectedEmDetail.telephone | phone }}</span></div>
                     <div class="em-inline-field"><span class="em-inline-label">Créé le</span><span>{{ selectedEmDetail.creationDate | date:'dd/MM/yyyy' }}</span></div>
                   </div>
                 </div>
