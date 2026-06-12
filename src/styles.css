@@ -116,7 +116,7 @@ body {
 table { width: 100%; border-collapse: collapse; }
 th { text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: .5px; border-bottom: 2px solid var(--gray-border); background: var(--gray-light); }
 td { padding: 12px 14px; border-bottom: 1px solid var(--gray-border); font-size: 14px; color: var(--text-dark); }
-tr:hover td { background: #f8fafc; }
+tr:hover td { background: #e8f0fe; }
 tr:last-child td { border-bottom: none; }
 
 /* Status badges */
@@ -307,4 +307,49 @@ tr:last-child td { border-bottom: none; }
   .form-row { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .page-header { flex-direction: column; gap: 12px; }
+}
+
+/* ── Champs de formulaire — compteur et erreur ── */
+.field-hint {
+  font-size: 11px;
+  color: var(--text-secondary, #64748b);
+  font-weight: 400;
+  float: right;
+}
+.field-error {
+  font-size: 11px;
+  color: var(--danger, #ef4444);
+  margin-top: 3px;
+}
+
+/* ── Dates grises en mode édition ── */
+.form-dates-readonly {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius, 8px);
+  padding: 10px 14px;
+  margin: 8px 0 12px;
+}
+.form-date-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.form-date-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+.form-date-value {
+  font-size: 12px;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 600px) {
+  .form-dates-readonly { grid-template-columns: 1fr; }
 }

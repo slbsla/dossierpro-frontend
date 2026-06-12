@@ -81,7 +81,15 @@
     <h3 class="modal-title">{{ editMode ? 'Modifier le Dossier' : duplicateMode ? 'Dupliquer le Dossier' : 'Nouveau Dossier' }}</h3>
     <div class="alert alert-error" *ngIf="error">{{ error }}</div>
     <form [formGroup]="form">
-      <div class="form-group"><label class="form-label">Libellé *</label><input class="form-control" formControlName="libelle" placeholder="Titre du dossier"></div>
+
+      <!-- Libellé (max 20) -->
+      <div class="form-group">
+        <label class="form-label">Libellé * <span class="field-hint">{{form.get('libelle')?.value?.length || 0}}/30</span></label>
+        <input class="form-control" formControlName="libelle" placeholder="Titre du dossier" maxlength="30">
+        <div class="field-error" *ngIf="form.get('libelle')?.errors?.['maxlength']">Maximum 30 caractères</div>
+      </div>
+
+      <!-- Type + Montant -->
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Type *</label>
@@ -92,11 +100,59 @@
         </div>
         <div class="form-group"><label class="form-label">Montant (€) *</label><input class="form-control" type="number" formControlName="amount" min="0" step="0.01"></div>
       </div>
+
+      <!-- Motif (max 20) -->
+      <div class="form-group">
+        <label class="form-label">Motif du dossier <span class="field-hint">{{form.get('motif')?.value?.length || 0}}/30</span></label>
+        <input class="form-control" formControlName="motif" placeholder="Motif (optionnel)" maxlength="30">
+        <div class="field-error" *ngIf="form.get('motif')?.errors?.['maxlength']">Maximum 30 caractères</div>
+      </div>
+
+      <!-- Budget départ + Nombre de parts -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Budget de départ (€)</label>
+          <input class="form-control" type="number" formControlName="budgetDepart" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nombre de parts <span class="field-hint">0–9</span></label>
+          <input class="form-control" type="number" formControlName="nombrePart" min="0" max="9" step="1" placeholder="—">
+          <div class="field-error" *ngIf="form.get('nombrePart')?.errors">Chiffre unique (0–9)</div>
+        </div>
+      </div>
+
+      <!-- Immatriculation (max 10) -->
+      <div class="form-group">
+        <label class="form-label">Immatriculation <span class="field-hint">{{form.get('immatriculation')?.value?.length || 0}}/10</span></label>
+        <input class="form-control" formControlName="immatriculation" placeholder="Ex : AB-123-CD" maxlength="10" style="text-transform:uppercase">
+        <div class="field-error" *ngIf="form.get('immatriculation')?.errors?.['maxlength']">Maximum 10 caractères</div>
+      </div>
+
+      <!-- Description -->
       <div class="form-group"><label class="form-label">Description</label><textarea class="form-control" formControlName="description" rows="3" placeholder="Détails du dossier..."></textarea></div>
-      <div class="form-group" *ngIf="!editMode" style="display:flex;align-items:center;gap:10px">
+
+      <!-- Dates grises en mode édition -->
+      <div *ngIf="editMode && viewDossier" class="form-dates-readonly">
+        <div class="form-date-item">
+          <span class="form-date-label">Créé le</span>
+          <span class="form-date-value">{{ formatDate(viewDossier.creationDate) }}</span>
+        </div>
+        <div class="form-date-item">
+          <span class="form-date-label">Expiration</span>
+          <span class="form-date-value">{{ formatDate(viewDossier.expirationDate) }}</span>
+        </div>
+        <div class="form-date-item">
+          <span class="form-date-label">Modifié le</span>
+          <span class="form-date-value">{{ formatDate(viewDossier.lastModifDate) }}</span>
+        </div>
+      </div>
+
+      <!-- Soumettre immédiatement (création / duplication uniquement) -->
+      <div class="form-group" *ngIf="!editMode" style="display:flex;align-items:center;gap:10px;margin-top:4px">
         <label class="toggle"><input type="checkbox" formControlName="submitNow"><span class="toggle-slider"></span></label>
         <span class="form-label" style="margin:0">Soumettre immédiatement au manager</span>
       </div>
+
     </form>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="showModal=false">Annuler</button>

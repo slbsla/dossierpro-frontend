@@ -5,6 +5,20 @@ import { ApiService } from '../../../core/services/api.service';
 import { Dossier, DossierStatus, DossierType, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
+/** Construit le groupe de contrôles communs aux 3 modes (create / edit / duplicate). */
+function buildFormControls(fb: FormBuilder, d?: Partial<Dossier>) {
+  return {
+    libelle:        [d?.libelle        ?? '', [Validators.required, Validators.maxLength(30)]],
+    description:    [d?.description    ?? ''],
+    type:           [d?.type           ?? '', Validators.required],
+    amount:         [d?.amount         ?? 0, [Validators.required, Validators.min(0)]],
+    motif:          [d?.motif          ?? '', Validators.maxLength(30)],
+    budgetDepart:   [d?.budgetDepart   ?? null],
+    nombrePart:     [d?.nombrePart     ?? null, [Validators.min(0), Validators.max(9), Validators.pattern('^[0-9]$')]],
+    immatriculation:[d?.immatriculation ?? '', Validators.maxLength(10)],
+  };
+}
+
 @Component({ selector: 'app-user-dossiers', templateUrl: './user-dossiers.component.html' })
 export class UserDossiersComponent implements OnInit, OnDestroy {
   page: PageResponse<Dossier> = { content: [], page: 0, size: 8, totalElements: 0, totalPages: 0, last: true };
@@ -39,27 +53,37 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
   }
 
   openCreate() {
-    this.editMode = false; this.duplicateMode = false; this.selectedRef = null; this.error = '';
-    this.form = this.fb.group({ libelle: ['', Validators.required], description: [''], type: ['', Validators.required], amount: [0, [Validators.required, Validators.min(0)]], submitNow: [false] });
+    this.editMode = false; this.duplicateMode = false; this.selectedRef = null;
+    this.viewDossier = null; this.error = '';
+    this.form = this.fb.group({ ...buildFormControls(this.fb), submitNow: [false] });
     this.showModal = true;
   }
 
   openDuplicate(d: Dossier) {
-    this.editMode = false; this.duplicateMode = true; this.selectedRef = null; this.error = '';
-    const copiedLibelle = `${d.libelle}_cp_${Date.now()}`;
-    this.form = this.fb.group({ libelle: [copiedLibelle, Validators.required], description: [d.description || ''], type: [d.type || '', Validators.required], amount: [d.amount ?? 0, [Validators.required, Validators.min(0)]], submitNow: [false] });
+    this.editMode = false; this.duplicateMode = true; this.selectedRef = null;
+    this.viewDossier = null; this.error = '';
+    const base = { ...d, libelle: d.libelle.substring(0, 17) + '_cp' };
+    this.form = this.fb.group({ ...buildFormControls(this.fb, base), submitNow: [false] });
     this.showModal = true;
   }
 
   openEdit(d: Dossier) {
     if (d.status === DossierStatus.VALIDATED || d.status === 'EXPIRED') return;
-    this.editMode = true; this.duplicateMode = false; this.selectedRef = d.reference; this.error = '';
-    this.originalValues = { libelle: d.libelle, description: d.description, type: d.type, amount: d.amount };
-    this.form = this.fb.group({ libelle: [d.libelle, Validators.required], description: [d.description], type: [d.type, Validators.required], amount: [d.amount, [Validators.required, Validators.min(0)]] });
+    this.editMode = true; this.duplicateMode = false; this.selectedRef = d.reference;
+    this.viewDossier = d; this.error = '';
+    this.originalValues = { libelle: d.libelle, description: d.description, type: d.type, amount: d.amount,
+      motif: d.motif, budgetDepart: d.budgetDepart, nombrePart: d.nombrePart, immatriculation: d.immatriculation };
+    this.form = this.fb.group(buildFormControls(this.fb, d));
     this.showModal = true;
   }
 
   resetForm() { this.form.patchValue(this.originalValues); this.error = ''; }
+
+  formatDate(d?: string): string {
+    if (!d) return '—';
+    try { return new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+    catch { return d; }
+  }
 
   save() {
     if (this.form.invalid) return;

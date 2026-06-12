@@ -76,6 +76,10 @@ export interface Dossier {
   submitDate?: string;
   rejectDate?: string;
   hasPdf: boolean;
+  motif?: string;
+  budgetDepart?: number;
+  nombrePart?: number;
+  immatriculation?: string;
 }
 
 export interface UserPref {
