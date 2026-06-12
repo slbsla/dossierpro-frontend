@@ -17,10 +17,10 @@ export class ApiService {
     return this.http.get<DashboardAdmin>(`${this.API}/admin/dashboard`);
   }
 
-  getEntities(page = 0, size = 8): Observable<PageResponse<EntityOrg>> {
-    return this.http.get<PageResponse<EntityOrg>>(`${this.API}/admin/entities`, {
-      params: new HttpParams().set('page', page).set('size', size)
-    });
+  getEntities(page = 0, size = 8, entityManagerId?: string): Observable<PageResponse<EntityOrg>> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (entityManagerId) params = params.set('entityManagerId', entityManagerId);
+    return this.http.get<PageResponse<EntityOrg>>(`${this.API}/admin/entities`, { params });
   }
 
   getEntity(code: string): Observable<EntityOrg> {

@@ -61,15 +61,25 @@ export class EntityManagersComponent implements OnInit {
     });
   }
 
-  async delete(ref: string) {
+  async delete(m: EntityMng) {
+    if (m.entityCode) {
+      await this.confirm.open({
+        title: 'Suppression impossible',
+        message: `Ce manager est actuellement affecté à l'entité "${m.entityName || m.entityCode}". Veuillez d'abord lui retirer l'entité avant de le supprimer.`,
+        confirmLabel: 'OK',
+        cancelLabel: ' ',
+        type: 'warning'
+      });
+      return;
+    }
     const ok = await this.confirm.open({
       title: 'Supprimer l\'Entity Manager',
-      message: 'Cet Entity Manager sera supprimé définitivement. Cette action est irréversible.',
+      message: 'Ce manager n\'est pas attaché à une entité. Voulez-vous le supprimer définitivement ?',
       confirmLabel: 'Supprimer',
       type: 'danger'
     });
     if (!ok) return;
-    this.api.deleteEntityManager(ref).subscribe({
+    this.api.deleteEntityManager(m.reference).subscribe({
       next: () => { this.load(this.page.page); this.success = 'EM supprimé'; setTimeout(() => this.success = '', 3000); },
       error: (e) => this.confirm.open({ title: 'Erreur', message: e?.error?.message || 'Erreur lors de la suppression', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
     });

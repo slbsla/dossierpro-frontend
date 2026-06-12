@@ -9,7 +9,7 @@
     <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
     <div class="table-wrapper" *ngIf="!loading">
       <table>
-        <thead><tr><th>Référence</th><th>Nom</th><th>Fonction</th><th>Téléphone</th><th>Entité</th><th>Créé le</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Référence</th><th>Nom</th><th>Fonction</th><th>Téléphone</th><th>Entité</th><th>Entités assignées</th><th>Créé le</th><th>Actions</th></tr></thead>
         <tbody>
           <tr *ngFor="let m of page.content">
             <td><code>{{ m.reference }}</code></td>
@@ -17,13 +17,16 @@
             <td>{{ m.fonction || '—' }}</td>
             <td>{{ m.telephone || '—' }}</td>
             <td><span *ngIf="m.entityName" class="badge badge-em">{{ m.entityName }}</span><span *ngIf="!m.entityName">—</span></td>
+            <td style="text-align:center">
+              <span class="entity-count-badge" [class.has-entities]="(m.entityCount || 0) > 0">{{ m.entityCount || 0 }}</span>
+            </td>
             <td>{{ m.creationDate | date:'dd/MM/yyyy' }}</td>
             <td>
               <button class="btn btn-sm btn-secondary" (click)="openEdit(m)">✏️</button>
-              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(m.reference)">🗑️</button>
+              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(m)">🗑️</button>
             </td>
           </tr>
-          <tr *ngIf="page.content.length === 0"><td colspan="7" class="empty-state"><span class="empty-state-icon">👔</span><p>Aucun Entity Manager</p></td></tr>
+          <tr *ngIf="page.content.length === 0"><td colspan="8" class="empty-state"><span class="empty-state-icon">👔</span><p>Aucun Entity Manager</p></td></tr>
         </tbody>
       </table>
       <div class="pagination" *ngIf="page.totalPages > 1">

@@ -11,9 +11,17 @@ export class EntitiesComponent implements OnInit {
   managers: EntityMng[] = [];
   loading = false; showModal = false; editMode = false;
   selectedCode: string | null = null;
+  selectedEntityPendingCount = 0;
   form!: FormGroup; error = ''; success = '';
   originalValues: any = {};
   sectors = Object.values(EntitySector);
+
+  // Filter by entity manager
+  filterManagerId = '';
+
+  // Inline EM detail panel
+  expandedEntityCode: string | null = null;
+  selectedEmDetail: EntityMng | null = null;
 
   // Autocomplete adresse
   suggestions: any[] = [];
@@ -32,7 +40,19 @@ export class EntitiesComponent implements OnInit {
 
   load(p = 0) {
     this.loading = true;
-    this.api.getEntities(p, 8).subscribe({ next: r => { this.page = r; this.loading = false; }, error: () => this.loading = false });
+    this.api.getEntities(p, 8, this.filterManagerId || undefined).subscribe({ next: r => { this.page = r; this.loading = false; }, error: () => this.loading = false });
+  }
+
+  applyFilter() { this.expandedEntityCode = null; this.selectedEmDetail = null; this.load(0); }
+
+  toggleEmDetail(e: EntityOrg) {
+    if (!e.entityManagerId) return;
+    if (this.expandedEntityCode === e.code) {
+      this.expandedEntityCode = null; this.selectedEmDetail = null; return;
+    }
+    this.expandedEntityCode = e.code;
+    this.selectedEmDetail = null;
+    this.api.getEntityManager(e.entityManagerId).subscribe({ next: m => this.selectedEmDetail = m, error: () => this.selectedEmDetail = null });
   }
 
   loadManagers() {
@@ -41,6 +61,7 @@ export class EntitiesComponent implements OnInit {
 
   openCreate() {
     this.editMode = false; this.selectedCode = null; this.error = '';
+    this.selectedEntityPendingCount = 0;
     this.form = this.fb.group({
       name:            ['', Validators.required],
       sector:          [''],
@@ -57,6 +78,7 @@ export class EntitiesComponent implements OnInit {
 
   openEdit(e: EntityOrg) {
     this.editMode = true; this.selectedCode = e.code; this.error = '';
+    this.selectedEntityPendingCount = e.pendingDossiersCount || 0;
     this.originalValues = {
       name: e.name, sector: e.sector,
       adresse: e.adresse, numero: e.numero, ligne: e.ligne, postcode: e.postcode, ville: e.ville,
@@ -71,7 +93,7 @@ export class EntitiesComponent implements OnInit {
       postcode:        [e.postcode, [Validators.required, Validators.pattern(/^\d{5}$/)]],
       ville:           [e.ville, Validators.required],
       description:     [e.description],
-      entityManagerId: [e.entityManagerId]
+      entityManagerId: [{ value: e.entityManagerId, disabled: this.selectedEntityPendingCount > 0 }]
     });
     this.showModal = true;
   }
@@ -136,21 +158,40 @@ export class EntitiesComponent implements OnInit {
 
   save() {
     if (this.form.invalid) return;
-    const obs = this.editMode ? this.api.updateEntity(this.selectedCode!, this.form.value) : this.api.createEntity(this.form.value);
+    const obs = this.editMode ? this.api.updateEntity(this.selectedCode!, this.form.getRawValue()) : this.api.createEntity(this.form.value);
     obs.subscribe({ next: () => { this.showModal = false; this.load(this.page.page); this.success = this.editMode ? 'Entité modifiée' : 'Entité créée'; setTimeout(() => this.success = '', 3000); }, error: (e) => this.error = e?.error?.message || 'Erreur' });
   }
 
-  async delete(code: string) {
+  async delete(e: EntityOrg) {
+    const users = e.userCount || 0;
+
+    // Has users + has EM → deletion blocked, EM must clear users first
+    if (users > 0 && e.entityManagerId) {
+      await this.confirm.open({
+        title: 'Suppression impossible',
+        message: `Cette entité contient ${users} utilisateur(s). L'Entity Manager "${e.entityManagerName || e.entityManagerId}" doit d'abord supprimer tous les utilisateurs avant que l'entité puisse être supprimée.`,
+        confirmLabel: 'OK',
+        cancelLabel: ' ',
+        type: 'warning'
+      });
+      return;
+    }
+
+    // Has users but no EM → warn admin but allow
+    const message = users > 0
+      ? `Cette entité contient ${users} utilisateur(s) et n'a pas d'Entity Manager assigné. Supprimer quand même ?`
+      : 'Cette entité et toutes ses données associées seront supprimées définitivement.';
+
     const ok = await this.confirm.open({
       title: 'Supprimer l\'entité',
-      message: 'Cette entité et toutes ses données associées seront supprimées définitivement.',
+      message,
       confirmLabel: 'Supprimer',
       type: 'danger'
     });
     if (!ok) return;
-    this.api.deleteEntity(code).subscribe({
+    this.api.deleteEntity(e.code).subscribe({
       next: () => { this.load(this.page.page); this.success = 'Entité supprimée'; setTimeout(() => this.success = '', 3000); },
-      error: (e) => this.confirm.open({ title: 'Erreur', message: e?.error?.message || 'Erreur lors de la suppression', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
+      error: (err) => this.confirm.open({ title: 'Erreur', message: err?.error?.message || 'Erreur lors de la suppression', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
     });
   }
 

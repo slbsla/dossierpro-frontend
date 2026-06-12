@@ -5,24 +5,61 @@
     <button class="btn btn-primary" (click)="openCreate()">+ Nouvelle Entité</button>
   </div>
   <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <label class="filter-label">Filtrer par Entity Manager :</label>
+    <select class="form-control filter-select" [(ngModel)]="filterManagerId" (change)="applyFilter()">
+      <option value="">— Tous —</option>
+      <option *ngFor="let m of managers" [value]="m.reference">{{ m.firstName }} {{ m.lastName }} ({{ m.reference }})</option>
+    </select>
+    <button *ngIf="filterManagerId" class="btn btn-sm btn-secondary" (click)="filterManagerId=''; applyFilter()">✕ Effacer</button>
+  </div>
+
   <div class="card">
     <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
     <div class="table-wrapper" *ngIf="!loading">
       <table>
         <thead><tr><th>Code</th><th>Nom</th><th>Secteur</th><th>Entity Manager</th><th>Statut</th><th>Créé le</th><th>Actions</th></tr></thead>
         <tbody>
-          <tr *ngFor="let e of page.content">
-            <td><code>{{ e.code }}</code></td>
-            <td><strong>{{ e.name }}</strong></td>
-            <td><span class="badge badge-em">{{ e.sector }}</span></td>
-            <td>{{ e.entityManagerName || e.entityManagerId || '—' }}</td>
-            <td><span class="badge" [ngClass]="e.isActive ? 'badge-active' : 'badge-inactive'">{{ e.isActive ? 'Actif' : 'Inactif' }}</span></td>
-            <td>{{ e.creationDate | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <button class="btn btn-sm btn-secondary" (click)="openEdit(e)" title="Modifier">✏️</button>
-              <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(e.code)" title="Supprimer">🗑️</button>
-            </td>
-          </tr>
+          <ng-container *ngFor="let e of page.content">
+            <tr>
+              <td><code>{{ e.code }}</code></td>
+              <td><strong>{{ e.name }}</strong></td>
+              <td><span class="badge badge-em">{{ e.sector }}</span></td>
+              <td>
+                <button *ngIf="e.entityManagerId" class="em-link-btn" (click)="toggleEmDetail(e)" [class.active]="expandedEntityCode === e.code" [title]="'Voir le détail de ' + (e.entityManagerName || e.entityManagerId)">
+                  {{ e.entityManagerName || e.entityManagerId }}
+                  <span class="material-icons em-link-icon">{{ expandedEntityCode === e.code ? 'expand_less' : 'info_outline' }}</span>
+                </button>
+                <span *ngIf="!e.entityManagerId">—</span>
+              </td>
+              <td><span class="badge" [ngClass]="e.isActive ? 'badge-active' : 'badge-inactive'">{{ e.isActive ? 'Actif' : 'Inactif' }}</span></td>
+              <td>{{ e.creationDate | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <button class="btn btn-sm btn-secondary" (click)="openEdit(e)" title="Modifier">✏️</button>
+                <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(e)" title="Supprimer">🗑️</button>
+              </td>
+            </tr>
+            <!-- Inline EM detail row -->
+            <tr *ngIf="expandedEntityCode === e.code" class="em-detail-expand-row">
+              <td colspan="7">
+                <div class="em-inline-card" *ngIf="selectedEmDetail; else loadingEm">
+                  <div class="em-inline-header">
+                    <span class="material-icons" style="font-size:16px;color:var(--primary)">manage_accounts</span>
+                    <strong>Détail Entity Manager</strong>
+                  </div>
+                  <div class="em-inline-body">
+                    <div class="em-inline-field highlight"><span class="em-inline-label">Référence</span><code>{{ selectedEmDetail.reference }}</code></div>
+                    <div class="em-inline-field"><span class="em-inline-label">Nom complet</span><span>{{ selectedEmDetail.firstName }} {{ selectedEmDetail.lastName }}</span></div>
+                    <div class="em-inline-field"><span class="em-inline-label">Fonction</span><span>{{ selectedEmDetail.fonction || '—' }}</span></div>
+                    <div class="em-inline-field"><span class="em-inline-label">Téléphone</span><span>{{ selectedEmDetail.telephone || '—' }}</span></div>
+                    <div class="em-inline-field"><span class="em-inline-label">Créé le</span><span>{{ selectedEmDetail.creationDate | date:'dd/MM/yyyy' }}</span></div>
+                  </div>
+                </div>
+                <ng-template #loadingEm><div style="padding:10px;color:var(--gray-text);font-size:13px">Chargement...</div></ng-template>
+              </td>
+            </tr>
+          </ng-container>
           <tr *ngIf="page.content.length === 0"><td colspan="7" class="empty-state"><span class="empty-state-icon">🏢</span><p>Aucune entité</p></td></tr>
         </tbody>
       </table>
@@ -40,6 +77,10 @@
 <div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
   <div class="modal-box" (click)="$event.stopPropagation()">
     <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Créer' }} une Entité</h3>
+    <div class="alert alert-warning" *ngIf="editMode && selectedEntityPendingCount > 0" style="display:flex;align-items:center;gap:8px">
+      <span class="material-icons" style="font-size:18px">warning</span>
+      <span>{{ selectedEntityPendingCount }} dossier(s) en attente de validation. Le changement d'Entity Manager est bloqué jusqu'à leur traitement.</span>
+    </div>
     <div class="alert alert-error" *ngIf="error">{{ error }}</div>
     <form [formGroup]="form">
       <div class="form-group">
@@ -60,6 +101,7 @@
             <option value="">— Aucun —</option>
             <option *ngFor="let m of managers" [value]="m.reference">{{ m.firstName }} {{ m.lastName }} ({{ m.reference }})</option>
           </select>
+          <small *ngIf="editMode && selectedEntityPendingCount > 0" style="color:var(--warning,#f59e0b);font-size:11px;margin-top:3px;display:block">Modification bloquée (dossiers en attente)</small>
         </div>
       </div>
       <!-- Adresse avec autocomplete -->
@@ -150,6 +192,22 @@
 .addr-option:hover { background:#f1f5f9; }
 .input-error { border-color:var(--danger,#ef4444) !important; }
 .field-error { font-size:11px; color:var(--danger,#ef4444); margin-top:3px; display:block; }
+/* Filter bar */
+.filter-bar { display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+.filter-label { font-size:13px; color:var(--gray-text); font-weight:500; white-space:nowrap; }
+.filter-select { max-width:280px; height:36px; padding:4px 8px; font-size:13px; }
+/* EM link button in table */
+.em-link-btn { background:none; border:none; cursor:pointer; color:var(--primary); font-size:13px; display:inline-flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; transition:background .15s; }
+.em-link-btn:hover, .em-link-btn.active { background:var(--primary-light,#dbeafe); }
+.em-link-icon { font-size:14px !important; }
+/* Inline EM detail expand row */
+.em-detail-expand-row td { padding:0 !important; border-bottom:none; }
+.em-inline-card { background:var(--gray-light,#f8fafc); border:1px solid var(--primary-light,#dbeafe); border-radius:6px; margin:6px 12px 6px 24px; padding:12px 16px; }
+.em-inline-header { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--primary); margin-bottom:10px; font-weight:600; }
+.em-inline-body { display:flex; flex-wrap:wrap; gap:8px 24px; }
+.em-inline-field { display:flex; flex-direction:column; min-width:140px; }
+.em-inline-field.highlight code { font-size:13px; font-weight:700; color:var(--primary); background:var(--primary-light,#dbeafe); padding:2px 8px; border-radius:4px; }
+.em-inline-label { font-size:11px; color:var(--gray-text); font-weight:500; text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px; }
 </style>
     </form>
     <div class="modal-actions">

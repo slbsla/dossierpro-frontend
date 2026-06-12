@@ -53,3 +53,14 @@
   font-size: 0.78rem;
   color: var(--danger, #ef4444);
 }
+
+.entity-count-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 24px; height: 24px; border-radius: 12px;
+  font-size: 12px; font-weight: 700;
+  background: var(--gray-border, #e2e8f0); color: var(--gray-text, #6b7280);
+  padding: 0 6px;
+}
+.entity-count-badge.has-entities {
+  background: var(--primary-light, #dbeafe); color: var(--primary, #2563eb);
+}

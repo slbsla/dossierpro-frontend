@@ -29,6 +29,8 @@ export interface EntityOrg {
   entityManagerId?: string;
   entityManagerName?: string;
   isActive: boolean;
+  pendingDossiersCount?: number;
+  userCount?: number;
   creationDate?: string;
 }
 
@@ -40,6 +42,7 @@ export interface EntityMng {
   fonction?: string;
   entityCode?: string;
   entityName?: string;
+  entityCount?: number;
   creationDate?: string;
 }
 
