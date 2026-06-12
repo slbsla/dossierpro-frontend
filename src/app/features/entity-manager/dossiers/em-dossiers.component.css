@@ -5,4 +5,5 @@
 .dossier-detail { background:var(--gray-light); border-radius:var(--radius); padding:16px; }
 .detail-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--gray-border); }
 .detail-row:last-child { border-bottom:none; }
-.detail-label { font-size:13px; color:var(--gray-text); font-weight:500; min-width:100px; }
+.detail-label { font-size:13px; color:var(--gray-text); font-weight:500; min-width:130px; }
+.detail-separator { height:1px; background:var(--primary-light); margin:6px 0; }

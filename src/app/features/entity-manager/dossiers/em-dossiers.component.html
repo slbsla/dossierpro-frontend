@@ -97,6 +97,17 @@
         <div class="detail-row"><span class="detail-label">Auteur</span><span>{{ selectedDossier.userFullName }}</span></div>
         <div class="detail-row"><span class="detail-label">Entité</span><code>{{ selectedDossier.entityCode }}</code></div>
         <div class="detail-row" *ngIf="selectedDossier.description"><span class="detail-label">Description</span><span>{{ selectedDossier.description }}</span></div>
+
+        <!-- Champs optionnels — toujours affichés -->
+        <div class="detail-separator"></div>
+        <div class="detail-row"><span class="detail-label">Motif</span><span>{{ selectedDossier.motif || '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Immatriculation</span><span>{{ selectedDossier.immatriculation || '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Nombre de parts</span><span>{{ selectedDossier.nombrePart != null ? selectedDossier.nombrePart : '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Budget de départ</span><span>{{ selectedDossier.budgetDepart != null ? ((selectedDossier.budgetDepart | number:'1.2-2') + ' €') : '—' }}</span></div>
+
+        <!-- Dates -->
+        <div class="detail-separator"></div>
+        <div class="detail-row"><span class="detail-label">Créé le</span><span>{{ selectedDossier.creationDate | date:'dd/MM/yyyy HH:mm' }}</span></div>
         <div class="detail-row"><span class="detail-label">Soumis le</span><span>{{ selectedDossier.submitDate | date:'dd/MM/yyyy HH:mm' }}</span></div>
         <div class="detail-row"><span class="detail-label">Expire le</span><span>{{ selectedDossier.expirationDate | date:'dd/MM/yyyy' }}</span></div>
       </div>
