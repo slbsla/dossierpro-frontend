@@ -8,7 +8,13 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly API = 'http://localhost:8080/api';
+
+ /**
+  Direct run :   private readonly API = 'http://localhost:8080/api';
+  Run with back end :   private readonly API = '/api';
+  */
+
+  private readonly API = '/api';
 
   constructor(private http: HttpClient) {}
 
