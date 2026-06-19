@@ -11,6 +11,10 @@
         Profil Entity Manager
       </div>
 
+      <div class="info-row" *ngIf="user.roleName">
+        <span class="info-label"><span class="material-icons info-icon">verified_user</span>Rôle</span>
+        <span class="info-badge">{{ user.roleName }}</span>
+      </div>
       <div class="info-row">
         <span class="info-label"><span class="material-icons info-icon">badge</span>Référence</span>
         <code class="info-code">{{ user.uniqueReference }}</code>
@@ -77,6 +81,21 @@
           <span class="info-count-value">{{ dashboard.totalDossiers }}</span>
           <span class="info-count-label">Dossiers</span>
         </a>
+      </div>
+    </div>
+
+    <!-- ── Card: Managers de l'entité ── -->
+    <div class="info-card" *ngIf="managers.length > 0">
+      <div class="info-card-title">
+        <span class="material-icons" style="font-size:22px;color:var(--primary)">groups</span>
+        {{ canManageUsers ? "Managers de l'entité" : 'Mon Entity Manager' }}
+      </div>
+      <div class="info-row" *ngFor="let m of managers">
+        <span class="info-label">
+          <span class="material-icons info-icon">{{ m.isPrimaryEm ? 'manage_accounts' : 'person' }}</span>
+          {{ m.firstName }} {{ m.lastName }}{{ m.isYou ? ' (vous)' : '' }}
+        </span>
+        <span class="info-badge">{{ m.roleName || '—' }}</span>
       </div>
     </div>
 

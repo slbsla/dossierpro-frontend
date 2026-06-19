@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { EntityUser, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 export interface EmGroup {
   groupReference: string;
@@ -31,6 +32,7 @@ export class EmUsersComponent implements OnInit {
   // ── Users tab ──
   page: PageResponse<EntityUser> = { content: [], page: 0, size: 8, totalElements: 0, totalPages: 0, last: true };
   loading = false; showModal = false; editMode = false; selectedRef: string | null = null;
+  showViewModal = false; viewUser: EntityUser | null = null;
   form!: FormGroup; error = ''; success = '';
   showPassword = false; showConfirmPassword = false;
   originalValues: any = {};
@@ -59,7 +61,10 @@ export class EmUsersComponent implements OnInit {
   groupIcons = GROUP_ICONS;
   groupError = '';
 
-  constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
+  constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService, private auth: AuthService) {}
+
+  /** Entity Auditor / Entity Signataire : lecture seule, ne peuvent pas gérer les utilisateurs/groupes. */
+  get canManageUsers(): boolean { return this.auth.canManageUsers; }
 
   ngOnInit() { this.load(); }
 
@@ -98,6 +103,7 @@ export class EmUsersComponent implements OnInit {
   }
 
   openCreate() {
+    if (!this.canManageUsers) return;
     this.editMode = false; this.selectedRef = null; this.error = '';
     this.showPassword = false; this.showConfirmPassword = false;
     this.form = this.fb.group({
@@ -112,6 +118,7 @@ export class EmUsersComponent implements OnInit {
   }
 
   openEdit(u: EntityUser) {
+    if (!this.canManageUsers) return;
     this.editMode = true; this.selectedRef = u.reference; this.error = '';
     this.originalValues = { firstName: u.firstName, lastName: u.lastName, telephone: u.telephone, email: u.email };
     this.form = this.fb.group({
@@ -121,6 +128,12 @@ export class EmUsersComponent implements OnInit {
       email:     [u.email, Validators.email]
     });
     this.showModal = true;
+  }
+
+  /** Vue lecture seule — toujours disponible, même pour les prospects ou les rôles non-EM. */
+  openView(u: EntityUser) {
+    this.viewUser = u;
+    this.showViewModal = true;
   }
 
   resetForm() { this.form.patchValue(this.originalValues); this.error = ''; }
@@ -139,6 +152,7 @@ export class EmUsersComponent implements OnInit {
   }
 
   async delete(u: import('../../../core/models/models').EntityUser) {
+    if (!this.canManageUsers) return;
     const count = u.dossierCount ?? 0;
     const dossierInfo = count > 0
       ? ` Cet utilisateur possède <strong>${count} dossier(s)</strong> qui seront également supprimés.`
@@ -156,6 +170,7 @@ export class EmUsersComponent implements OnInit {
   }
 
   async toggleActive(ref: string) {
+    if (!this.canManageUsers) return;
     this.api.toggleUserActive(ref).subscribe({
       next: () => this.load(this.page.page),
       error: (e) => this.confirm.open({ title: 'Erreur', message: e?.error?.message || 'Erreur', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
@@ -187,6 +202,7 @@ export class EmUsersComponent implements OnInit {
   }
 
   async deleteGroup(g: EmGroup) {
+    if (!this.canManageUsers) return;
     const ok = await this.confirm.open({ title: 'Supprimer le groupe', message: `Supprimer "${g.groupName}" et retirer tous ses membres ?`, confirmLabel: 'Supprimer', type: 'danger' });
     if (!ok) return;
     this.api.deleteEmGroup(g.groupReference).subscribe({
@@ -201,6 +217,7 @@ export class EmUsersComponent implements OnInit {
 
   // ── Group create modal ──
   openGroupModal() {
+    if (!this.canManageUsers) return;
     this.groupError = '';
     this.groupForm = this.fb.group({
       groupName: ['', Validators.required],
@@ -235,7 +252,7 @@ export class EmUsersComponent implements OnInit {
   isBusy(userRef: string): boolean { return this.assignBusy.has(userRef); }
 
   toggleMembership(userRef: string) {
-    if (!this.selectedGroup || this.assignBusy.has(userRef)) return;
+    if (!this.canManageUsers || !this.selectedGroup || this.assignBusy.has(userRef)) return;
     this.assignBusy.add(userRef);
     const obs = this.isMember(userRef)
       ? this.api.removeGroupMember(this.selectedGroup.groupReference, userRef)

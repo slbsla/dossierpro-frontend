@@ -52,6 +52,19 @@ export class AuthService {
   isLoggedIn(): boolean { return this.userSubject.value !== null; }
   hasRole(role: Role): boolean { return this.userSubject.value?.role === role; }
 
+  // ── Capacités par rôle de manager (Entity Manager / Entity Auditor / Entity Signataire) ──
+  get managerRoleName(): string | null { return this.userSubject.value?.roleName ?? null; }
+  get isAuditor(): boolean { return this.managerRoleName === 'Entity Auditor'; }
+  get isSignataire(): boolean { return this.managerRoleName === 'Entity Signataire'; }
+  /** Gestion des utilisateurs (création/modification/suppression/activation, groupes) : Entity Manager uniquement. */
+  get canManageUsers(): boolean { return !this.isAuditor && !this.isSignataire; }
+  /** Traiter un dossier en attente (valider/rejeter) ou l'archiver : Entity Manager + Entity Signataire. */
+  get canProcessDossiers(): boolean { return !this.isAuditor; }
+  /** Activités récentes du dashboard : Entity Manager uniquement. */
+  get canViewRecentActivity(): boolean { return !this.isAuditor && !this.isSignataire; }
+  /** Un manager non-Entity Manager ne gère qu'une seule entité (pas de switch d'entité). */
+  get canSwitchEntity(): boolean { return this.managerRoleName === 'Entity Manager'; }
+
   getHomeRoute(): string {
     switch (this.currentUser?.role) {
       case Role.ADMIN: return '/admin/dashboard';

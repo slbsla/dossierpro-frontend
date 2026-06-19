@@ -24,7 +24,7 @@
           <span class="material-icons" style="font-size:16px;vertical-align:middle;color:var(--warning)">warning</span>
           Prospects uniquement
         </label>
-        <button class="btn btn-primary" (click)="openCreate()">+ Nouvel Utilisateur</button>
+        <button class="btn btn-primary" (click)="openCreate()" [disabled]="!canManageUsers" [title]="!canManageUsers ? 'Votre rôle ne permet pas de gérer les utilisateurs' : ''">+ Nouvel Utilisateur</button>
       </div>
     </div>
     <div class="alert alert-success" *ngIf="success">{{ success }}</div>
@@ -58,16 +58,19 @@
               <td>{{ u.telephone | phone }}</td>
               <td>
                 <label class="toggle">
-                  <input type="checkbox" [checked]="u.isActive" (change)="toggleActive(u.reference)">
+                  <input type="checkbox" [checked]="u.isActive" [disabled]="!canManageUsers" (change)="toggleActive(u.reference)">
                   <span class="toggle-slider"></span>
                 </label>
               </td>
               <td>{{ u.creationDate | date:'dd/MM/yyyy' }}</td>
               <td>
-                <button class="btn btn-sm btn-secondary" (click)="openEdit(u)" [disabled]="u.isProspect" [class.btn-disabled]="u.isProspect" [title]="u.isProspect ? 'Modification disponible après la première connexion' : 'Modifier'">
+                <button class="btn btn-sm btn-secondary" (click)="openView(u)" title="Voir les détails">
+                  <span class="material-icons" style="font-size:16px">visibility</span>
+                </button>
+                <button class="btn btn-sm btn-secondary" style="margin-left:4px" (click)="openEdit(u)" [disabled]="u.isProspect || !canManageUsers" [class.btn-disabled]="u.isProspect || !canManageUsers" [title]="!canManageUsers ? 'Votre rôle ne permet pas de gérer les utilisateurs' : (u.isProspect ? 'Modification disponible après la première connexion' : 'Modifier')">
                   <span class="material-icons" style="font-size:16px">edit</span>
                 </button>
-                <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(u)">
+                <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(u)" [disabled]="!canManageUsers" [title]="!canManageUsers ? 'Votre rôle ne permet pas de gérer les utilisateurs' : 'Supprimer'">
                   <span class="material-icons" style="font-size:16px">delete_forever</span>
                 </button>
               </td>
@@ -88,7 +91,7 @@
   <ng-container *ngIf="activeTab==='groups'">
     <div class="page-header">
       <div><h2 class="page-title">Groupes d'utilisateurs</h2><p class="page-subtitle">{{ groups.length }} groupe(s)</p></div>
-      <button class="btn btn-primary" (click)="openGroupModal()">+ Nouveau groupe</button>
+      <button class="btn btn-primary" (click)="openGroupModal()" [disabled]="!canManageUsers" [title]="!canManageUsers ? 'Votre rôle ne permet pas de gérer les groupes' : ''">+ Nouveau groupe</button>
     </div>
 
     <div class="split-panel">
@@ -106,7 +109,7 @@
               <span class="group-card-name">{{ g.groupName }}</span>
               <span class="group-card-count">{{ g.memberCount }} membre(s)</span>
             </div>
-            <button class="group-delete-btn" (click)="deleteGroup(g); $event.stopPropagation()" title="Supprimer">
+            <button class="group-delete-btn" (click)="deleteGroup(g); $event.stopPropagation()" [disabled]="!canManageUsers" [title]="!canManageUsers ? 'Votre rôle ne permet pas de gérer les groupes' : 'Supprimer'">
               <span class="material-icons" style="font-size:16px">delete</span>
             </button>
           </div>
@@ -206,7 +209,8 @@
               <button class="btn btn-sm assign-btn"
                       [class.btn-danger]="isMember(u.reference)"
                       [class.btn-primary]="!isMember(u.reference)"
-                      [disabled]="isBusy(u.reference)"
+                      [disabled]="isBusy(u.reference) || !canManageUsers"
+                      [title]="!canManageUsers ? 'Votre rôle ne permet pas de gérer les groupes' : ''"
                       (click)="toggleMembership(u.reference)">
                 <span class="material-icons" style="font-size:15px">{{ isMember(u.reference) ? 'remove' : 'add' }}</span>
                 {{ isMember(u.reference) ? 'Retirer' : 'Ajouter' }}
@@ -221,6 +225,32 @@
     </div>
   </ng-container>
 
+</div>
+
+<!-- ══ Modal view user (lecture seule, toujours accessible) ══ -->
+<div class="modal-overlay" *ngIf="showViewModal" (click)="showViewModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()" *ngIf="viewUser">
+    <h3 class="modal-title">Détails de l'utilisateur</h3>
+    <span class="badge" style="margin-bottom:16px;display:inline-block" *ngIf="viewUser.isProspect">⚠ Prospect — en attente de première connexion</span>
+    <div class="form-section">
+      <h4 class="form-section-title">Informations personnelles</h4>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nom</label><input class="form-control" [value]="viewUser.lastName" readonly></div>
+        <div class="form-group"><label class="form-label">Prénom</label><input class="form-control" [value]="viewUser.firstName" readonly></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" [value]="viewUser.telephone | phone" readonly></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-control" [value]="viewUser.email || '—'" readonly></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Référence</label><input class="form-control" [value]="viewUser.reference" readonly></div>
+        <div class="form-group"><label class="form-label">Créé le</label><input class="form-control" [value]="viewUser.creationDate | date:'dd/MM/yyyy'" readonly></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showViewModal=false">Fermer</button>
+    </div>
+  </div>
 </div>
 
 <!-- ══ Modal create/edit user ══ -->

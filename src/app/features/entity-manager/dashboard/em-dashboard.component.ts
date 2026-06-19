@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { DashboardEm, ActivityLog } from '../../../core/models/models';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({ selector: 'app-em-dashboard', templateUrl: './em-dashboard.component.html' })
 export class EmDashboardComponent implements OnInit {
@@ -8,17 +9,22 @@ export class EmDashboardComponent implements OnInit {
   recentLogs: ActivityLog[] = [];
   loading = true;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private auth: AuthService) {}
+
+  /** Entity Auditor / Entity Signataire ne voient pas les activités récentes. */
+  get canViewRecentActivity(): boolean { return this.auth.canViewRecentActivity; }
 
   ngOnInit() {
     this.api.getEmDashboard().subscribe({
       next: d => { this.dashboard = d; this.loading = false; },
       error: () => this.loading = false
     });
-    this.api.getEmActivityLogs(0, 8).subscribe({
-      next: (r: any) => this.recentLogs = r.content ?? [],
-      error: () => {}
-    });
+    if (this.canViewRecentActivity) {
+      this.api.getEmActivityLogs(0, 8).subscribe({
+        next: (r: any) => this.recentLogs = r.content ?? [],
+        error: () => {}
+      });
+    }
   }
 
   actionLabel(action: string): string {

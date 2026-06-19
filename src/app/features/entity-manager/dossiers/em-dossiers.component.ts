@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { Dossier, DossierArchive, DossierStatus, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({ selector: 'app-em-dossiers', templateUrl: './em-dossiers.component.html', styleUrls: ['./em-dossiers.component.css'] })
 export class EmDossiersComponent implements OnInit {
@@ -26,7 +27,10 @@ export class EmDossiersComponent implements OnInit {
   hashLibelle = '';
   hashCopied = false;
 
-  constructor(private api: ApiService, private confirm: ConfirmDialogService, private route: ActivatedRoute) {}
+  constructor(private api: ApiService, private confirm: ConfirmDialogService, private route: ActivatedRoute, private auth: AuthService) {}
+
+  /** Entity Auditor : lecture seule, ne peut pas valider/rejeter/archiver. Entity Manager + Entity Signataire : oui. */
+  get canProcessDossiers(): boolean { return this.auth.canProcessDossiers; }
   ngOnInit() {
     const tab = this.route.snapshot.queryParamMap.get('tab');
     if (tab === 'pending') this.activeTab = 'pending';
@@ -58,6 +62,7 @@ export class EmDossiersComponent implements OnInit {
   onStatusFilter(v: string)    { this.statusFilter = v;    this.loadValidated(0); }
 
   async archiveDossier(d: Dossier) {
+    if (!this.canProcessDossiers) return;
     const ok = await this.confirm.open({
       title: 'Archiver le dossier',
       message: `Archiver le dossier <strong>${d.libelle}</strong> (<code>${d.reference}</code>) ? Cette action crée une archive et est irréversible.`,
@@ -85,6 +90,7 @@ export class EmDossiersComponent implements OnInit {
   }
 
   openValidation(d: Dossier) {
+    if (!this.canProcessDossiers) return;
     this.selectedDossier = d; this.workflowStep = 1;
     this.rejectMode = false; this.rejectMotif = ''; this.workflowError = '';
   }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from '../../../core/services/api.service';
-import { EntityOrg, EntityMng, EntitySector, PageResponse } from '../../../core/models/models';
+import { EntityOrg, EntityMng, EntitySector, PageResponse, ManagerSummary } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({ selector: 'app-entities', templateUrl: './entities.component.html' })
@@ -18,6 +18,11 @@ export class EntitiesComponent implements OnInit {
 
   // Filter by entity manager
   filterManagerId = '';
+
+  // Managers additionnels (rôle différent d'Entity Manager)
+  selectedExtraManagers: ManagerSummary[] = [];
+  originalExtraManagers: ManagerSummary[] = [];
+  extraManagerToAdd = '';
 
   // Inline EM detail panel
   expandedEntityCode: string | null = null;
@@ -59,9 +64,47 @@ export class EntitiesComponent implements OnInit {
     this.api.getEntityManagers(0, 100).subscribe({ next: r => this.managers = r.content });
   }
 
+  /**
+   * Managers éligibles comme Entity Manager principal : uniquement ceux ayant
+   * le rôle "Entity Manager" (les autres rôles ne peuvent être que managers additionnels).
+   */
+  get primaryManagers(): EntityMng[] {
+    return this.managers.filter(m => m.roleName === 'Entity Manager');
+  }
+
+  /**
+   * Managers éligibles comme managers additionnels : rôle différent d'Entity Manager,
+   * pas déjà ajoutés à cette entité, et "libres" (pas déjà attachés à une autre entité —
+   * contrairement à l'Entity Manager principal, un manager additionnel ne peut gérer
+   * qu'une seule entité à la fois).
+   */
+  get availableExtraManagers(): EntityMng[] {
+    const selectedRefs = new Set(this.selectedExtraManagers.map(m => m.reference));
+    return this.managers.filter(m =>
+      m.roleName !== 'Entity Manager' &&
+      !selectedRefs.has(m.reference) &&
+      (m.extraManagerCount || 0) === 0
+    );
+  }
+
+  addExtraManager() {
+    if (!this.extraManagerToAdd) return;
+    const m = this.managers.find(mg => mg.reference === this.extraManagerToAdd);
+    if (m && !this.selectedExtraManagers.some(em => em.reference === m.reference)) {
+      this.selectedExtraManagers.push({ reference: m.reference, firstName: m.firstName, lastName: m.lastName, roleName: m.roleName });
+    }
+    this.extraManagerToAdd = '';
+  }
+
+  removeExtraManager(ref: string) {
+    this.selectedExtraManagers = this.selectedExtraManagers.filter(m => m.reference !== ref);
+  }
+
   openCreate() {
     this.editMode = false; this.selectedCode = null; this.error = '';
     this.selectedEntityPendingCount = 0;
+    this.selectedExtraManagers = []; this.extraManagerToAdd = '';
+    this.loadManagers();
     this.form = this.fb.group({
       name:            ['', Validators.required],
       sector:          [''],
@@ -79,6 +122,10 @@ export class EntitiesComponent implements OnInit {
   openEdit(e: EntityOrg) {
     this.editMode = true; this.selectedCode = e.code; this.error = '';
     this.selectedEntityPendingCount = e.pendingDossiersCount || 0;
+    this.selectedExtraManagers = (e.extraManagers || []).map(m => ({ ...m }));
+    this.originalExtraManagers = (e.extraManagers || []).map(m => ({ ...m }));
+    this.extraManagerToAdd = '';
+    this.loadManagers();
     this.originalValues = {
       name: e.name, sector: e.sector,
       adresse: e.adresse, numero: e.numero, ligne: e.ligne, postcode: e.postcode, ville: e.ville,
@@ -100,6 +147,7 @@ export class EntitiesComponent implements OnInit {
 
   resetForm() {
     this.form.patchValue(this.originalValues);
+    this.selectedExtraManagers = this.originalExtraManagers.map(m => ({ ...m }));
     this.suggestions = []; this.showSuggestions = false; this.addressLinked = false;
     this.error = '';
   }
@@ -158,7 +206,11 @@ export class EntitiesComponent implements OnInit {
 
   save() {
     if (this.form.invalid) return;
-    const obs = this.editMode ? this.api.updateEntity(this.selectedCode!, this.form.getRawValue()) : this.api.createEntity(this.form.value);
+    const extraManagerIds = this.selectedExtraManagers.map(m => m.reference);
+    const payload = this.editMode
+      ? { ...this.form.getRawValue(), extraManagerIds }
+      : { ...this.form.value, extraManagerIds };
+    const obs = this.editMode ? this.api.updateEntity(this.selectedCode!, payload) : this.api.createEntity(payload);
     obs.subscribe({ next: () => { this.showModal = false; this.load(this.page.page); this.success = this.editMode ? 'Entité modifiée' : 'Entité créée'; setTimeout(() => this.success = '', 3000); }, error: (e) => this.error = e?.error?.message || 'Erreur' });
   }
 

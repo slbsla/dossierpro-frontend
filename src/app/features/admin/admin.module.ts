@@ -7,16 +7,18 @@ import { SharedModule } from '../../shared/shared.module';
 import { AdminDashboardComponent } from './dashboard/admin-dashboard.component';
 import { EntitiesComponent } from './entities/entities.component';
 import { EntityManagersComponent } from './entity-managers/entity-managers.component';
+import { RolesComponent } from './roles/roles.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: AdminDashboardComponent },
   { path: 'entities', component: EntitiesComponent },
-  { path: 'entity-managers', component: EntityManagersComponent }
+  { path: 'entity-managers', component: EntityManagersComponent },
+  { path: 'roles', component: RolesComponent }
 ];
 
 @NgModule({
-  declarations: [AdminDashboardComponent, EntitiesComponent, EntityManagersComponent],
+  declarations: [AdminDashboardComponent, EntitiesComponent, EntityManagersComponent, RolesComponent],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, SharedModule, RouterModule.forChild(routes)]
 })
 export class AdminModule {}

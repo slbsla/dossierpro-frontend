@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
-import { EntityMng, PageResponse } from '../../../core/models/models';
+import { EntityMng, ManagerRole, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 @Component({ selector: 'app-entity-managers', templateUrl: './entity-managers.component.html', styleUrls: ['./entity-managers.component.css'] })
@@ -11,9 +11,14 @@ export class EntityManagersComponent implements OnInit {
   form!: FormGroup; error = ''; success = '';
   showPassword = false; showConfirmPassword = false;
   originalValues: any = {};
+  roles: ManagerRole[] = [];
+  selectedAttachedCount = 0;
 
   constructor(private api: ApiService, private fb: FormBuilder, private confirm: ConfirmDialogService) {}
-  ngOnInit() { this.load(); }
+  ngOnInit() {
+    this.load();
+    this.api.getManagerRoles().subscribe({ next: r => this.roles = r });
+  }
 
   load(p = 0) {
     this.loading = true;
@@ -22,12 +27,14 @@ export class EntityManagersComponent implements OnInit {
 
   openCreate() {
     this.editMode = false; this.selectedRef = null; this.error = '';
+    this.selectedAttachedCount = 0;
     this.showPassword = false; this.showConfirmPassword = false;
     this.form = this.fb.group({
       firstName:       ['', Validators.required],
       lastName:        ['', Validators.required],
       telephone:       [''],
       fonction:        [''],
+      roleId:          [null, Validators.required],
       password:        ['', [Validators.required, Validators.minLength(4)]],
       confirmPassword: ['', Validators.required]
     });
@@ -36,12 +43,14 @@ export class EntityManagersComponent implements OnInit {
 
   openEdit(m: EntityMng) {
     this.editMode = true; this.selectedRef = m.reference; this.error = '';
-    this.originalValues = { firstName: m.firstName, lastName: m.lastName, telephone: m.telephone, fonction: m.fonction };
+    this.selectedAttachedCount = (m.entityCount || 0) + (m.extraManagerCount || 0);
+    this.originalValues = { firstName: m.firstName, lastName: m.lastName, telephone: m.telephone, fonction: m.fonction, roleId: m.roleId };
     this.form = this.fb.group({
       firstName: [m.firstName, Validators.required],
       lastName:  [m.lastName,  Validators.required],
       telephone: [m.telephone],
-      fonction:  [m.fonction]
+      fonction:  [m.fonction],
+      roleId:    [{ value: m.roleId ?? null, disabled: this.selectedAttachedCount > 0 }, Validators.required]
     });
     this.showModal = true;
   }
@@ -62,10 +71,12 @@ export class EntityManagersComponent implements OnInit {
   }
 
   async delete(m: EntityMng) {
-    if (m.entityCode) {
+    const attached = (m.entityCount || 0) + (m.extraManagerCount || 0);
+    if (attached > 0) {
+      const detail = m.entityCode ? ` (dont l'entité "${m.entityName || m.entityCode}")` : '';
       await this.confirm.open({
         title: 'Suppression impossible',
-        message: `Ce manager est actuellement affecté à l'entité "${m.entityName || m.entityCode}". Veuillez d'abord lui retirer l'entité avant de le supprimer.`,
+        message: `Ce manager est actuellement affecté à ${attached} entité(s)${detail}. Veuillez d'abord le retirer de toutes les entités (Entity Manager principal et manager additionnel) avant de le supprimer.`,
         confirmLabel: 'OK',
         cancelLabel: ' ',
         type: 'warning'

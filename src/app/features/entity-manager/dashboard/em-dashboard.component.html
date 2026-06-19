@@ -17,7 +17,7 @@
     </div>
 
     <!-- Activités récentes -->
-    <div class="card">
+    <div class="card" *ngIf="canViewRecentActivity">
       <div class="card-header"><span class="card-title">🕐 Activités récentes</span></div>
       <div class="table-wrapper">
         <table *ngIf="recentLogs.length > 0">

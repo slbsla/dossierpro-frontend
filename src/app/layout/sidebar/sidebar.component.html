@@ -14,7 +14,7 @@
       <div class="user-name">{{ user.firstName ?? user.uniqueReference }}</div>
       <div class="user-role">
         <span class="badge" [ngClass]="{'badge-admin': user.role===Role.ADMIN, 'badge-em': user.role===Role.ENTITY_MANAGER, 'badge-active': user.role===Role.USER}">
-          {{ user.role }}
+          {{ user.role===Role.ENTITY_MANAGER && user.roleName ? user.roleName : user.role }}
         </span>
       </div>
     </div>
@@ -33,7 +33,10 @@
         <span class="material-icons nav-icon">corporate_fare</span> Entités
       </a>
       <a routerLink="/admin/entity-managers" routerLinkActive="active" class="nav-item">
-        <span class="material-icons nav-icon">manage_accounts</span> Entity Managers
+        <span class="material-icons nav-icon">manage_accounts</span> Managers
+      </a>
+      <a routerLink="/admin/roles" routerLinkActive="active" class="nav-item">
+        <span class="material-icons nav-icon">badge</span> Rôles
       </a>
     </ng-container>
 

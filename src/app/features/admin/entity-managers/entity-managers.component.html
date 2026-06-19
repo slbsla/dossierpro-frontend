@@ -1,24 +1,25 @@
-<app-navbar title="Entity Managers"></app-navbar>
+<app-navbar title="Managers"></app-navbar>
 <div class="page-content">
   <div class="page-header">
-    <div><h2 class="page-title">Entity Managers</h2><p class="page-subtitle">{{ page.totalElements }} manager(s)</p></div>
-    <button class="btn btn-primary" (click)="openCreate()">+ Nouveau EM</button>
+    <div><h2 class="page-title">Managers</h2><p class="page-subtitle">{{ page.totalElements }} manager(s)</p></div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Nouveau Manager</button>
   </div>
   <div class="alert alert-success" *ngIf="success">{{ success }}</div>
   <div class="card">
     <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
     <div class="table-wrapper" *ngIf="!loading">
       <table>
-        <thead><tr><th>Référence</th><th>Nom</th><th>Fonction</th><th>Téléphone</th><th>Entité</th><th>Entités assignées</th><th>Créé le</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Référence</th><th>Nom</th><th>Rôle</th><th>Fonction</th><th>Téléphone</th><th>Entité</th><th>Entités assignées</th><th>Créé le</th><th>Actions</th></tr></thead>
         <tbody>
           <tr *ngFor="let m of page.content">
             <td><code>{{ m.reference }}</code></td>
             <td><strong>{{ m.firstName }} {{ m.lastName }}</strong></td>
+            <td><span *ngIf="m.roleName" class="badge badge-em">{{ m.roleName }}</span><span *ngIf="!m.roleName">—</span></td>
             <td>{{ m.fonction || '—' }}</td>
             <td>{{ m.telephone | phone }}</td>
             <td><span *ngIf="m.entityName" class="badge badge-em">{{ m.entityName }}</span><span *ngIf="!m.entityName">—</span></td>
             <td style="text-align:center">
-              <span class="entity-count-badge" [class.has-entities]="(m.entityCount || 0) > 0">{{ m.entityCount || 0 }}</span>
+              <span class="entity-count-badge" [class.has-entities]="((m.entityCount || 0) + (m.extraManagerCount || 0)) > 0" [title]="(m.entityCount || 0) + ' principal(e), ' + (m.extraManagerCount || 0) + ' additionnel(le)'">{{ (m.entityCount || 0) + (m.extraManagerCount || 0) }}</span>
             </td>
             <td>{{ m.creationDate | date:'dd/MM/yyyy' }}</td>
             <td>
@@ -26,7 +27,7 @@
               <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(m)">🗑️</button>
             </td>
           </tr>
-          <tr *ngIf="page.content.length === 0"><td colspan="8" class="empty-state"><span class="empty-state-icon">👔</span><p>Aucun Entity Manager</p></td></tr>
+          <tr *ngIf="page.content.length === 0"><td colspan="9" class="empty-state"><span class="empty-state-icon">👔</span><p>Aucun Manager</p></td></tr>
         </tbody>
       </table>
       <div class="pagination" *ngIf="page.totalPages > 1">
@@ -40,7 +41,7 @@
 
 <div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
   <div class="modal-box" (click)="$event.stopPropagation()">
-    <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Créer' }} un Entity Manager</h3>
+    <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Créer' }} un Manager</h3>
     <div class="alert alert-error" *ngIf="error">{{ error }}</div>
     <form [formGroup]="form">
 
@@ -54,6 +55,18 @@
         <div class="form-row">
           <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" formControlName="telephone" appPhoneFormat placeholder="06 12 34 56 78"></div>
           <div class="form-group"><label class="form-label">Fonction</label><input class="form-control" formControlName="fonction" placeholder="Ex: Directeur régional"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Rôle *</label>
+            <select class="form-control" formControlName="roleId">
+              <option [ngValue]="null" disabled>— Sélectionner un rôle —</option>
+              <option *ngFor="let r of roles" [ngValue]="r.id">{{ r.name }}</option>
+            </select>
+            <small *ngIf="editMode && selectedAttachedCount > 0" style="color:var(--warning,#f59e0b);font-size:11px;margin-top:3px;display:block">
+              Changement de rôle bloqué : ce manager est affecté à {{ selectedAttachedCount }} entité(s). Retirez-le de toutes les entités (en tant qu'Entity Manager principal et manager additionnel) pour modifier son rôle.
+            </small>
+          </div>
         </div>
       </div>
 

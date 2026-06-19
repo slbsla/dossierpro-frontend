@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
-  Dossier, DossierArchive, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage
+  Dossier, DossierArchive, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage, ManagerRole, EmManagerInfo
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -25,6 +25,10 @@ export class ApiService {
 
   getAdminDashboard(): Observable<DashboardAdmin> {
     return this.http.get<DashboardAdmin>(`${this.API}/admin/dashboard`);
+  }
+
+  getManagerRoles(): Observable<ManagerRole[]> {
+    return this.http.get<ManagerRole[]>(`${this.API}/admin/roles`);
   }
 
   getEntities(page = 0, size = 8, entityManagerId?: string): Observable<PageResponse<EntityOrg>> {
@@ -79,6 +83,10 @@ export class ApiService {
 
   getEmDashboard(): Observable<DashboardEm> {
     return this.http.get<DashboardEm>(`${this.API}/em/dashboard`);
+  }
+
+  getEmManagers(): Observable<EmManagerInfo[]> {
+    return this.http.get<EmManagerInfo[]>(`${this.API}/em/managers`);
   }
 
   getEmUsers(page = 0, size = 8, prospectOnly = false, sortBy = '', sortDir = ''): Observable<PageResponse<EntityUser>> {

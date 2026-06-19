@@ -37,7 +37,7 @@
             <td>{{ d.amount | number:'1.2-2' }} €</td>
             <td>{{ d.userFullName || d.userReference }}</td>
             <td>{{ d.submitDate | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td><button class="btn btn-sm btn-primary" (click)="openValidation(d)"><span class="material-icons" style="font-size:16px;vertical-align:middle">domain_verification</span> Valider</button></td>
+            <td><button class="btn btn-sm btn-primary" (click)="openValidation(d)" [disabled]="!canProcessDossiers" [title]="!canProcessDossiers ? 'Votre rôle ne permet pas de traiter les dossiers' : ''"><span class="material-icons" style="font-size:16px;vertical-align:middle">domain_verification</span> Valider</button></td>
           </tr>
           <tr *ngIf="pendingPage.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">✅</div><p>Aucun dossier en attente</p></div></td></tr>
         </tbody>
@@ -83,7 +83,7 @@
               <span *ngIf="!d.hasPdf" style="color:var(--text-muted)">—</span>
             </td>
             <td>
-              <button *ngIf="d.status==='VALIDATED'" class="btn btn-sm btn-secondary" (click)="archiveDossier(d)" title="Archiver ce dossier">
+              <button *ngIf="d.status==='VALIDATED'" class="btn btn-sm btn-secondary" (click)="archiveDossier(d)" [disabled]="!canProcessDossiers" [title]="!canProcessDossiers ? 'Votre rôle ne permet pas de traiter les dossiers' : 'Archiver ce dossier'">
                 <span class="material-icons" style="font-size:15px;vertical-align:middle">archive</span> Archiver
               </button>
             </td>

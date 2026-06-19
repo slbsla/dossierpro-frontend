@@ -14,6 +14,7 @@ export interface UserInfo {
   email?: string;
   telephone?: string;
   entityCode?: string;
+  roleName?: string;
 }
 
 export interface EntityOrg {
@@ -28,10 +29,28 @@ export interface EntityOrg {
   description?: string;
   entityManagerId?: string;
   entityManagerName?: string;
+  extraManagers?: ManagerSummary[];
   isActive: boolean;
   pendingDossiersCount?: number;
   userCount?: number;
   creationDate?: string;
+}
+
+export interface ManagerSummary {
+  reference: string;
+  firstName: string;
+  lastName: string;
+  roleName?: string;
+}
+
+export interface EmManagerInfo {
+  reference: string;
+  firstName: string;
+  lastName: string;
+  telephone?: string;
+  roleName?: string;
+  isYou: boolean;
+  isPrimaryEm: boolean;
 }
 
 export interface EntityMng {
@@ -40,9 +59,12 @@ export interface EntityMng {
   lastName: string;
   telephone?: string;
   fonction?: string;
+  roleId?: number;
+  roleName?: string;
   entityCode?: string;
   entityName?: string;
   entityCount?: number;
+  extraManagerCount?: number;
   creationDate?: string;
 }
 
@@ -132,6 +154,12 @@ export interface DossierArchive {
   referenceEntity: string;
   libelle: string;
   hash: string;
+}
+
+export interface ManagerRole {
+  id: number;
+  name: string;
+  description: string;
 }
 
 export interface ActivityLog {

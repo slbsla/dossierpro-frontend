@@ -9,7 +9,8 @@
       <span class="chip-name">{{ emSession.entity?.name }}</span>
       <span class="chip-code">{{ emSession.entity?.code }}</span>
     </div>
-    <button class="chip-change-btn" (click)="changeEntity()" title="Changer d'entité">
+    <button class="chip-change-btn" [disabled]="!canSwitchEntity" (click)="changeEntity()"
+      [title]="canSwitchEntity ? 'Changer d\'entité' : 'Indisponible : ce rôle ne gère qu\'une seule entité'">
       <span class="material-icons" style="font-size:18px">swap_horiz</span>
     </button>
   </div>

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthService } from '../../../core/services/auth.service';
 import { ApiService } from '../../../core/services/api.service';
-import { UserInfo, DashboardEm } from '../../../core/models/models';
+import { UserInfo, DashboardEm, EmManagerInfo } from '../../../core/models/models';
 
 @Component({ selector: 'app-em-info', templateUrl: './em-info.component.html' })
 export class EmInfoComponent implements OnInit {
@@ -11,6 +11,8 @@ export class EmInfoComponent implements OnInit {
   dashboard: DashboardEm | null = null;
   safeMapUrl: SafeResourceUrl | null = null;
   mapLoading = false;
+  managers: EmManagerInfo[] = [];
+  managersLoading = false;
 
   constructor(
     private auth: AuthService,
@@ -19,11 +21,19 @@ export class EmInfoComponent implements OnInit {
     private sanitizer: DomSanitizer
   ) {}
 
+  /** Vrai Entity Manager : voit toute l'équipe. Auditor/Signataire : voit seulement lui-même + son EM. */
+  get canManageUsers(): boolean { return this.auth.canManageUsers; }
+
   ngOnInit() {
     this.user = this.auth.currentUser;
     this.api.getEmDashboard().subscribe(d => {
       this.dashboard = d;
       if (d.entityAdresse) this.geocodeAddress(d.entityAdresse);
+    });
+    this.managersLoading = true;
+    this.api.getEmManagers().subscribe({
+      next: ms => { this.managers = ms; this.managersLoading = false; },
+      error: () => this.managersLoading = false
     });
   }
 

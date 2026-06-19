@@ -1,0 +1,24 @@
+<app-navbar title="Rôles"></app-navbar>
+<div class="page-content">
+  <div class="page-header">
+    <div><h2 class="page-title">Rôles</h2><p class="page-subtitle">{{ roles.length }} rôle(s)</p></div>
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <div class="card">
+    <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loading">
+      <table>
+        <thead><tr><th>Nom</th><th>Signification</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let r of roles">
+            <td><strong>{{ r.name }}</strong></td>
+            <td>{{ r.description }}</td>
+          </tr>
+          <tr *ngIf="roles.length === 0"><td colspan="2" class="empty-state"><p>Aucun rôle</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

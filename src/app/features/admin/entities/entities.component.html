@@ -10,7 +10,7 @@
     <label class="filter-label">Filtrer par Entity Manager :</label>
     <select class="form-control filter-select" [(ngModel)]="filterManagerId" (change)="applyFilter()">
       <option value="">— Tous —</option>
-      <option *ngFor="let m of managers" [value]="m.reference">{{ m.firstName }} {{ m.lastName }} ({{ m.reference }})</option>
+      <option *ngFor="let m of primaryManagers" [value]="m.reference">{{ m.firstName }} {{ m.lastName }} ({{ m.reference }})</option>
     </select>
     <button *ngIf="filterManagerId" class="btn btn-sm btn-secondary" (click)="filterManagerId=''; applyFilter()">✕ Effacer</button>
   </div>
@@ -51,9 +51,21 @@
                   <div class="em-inline-body">
                     <div class="em-inline-field highlight"><span class="em-inline-label">Référence</span><code>{{ selectedEmDetail.reference }}</code></div>
                     <div class="em-inline-field"><span class="em-inline-label">Nom complet</span><span>{{ selectedEmDetail.firstName }} {{ selectedEmDetail.lastName }}</span></div>
+                    <div class="em-inline-field"><span class="em-inline-label">Rôle</span><span>{{ selectedEmDetail.roleName || '—' }}</span></div>
                     <div class="em-inline-field"><span class="em-inline-label">Fonction</span><span>{{ selectedEmDetail.fonction || '—' }}</span></div>
                     <div class="em-inline-field"><span class="em-inline-label">Téléphone</span><span>{{ selectedEmDetail.telephone | phone }}</span></div>
                     <div class="em-inline-field"><span class="em-inline-label">Créé le</span><span>{{ selectedEmDetail.creationDate | date:'dd/MM/yyyy' }}</span></div>
+                  </div>
+                  <div class="em-inline-header" style="margin-top:12px" *ngIf="e.extraManagers && e.extraManagers.length > 0">
+                    <span class="material-icons" style="font-size:16px;color:var(--primary)">group_add</span>
+                    <strong>Managers additionnels</strong>
+                  </div>
+                  <div class="extra-mgr-list" *ngIf="e.extraManagers && e.extraManagers.length > 0">
+                    <div class="extra-mgr-chip" *ngFor="let em of e.extraManagers">
+                      <span class="material-icons" style="font-size:15px;color:var(--primary)">person</span>
+                      <span>{{ em.firstName }} {{ em.lastName }}</span>
+                      <span class="badge badge-em" style="margin-left:4px">{{ em.roleName || '—' }}</span>
+                    </div>
                   </div>
                 </div>
                 <ng-template #loadingEm><div style="padding:10px;color:var(--gray-text);font-size:13px">Chargement...</div></ng-template>
@@ -75,7 +87,7 @@
 
 <!-- Modal -->
 <div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
-  <div class="modal-box" (click)="$event.stopPropagation()">
+  <div class="modal-box entity-modal-box" (click)="$event.stopPropagation()">
     <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Créer' }} une Entité</h3>
     <div class="alert alert-warning" *ngIf="editMode && selectedEntityPendingCount > 0" style="display:flex;align-items:center;gap:8px">
       <span class="material-icons" style="font-size:18px">warning</span>
@@ -83,103 +95,140 @@
     </div>
     <div class="alert alert-error" *ngIf="error">{{ error }}</div>
     <form [formGroup]="form">
-      <div class="form-group">
-        <label class="form-label">Nom *</label>
-        <input class="form-control" formControlName="name" placeholder="Nom de l'entité">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Secteur</label>
-          <select class="form-control" formControlName="sector">
-            <option value="">— Sélectionner —</option>
-            <option *ngFor="let s of sectors" [value]="s">{{ s }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Entity Manager</label>
-          <select class="form-control" formControlName="entityManagerId">
-            <option value="">— Aucun —</option>
-            <option *ngFor="let m of managers" [value]="m.reference">{{ m.firstName }} {{ m.lastName }} ({{ m.reference }})</option>
-          </select>
-          <small *ngIf="editMode && selectedEntityPendingCount > 0" style="color:var(--warning,#f59e0b);font-size:11px;margin-top:3px;display:block">Modification bloquée (dossiers en attente)</small>
-        </div>
-      </div>
-      <!-- Adresse avec autocomplete -->
-      <div class="addr-card">
-        <p class="addr-title">
-          <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px">location_on</span>Adresse *
-        </p>
+      <div class="entity-3col">
 
-        <!-- Aide utilisateur -->
-        <div class="addr-hint">
-          <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:5px;color:#2563eb">info</span>
-          Tapez une adresse française dans le champ de recherche pour obtenir des suggestions.
-          Sélectionnez-en une pour remplir automatiquement les champs.
-          Toute modification manuelle des champs vidangera la sélection.
-        </div>
-
-        <!-- Champ de recherche + dropdown -->
-        <div class="form-group" style="position:relative;margin-bottom:8px">
-          <label class="form-label">Recherche d'adresse *</label>
-          <div style="position:relative">
-            <span class="material-icons addr-search-icon">search</span>
-            <input class="form-control addr-search-input" formControlName="adresse"
-              placeholder="ex : 8 Boulevard du Port Amiens"
-              [class.input-error]="form.get('adresse')?.invalid && form.get('adresse')?.touched"
-              [class.addr-linked]="addressLinked"
-              (input)="onAdresseInput($event)"
-              (blur)="closeSuggestions()"
-              autocomplete="off">
-            <span class="material-icons addr-linked-icon" *ngIf="addressLinked" title="Adresse vérifiée">check_circle</span>
+        <!-- Bloc 1 : Informations générales -->
+        <div class="entity-col info-card">
+          <p class="addr-title">
+            <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px">info</span>Informations générales
+          </p>
+          <div class="form-group">
+            <label class="form-label">Nom *</label>
+            <input class="form-control" formControlName="name" placeholder="Nom de l'entité">
           </div>
-
-          <!-- Dropdown suggestions -->
-          <ul class="addr-dropdown" *ngIf="showSuggestions && suggestions.length > 0">
-            <li *ngFor="let s of suggestions" class="addr-option" (mousedown)="selectSuggestion(s)">
-              <span class="material-icons" style="font-size:15px;color:#6b7280;flex-shrink:0;margin-right:6px">location_on</span>
-              <span>{{ s.properties.label }}</span>
-            </li>
-          </ul>
-        </div>
-
-        <!-- 4 champs structurés -->
-        <div class="form-row">
-          <div class="form-group" style="flex:0 0 110px">
-            <label class="form-label">N° *</label>
-            <input class="form-control" formControlName="numero" placeholder="8"
-              [class.input-error]="form.get('numero')?.invalid && form.get('numero')?.touched"
-              (input)="onStructuredFieldChange()">
+          <div class="form-group">
+            <label class="form-label">Secteur</label>
+            <select class="form-control" formControlName="sector">
+              <option value="">— Sélectionner —</option>
+              <option *ngFor="let s of sectors" [value]="s">{{ s }}</option>
+            </select>
           </div>
-          <div class="form-group" style="flex:1">
-            <label class="form-label">Voie *</label>
-            <input class="form-control" formControlName="ligne" placeholder="Boulevard du Port"
-              [class.input-error]="form.get('ligne')?.invalid && form.get('ligne')?.touched"
-              (input)="onStructuredFieldChange()">
+          <div class="form-group">
+            <label class="form-label">Entity Manager</label>
+            <select class="form-control" formControlName="entityManagerId">
+              <option value="">— Aucun —</option>
+              <option *ngFor="let m of primaryManagers" [value]="m.reference">{{ m.firstName }} {{ m.lastName }} ({{ m.reference }})</option>
+            </select>
+            <small *ngIf="editMode && selectedEntityPendingCount > 0" style="color:var(--warning,#f59e0b);font-size:11px;margin-top:3px;display:block">Modification bloquée (dossiers en attente)</small>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-control entity-desc-fixed" formControlName="description" rows="3" placeholder="Description"></textarea>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group" style="flex:0 0 140px">
-            <label class="form-label">Code postal *</label>
-            <input class="form-control" formControlName="postcode" placeholder="80000" maxlength="5"
-              [class.input-error]="form.get('postcode')?.invalid && form.get('postcode')?.touched"
-              (input)="onStructuredFieldChange()">
-            <span class="field-error" *ngIf="form.get('postcode')?.hasError('pattern') && form.get('postcode')?.touched">5 chiffres requis</span>
+
+        <!-- Bloc 2 : Adresse avec autocomplete -->
+        <div class="entity-col addr-card">
+          <p class="addr-title">
+            <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px">location_on</span>Adresse *
+          </p>
+
+          <!-- Aide utilisateur -->
+          <div class="addr-hint">
+            <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:5px;color:#2563eb">info</span>
+            Tapez une adresse française pour obtenir des suggestions, ou saisissez les champs manuellement.
           </div>
-          <div class="form-group" style="flex:1">
-            <label class="form-label">Ville *</label>
-            <input class="form-control" formControlName="ville" placeholder="Amiens"
-              [class.input-error]="form.get('ville')?.invalid && form.get('ville')?.touched"
-              (input)="onStructuredFieldChange()">
+
+          <!-- Champ de recherche + dropdown -->
+          <div class="form-group" style="position:relative;margin-bottom:8px">
+            <label class="form-label">Recherche d'adresse *</label>
+            <div style="position:relative">
+              <span class="material-icons addr-search-icon">search</span>
+              <input class="form-control addr-search-input" formControlName="adresse"
+                placeholder="ex : 8 Boulevard du Port Amiens"
+                [class.input-error]="form.get('adresse')?.invalid && form.get('adresse')?.touched"
+                [class.addr-linked]="addressLinked"
+                (input)="onAdresseInput($event)"
+                (blur)="closeSuggestions()"
+                autocomplete="off">
+              <span class="material-icons addr-linked-icon" *ngIf="addressLinked" title="Adresse vérifiée">check_circle</span>
+            </div>
+
+            <!-- Dropdown suggestions -->
+            <ul class="addr-dropdown" *ngIf="showSuggestions && suggestions.length > 0">
+              <li *ngFor="let s of suggestions" class="addr-option" (mousedown)="selectSuggestion(s)">
+                <span class="material-icons" style="font-size:15px;color:#6b7280;flex-shrink:0;margin-right:6px">location_on</span>
+                <span>{{ s.properties.label }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Champs structurés -->
+          <div class="form-row">
+            <div class="form-group" style="flex:0 0 90px">
+              <label class="form-label">N° *</label>
+              <input class="form-control" formControlName="numero" placeholder="8"
+                [class.input-error]="form.get('numero')?.invalid && form.get('numero')?.touched"
+                (input)="onStructuredFieldChange()">
+            </div>
+            <div class="form-group" style="flex:1">
+              <label class="form-label">Voie *</label>
+              <input class="form-control" formControlName="ligne" placeholder="Boulevard du Port"
+                [class.input-error]="form.get('ligne')?.invalid && form.get('ligne')?.touched"
+                (input)="onStructuredFieldChange()">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:0 0 120px">
+              <label class="form-label">Code postal *</label>
+              <input class="form-control" formControlName="postcode" placeholder="80000" maxlength="5"
+                [class.input-error]="form.get('postcode')?.invalid && form.get('postcode')?.touched"
+                (input)="onStructuredFieldChange()">
+              <span class="field-error" *ngIf="form.get('postcode')?.hasError('pattern') && form.get('postcode')?.touched">5 chiffres requis</span>
+            </div>
+            <div class="form-group" style="flex:1">
+              <label class="form-label">Ville *</label>
+              <input class="form-control" formControlName="ville" placeholder="Amiens"
+                [class.input-error]="form.get('ville')?.invalid && form.get('ville')?.touched"
+                (input)="onStructuredFieldChange()">
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label class="form-label">Description</label>
-        <textarea class="form-control" formControlName="description" rows="3" placeholder="Description"></textarea>
+        <!-- Bloc 3 : Managers additionnels -->
+        <div class="entity-col extra-mgr-card">
+          <p class="addr-title">
+            <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px">group_add</span>Managers additionnels
+          </p>
+          <div class="form-group">
+            <label class="form-label">Ajouter un manager <span style="font-weight:400;color:var(--gray-text)">(rôle ≠ Entity Manager, libre)</span></label>
+            <select class="form-control" [(ngModel)]="extraManagerToAdd" [ngModelOptions]="{standalone:true}">
+              <option value="">— Sélectionner —</option>
+              <option *ngFor="let m of availableExtraManagers" [value]="m.reference">{{ m.firstName }} {{ m.lastName }} — {{ m.roleName || '—' }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <button type="button" class="btn btn-secondary" style="width:100%" [disabled]="!extraManagerToAdd" (click)="addExtraManager()">+ Ajouter</button>
+          </div>
+          <div class="extra-mgr-list" *ngIf="selectedExtraManagers.length > 0">
+            <div class="extra-mgr-chip" *ngFor="let m of selectedExtraManagers">
+              <span class="material-icons" style="font-size:15px;color:var(--primary)">person</span>
+              <span>{{ m.firstName }} {{ m.lastName }}</span>
+              <span class="badge badge-em" style="margin-left:4px">{{ m.roleName || '—' }}</span>
+              <button type="button" class="extra-mgr-remove" title="Retirer" (click)="removeExtraManager(m.reference)">✕</button>
+            </div>
+          </div>
+          <p *ngIf="selectedExtraManagers.length === 0" style="font-size:12px;color:var(--gray-text);margin:4px 0 0">Aucun manager additionnel.</p>
+        </div>
+
       </div>
 
 <style>
+.entity-modal-box { max-width:1140px; }
+.entity-desc-fixed { resize:none; height:90px; }
+.entity-3col { display:flex; gap:16px; align-items:flex-start; }
+.entity-3col > .entity-col { flex:1; min-width:0; margin-bottom:0; }
+.info-card { border:1px solid var(--gray-border,#e2e8f0); border-radius:8px; padding:14px 16px; }
 .addr-card { border:1px solid var(--gray-border,#e2e8f0); border-radius:8px; padding:14px 16px; margin-bottom:12px; }
 .addr-title { font-size:12px; font-weight:700; color:var(--gray-text); margin:0 0 10px; text-transform:uppercase; letter-spacing:.05em; }
 .addr-hint { font-size:12px; color:#374151; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:8px 10px; margin-bottom:12px; line-height:1.6; }
@@ -208,6 +257,15 @@
 .em-inline-field { display:flex; flex-direction:column; min-width:140px; }
 .em-inline-field.highlight code { font-size:13px; font-weight:700; color:var(--primary); background:var(--primary-light,#dbeafe); padding:2px 8px; border-radius:4px; }
 .em-inline-label { font-size:11px; color:var(--gray-text); font-weight:500; text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px; }
+/* Managers additionnels */
+.extra-mgr-card { border:1px solid var(--gray-border,#e2e8f0); border-radius:8px; padding:14px 16px; margin-bottom:12px; }
+.extra-mgr-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.extra-mgr-chip { display:flex; align-items:center; gap:4px; background:var(--gray-light,#f8fafc); border:1px solid var(--gray-border,#e2e8f0); border-radius:16px; padding:4px 8px 4px 10px; font-size:12px; }
+.extra-mgr-remove { background:none; border:none; cursor:pointer; color:var(--danger,#ef4444); font-size:13px; padding:0 4px; margin-left:2px; }
+.extra-mgr-remove:hover { color:#b91c1c; }
+@media (max-width: 900px) {
+  .entity-3col { flex-direction:column; }
+}
 </style>
     </form>
     <div class="modal-actions">
