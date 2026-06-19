@@ -1,0 +1,97 @@
+.status-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: #555;
+  margin-right: 4px;
+}
+
+.radio-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.radio-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid #d8dee4;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+.radio-pill:hover {
+  border-color: #888;
+}
+
+.radio-pill input[type="radio"] {
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.radio-pill input[type="radio"]:checked + span {
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* ---- Tableau : selection (single-select) ---- */
+/* L'en-tete mauve fonce, le zebrage blanc/mauve clair et le survol mauve
+   sont desormais geres globalement dans styles.css pour toute l'application. */
+
+.ticket-row {
+  cursor: pointer;
+}
+
+.ticket-row.row-selected td code {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+
+/* ---- Checkbox de selection (par ligne, selection unique) ---- */
+
+.col-check {
+  width: 36px;
+  text-align: center;
+}
+
+.row-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #9b59b6;
+}
+
+/* ---- Badges de statut : couleur dediee par statut ---- */
+
+.badge-status-ouvert {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.badge-status-encours {
+  background-color: #fef9c3;
+  color: #ca8a04;
+}
+
+.badge-status-cloture {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+/* Le panneau de titre mauve fonce sur fond de modal mauve clair est
+   desormais gere globalement dans styles.css (classes .modal-box / .modal-title). */

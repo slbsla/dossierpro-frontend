@@ -3,7 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
-  Dossier, DossierArchive, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage, ManagerRole, EmManagerInfo
+  Dossier, DossierArchive, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage, ManagerRole, EmManagerInfo,
+  Ticket
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -299,6 +300,29 @@ export class ApiService {
 
   sendSupportMessage(data: {subject: string; email: string; message: string}): Observable<SupportMessage> {
     return this.http.post<SupportMessage>(`${this.API}/user/support`, data);
+  }
+
+  // ---- Support (tickets) ----
+  getTickets(page = 0, size = 10, status = ''): Observable<PageResponse<Ticket>> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (status) params = params.set('status', status);
+    return this.http.get<PageResponse<Ticket>>(`${this.API}/tickets`, { params });
+  }
+
+  getTicket(ref: string): Observable<Ticket> {
+    return this.http.get<Ticket>(`${this.API}/tickets/${ref}`);
+  }
+
+  createTicket(data: Partial<Ticket>): Observable<Ticket> {
+    return this.http.post<Ticket>(`${this.API}/tickets`, data);
+  }
+
+  updateTicket(ref: string, data: Partial<Ticket>): Observable<Ticket> {
+    return this.http.put<Ticket>(`${this.API}/tickets/${ref}`, data);
+  }
+
+  deleteTicket(ref: string): Observable<void> {
+    return this.http.delete<void>(`${this.API}/tickets/${ref}`);
   }
 
   // ---- EM Groups ----

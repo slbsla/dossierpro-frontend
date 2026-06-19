@@ -1,0 +1,108 @@
+<app-navbar title="Support"></app-navbar>
+<div class="page-content">
+  <div class="page-header">
+    <div><h2 class="page-title">Support</h2><p class="page-subtitle">{{ page.totalElements }} ticket(s){{ isAdmin ? ' (tous profils)' : '' }}</p></div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Créer un ticket</button>
+  </div>
+
+  <!-- Filtre statut (radio) -->
+  <div class="status-filter-bar">
+    <span class="filter-label">Statut :</span>
+    <label class="radio-pill">
+      <input type="radio" name="statusFilter" value="" [checked]="statusFilter===''" (change)="onStatusFilter('')">
+      <span>Tous</span>
+    </label>
+    <label class="radio-pill" *ngFor="let o of statusOptions">
+      <input type="radio" name="statusFilter" [value]="o.value" [checked]="statusFilter===o.value" (change)="onStatusFilter(o.value)">
+      <span>{{ o.label }}</span>
+    </label>
+  </div>
+
+  <div class="card">
+    <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loading">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-check"></th><th>N° Ticket</th><th>Libellé</th><th>Date</th><th>Type</th><th>Statut</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of page.content"
+              class="ticket-row"
+              [class.row-selected]="isSelected(t)"
+              (click)="selectRow(t)">
+            <td class="col-check" (click)="$event.stopPropagation()">
+              <input type="checkbox" class="row-checkbox" [checked]="isSelected(t)" (change)="selectRow(t)">
+            </td>
+            <td><code>{{ t.ticketRef }}</code></td>
+            <td><strong>{{ t.label }}</strong></td>
+            <td>{{ t.creationDate | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td><span class="badge badge-em">{{ typeLabel(t.type) }}</span></td>
+            <td><span class="badge" [ngClass]="statusClass(t.status)">{{ statusLabel(t.status) }}</span></td>
+            <td (click)="$event.stopPropagation()">
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(t)" [disabled]="!canEdit(t)"
+                [title]="canEdit(t) ? 'Modifier' : 'Vous ne pouvez modifier que vos propres tickets'">✏️ Edit</button>
+              <button *ngIf="isAdmin" class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(t)" title="Supprimer">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="page.content.length === 0">
+            <td colspan="7"><div class="empty-state"><div class="empty-state-icon">🎫</div><p>Aucun ticket</p></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination" *ngIf="page.totalPages > 1">
+        <button (click)="load(page.page-1)" [disabled]="page.page===0">◀</button>
+        <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="load(p)">{{ p+1 }}</button>
+        <button (click)="load(page.page+1)" [disabled]="page.last">▶</button>
+        <span class="page-info">Page {{ page.page+1 }}/{{ page.totalPages }}</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal Créer / Modifier -->
+<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Créer' }} un ticket</h3>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+    <div class="form-group">
+      <label class="form-label">Libellé *</label>
+      <input class="form-control" [(ngModel)]="current.label" placeholder="Libellé du ticket" maxlength="200">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Type *</label>
+      <div class="radio-group">
+        <label class="radio-pill" *ngFor="let o of typeOptions">
+          <input type="radio" name="type" [value]="o.value" [checked]="current.type===o.value" (change)="current.type=o.value">
+          <span>{{ o.label }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Statut *</label>
+      <div class="radio-group">
+        <label class="radio-pill" *ngFor="let o of statusOptions">
+          <input type="radio" name="status" [value]="o.value" [checked]="current.status===o.value" (change)="current.status=o.value">
+          <span>{{ o.label }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-control" [(ngModel)]="current.description" rows="4" placeholder="Description (facultatif)"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showModal=false">Annuler</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving || !current.label.trim()">
+        {{ saving ? 'Enregistrement...' : (editMode ? 'Enregistrer' : 'Créer') }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -4,6 +4,8 @@ export enum DossierType { SINISTRE = 'SINISTRE', EER = 'EER', ADHESION = 'ADHESI
 export enum EntitySector { ASSURANCE = 'ASSURANCE', BANQUE = 'BANQUE', COMMERCE = 'COMMERCE' }
 export enum Theme { LIGHT = 'LIGHT', DARK = 'DARK' }
 export enum Language { FR = 'FR', EN = 'EN' }
+export enum TicketType { BUG = 'BUG', ENHANCEMENT = 'ENHANCEMENT', GROSSE_EVOLUTION = 'GROSSE_EVOLUTION' }
+export enum TicketStatus { OUVERT = 'OUVERT', EN_COURS = 'EN_COURS', CLOTURE = 'CLOTURE' }
 
 export interface UserInfo {
   uniqueReference: string;
@@ -208,6 +210,18 @@ export interface DossierUpload {
   uploadDate: string;
   successCount: number;
   rejectedCount: number;
+}
+
+export interface Ticket {
+  ticketRef: string;
+  label: string;
+  description?: string;
+  type: TicketType;
+  status: TicketStatus;
+  creationDate: string;
+  creatorReference?: string;
+  creatorFullName?: string;
+  mine?: boolean;
 }
 
 export interface SupportMessage {

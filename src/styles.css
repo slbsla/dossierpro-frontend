@@ -25,6 +25,10 @@
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1);
   --radius: 8px;
   --radius-sm: 4px;
+  --mauve-dark: #5b2d75;
+  --mauve: #f6f1fa;
+  --mauve-hover: #ecdff5;
+  --mauve-selected: #c9a3df;
 }
 
 [data-theme="dark"] {
@@ -114,9 +118,12 @@ body {
 /* Tables */
 .table-wrapper { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
-th { text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: .5px; border-bottom: 2px solid var(--gray-border); background: var(--gray-light); }
-td { padding: 12px 14px; border-bottom: 1px solid var(--gray-border); font-size: 14px; color: var(--text-dark); }
-tr:hover td { background: #e8f0fe; }
+th { text-align: left; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #fff; text-transform: uppercase; letter-spacing: .5px; border-bottom: 2px solid var(--mauve-dark); background: var(--mauve-dark); }
+td { padding: 8px 14px; border-bottom: 1px solid var(--gray-border); font-size: 14px; color: var(--text-dark); }
+tbody tr:nth-child(odd) td { background: #ffffff; }
+tbody tr:nth-child(even) td { background: var(--mauve); }
+tr:hover td { background: var(--mauve-hover); }
+tr.row-selected td, tr.row-selected:hover td { background: var(--mauve-selected); color: #2b1a36; }
 tr:last-child td { border-bottom: none; }
 
 /* Status badges */
@@ -187,10 +194,17 @@ tr:last-child td { border-bottom: none; }
   display: flex; align-items: center; justify-content: center; z-index: 1000;
 }
 .modal-box {
-  background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  background: var(--mauve); border-radius: var(--radius); box-shadow: var(--shadow-lg);
   padding: 28px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto;
 }
-.modal-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+.modal-title {
+  font-size: 18px; font-weight: 600;
+  margin: -28px -28px 20px -28px;
+  padding: 16px 28px;
+  background: var(--mauve-dark);
+  color: #fff;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 
 /* Alerts */

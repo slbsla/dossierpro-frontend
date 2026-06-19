@@ -8,13 +8,15 @@ import { AdminDashboardComponent } from './dashboard/admin-dashboard.component';
 import { EntitiesComponent } from './entities/entities.component';
 import { EntityManagersComponent } from './entity-managers/entity-managers.component';
 import { RolesComponent } from './roles/roles.component';
+import { SupportTicketsComponent } from '../../shared/support-tickets/support-tickets.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: AdminDashboardComponent },
   { path: 'entities', component: EntitiesComponent },
   { path: 'entity-managers', component: EntityManagersComponent },
-  { path: 'roles', component: RolesComponent }
+  { path: 'roles', component: RolesComponent },
+  { path: 'support', component: SupportTicketsComponent }
 ];
 
 @NgModule({

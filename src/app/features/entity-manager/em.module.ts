@@ -10,6 +10,7 @@ import { EmUsersComponent } from './users/em-users.component';
 import { EmDossiersComponent } from './dossiers/em-dossiers.component';
 import { EmShellComponent } from './shell/em-shell.component';
 import { EmEntityPickerComponent } from './entity-picker/em-entity-picker.component';
+import { SupportTicketsComponent } from '../../shared/support-tickets/support-tickets.component';
 
 const routes: Routes = [
   {
@@ -20,7 +21,8 @@ const routes: Routes = [
       { path: 'dashboard', component: EmDashboardComponent },
       { path: 'info', component: EmInfoComponent },
       { path: 'users', component: EmUsersComponent },
-      { path: 'dossiers', component: EmDossiersComponent }
+      { path: 'dossiers', component: EmDossiersComponent },
+      { path: 'support', component: SupportTicketsComponent }
     ]
   }
 ];
