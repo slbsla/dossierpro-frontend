@@ -19,14 +19,17 @@
     <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
     <div class="table-wrapper" *ngIf="!loading">
       <table>
-        <thead><tr><th>Code</th><th>Nom</th><th>Secteur</th><th>Entity Manager</th><th>Statut</th><th>Créé le</th><th>Actions</th></tr></thead>
+        <thead><tr><th class="col-check"></th><th>Code</th><th>Nom</th><th>Secteur</th><th>Entity Manager</th><th>Statut</th><th>Créé le</th><th>Actions</th></tr></thead>
         <tbody>
           <ng-container *ngFor="let e of page.content">
-            <tr>
+            <tr [class.row-selected]="isSelected(e)" (click)="selectRow(e)">
+              <td class="col-check" (click)="$event.stopPropagation()">
+                <input type="checkbox" class="row-checkbox" [checked]="isSelected(e)" (change)="selectRow(e)">
+              </td>
               <td><code>{{ e.code }}</code></td>
               <td><strong>{{ e.name }}</strong></td>
               <td><span class="badge badge-em">{{ e.sector }}</span></td>
-              <td>
+              <td (click)="$event.stopPropagation()">
                 <button *ngIf="e.entityManagerId" class="em-link-btn" (click)="toggleEmDetail(e)" [class.active]="expandedEntityCode === e.code" [title]="'Voir le détail de ' + (e.entityManagerName || e.entityManagerId)">
                   {{ e.entityManagerName || e.entityManagerId }}
                   <span class="material-icons em-link-icon">{{ expandedEntityCode === e.code ? 'expand_less' : 'info_outline' }}</span>
@@ -35,14 +38,14 @@
               </td>
               <td><span class="badge" [ngClass]="e.isActive ? 'badge-active' : 'badge-inactive'">{{ e.isActive ? 'Actif' : 'Inactif' }}</span></td>
               <td>{{ e.creationDate | date:'dd/MM/yyyy' }}</td>
-              <td>
+              <td (click)="$event.stopPropagation()">
                 <button class="btn btn-sm btn-secondary" (click)="openEdit(e)" title="Modifier">✏️</button>
                 <button class="btn btn-sm btn-danger" style="margin-left:4px" (click)="delete(e)" title="Supprimer">🗑️</button>
               </td>
             </tr>
             <!-- Inline EM detail row -->
             <tr *ngIf="expandedEntityCode === e.code" class="em-detail-expand-row">
-              <td colspan="7">
+              <td colspan="8">
                 <div class="em-inline-card" *ngIf="selectedEmDetail; else loadingEm">
                   <div class="em-inline-header">
                     <span class="material-icons" style="font-size:16px;color:var(--primary)">manage_accounts</span>
@@ -72,7 +75,7 @@
               </td>
             </tr>
           </ng-container>
-          <tr *ngIf="page.content.length === 0"><td colspan="7" class="empty-state"><span class="empty-state-icon">🏢</span><p>Aucune entité</p></td></tr>
+          <tr *ngIf="page.content.length === 0"><td colspan="8" class="empty-state"><span class="empty-state-icon">🏢</span><p>Aucune entité</p></td></tr>
         </tbody>
       </table>
       <div class="pagination" *ngIf="page.totalPages > 1">
@@ -107,11 +110,15 @@
             <input class="form-control" formControlName="name" placeholder="Nom de l'entité">
           </div>
           <div class="form-group">
-            <label class="form-label">Secteur</label>
+            <label class="form-label">Secteur *</label>
             <select class="form-control" formControlName="sector">
               <option value="">— Sélectionner —</option>
               <option *ngFor="let s of sectors" [value]="s">{{ s }}</option>
             </select>
+            <small *ngIf="editMode" style="color:var(--gray-text);font-size:11px;margin-top:3px;display:block">
+              <span class="material-icons" style="font-size:12px;vertical-align:middle">lock</span>
+              Le secteur ne peut plus être modifié après création.
+            </small>
           </div>
           <div class="form-group">
             <label class="form-label">Entity Manager</label>

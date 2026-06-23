@@ -1,26 +1,51 @@
 .register-page {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   background: var(--gray-light);
   padding: 24px 16px;
 }
 
+/* Panneau sombre (identique à la page de connexion) — affiché à droite, prend le maximum de largeur possible */
+.login-side {
+  order: 2;
+  flex: 1 1 auto;
+  background: var(--mauve-dark);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 64px;
+  border-radius: 0 12px 12px 0;
+}
+.login-side-logo { height: 100px; width: auto; margin-bottom: 24px; }
+.login-side h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+.login-side-tagline { color: #d8c2e8; font-size: 14px; margin-bottom: 28px; }
+.login-side-features { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.login-side-features li { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #ecdff5; }
+.login-side-features .material-icons { font-size: 16px; color: #4ade80; }
+@media (max-width: 860px) { .login-side { display: none; } }
+
 .register-box {
+  order: 1;
   background: var(--white);
-  border-radius: 12px;
+  border-radius: 12px 0 0 12px;
   box-shadow: var(--shadow-lg);
   padding: 32px;
-  width: 100%;
+  flex: 0 0 520px;
   max-width: 520px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
 }
+@media (max-width: 860px) { .register-box { border-radius: 12px; } }
 
 /* Header */
 .register-header { text-align: center; margin-bottom: 24px; }
 .register-header h1 { font-size: 22px; font-weight: 700; color: var(--text-dark); margin: 8px 0 4px; }
 .register-header p { color: var(--gray-text); font-size: 13px; }
-.login-logo { font-size: 36px; }
+.login-logo { height: 60px; width: auto; }
 
 /* Stepper */
 .stepper {

@@ -11,10 +11,20 @@ export class RolesComponent implements OnInit {
   loading = true;
   error = '';
 
+  selected: ManagerRole | null = null;
+
   constructor(private api: ApiService) {}
 
   ngOnInit() {
     this.load();
+  }
+
+  selectRow(r: ManagerRole): void {
+    this.selected = this.isSelected(r) ? null : r;
+  }
+
+  isSelected(r: ManagerRole): boolean {
+    return this.selected?.id === r.id;
   }
 
   load() {

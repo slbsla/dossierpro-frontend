@@ -10,13 +10,16 @@
     <div *ngIf="loading" class="loading"><div class="spinner"></div></div>
     <div class="table-wrapper" *ngIf="!loading">
       <table>
-        <thead><tr><th>Nom</th><th>Signification</th></tr></thead>
+        <thead><tr><th class="col-check"></th><th>Nom</th><th>Signification</th></tr></thead>
         <tbody>
-          <tr *ngFor="let r of roles">
+          <tr *ngFor="let r of roles" [class.row-selected]="isSelected(r)" (click)="selectRow(r)">
+            <td class="col-check" (click)="$event.stopPropagation()">
+              <input type="checkbox" class="row-checkbox" [checked]="isSelected(r)" (change)="selectRow(r)">
+            </td>
             <td><strong>{{ r.name }}</strong></td>
             <td>{{ r.description }}</td>
           </tr>
-          <tr *ngIf="roles.length === 0"><td colspan="2" class="empty-state"><p>Aucun rôle</p></td></tr>
+          <tr *ngIf="roles.length === 0"><td colspan="3" class="empty-state"><p>Aucun rôle</p></td></tr>
         </tbody>
       </table>
     </div>

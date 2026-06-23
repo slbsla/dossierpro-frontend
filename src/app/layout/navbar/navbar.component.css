@@ -1,7 +1,7 @@
 .navbar {
-  height: 56px;
-  background: var(--white);
-  border-bottom: 1px solid var(--gray-border);
+  height: 144px;
+  background: var(--mauve-dark);
+  border-bottom: 1px solid var(--mauve-dark);
   display: flex;
   align-items: center;
   padding: 0 24px;
@@ -9,7 +9,9 @@
   gap: 12px;
 }
 
-.navbar-title { font-size: 16px; font-weight: 600; color: var(--text-dark); flex: 1; }
+.navbar-logo { height: 104px; width: auto; flex-shrink: 0; }
+
+.navbar-title { font-size: 20px; font-weight: 600; color: #fff; flex: 1; }
 
 /* EM entity chip */
 .em-entity-chip {

@@ -12,6 +12,7 @@ export class EntitiesComponent implements OnInit {
   loading = false; showModal = false; editMode = false;
   selectedCode: string | null = null;
   selectedEntityPendingCount = 0;
+  selected: EntityOrg | null = null;
   form!: FormGroup; error = ''; success = '';
   originalValues: any = {};
   sectors = Object.values(EntitySector);
@@ -49,6 +50,14 @@ export class EntitiesComponent implements OnInit {
   }
 
   applyFilter() { this.expandedEntityCode = null; this.selectedEmDetail = null; this.load(0); }
+
+  selectRow(e: EntityOrg): void {
+    this.selected = this.isSelected(e) ? null : e;
+  }
+
+  isSelected(e: EntityOrg): boolean {
+    return this.selected?.code === e.code;
+  }
 
   toggleEmDetail(e: EntityOrg) {
     if (!e.entityManagerId) return;
@@ -107,7 +116,7 @@ export class EntitiesComponent implements OnInit {
     this.loadManagers();
     this.form = this.fb.group({
       name:            ['', Validators.required],
-      sector:          [''],
+      sector:          ['', Validators.required],
       adresse:         ['', Validators.required],
       numero:          ['', Validators.required],
       ligne:           ['', Validators.required],
@@ -133,7 +142,7 @@ export class EntitiesComponent implements OnInit {
     };
     this.form = this.fb.group({
       name:            [e.name, Validators.required],
-      sector:          [e.sector],
+      sector:          [{ value: e.sector, disabled: true }, Validators.required],
       adresse:         [e.adresse, Validators.required],
       numero:          [e.numero, Validators.required],
       ligne:           [e.ligne, Validators.required],
