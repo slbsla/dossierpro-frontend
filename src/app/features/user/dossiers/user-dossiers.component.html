@@ -107,7 +107,7 @@
 </div>
 
 <div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
-  <div class="modal-box" (click)="$event.stopPropagation()">
+  <div class="modal-box" [class.modal-box-wide]="editMode || readOnlyMode" (click)="$event.stopPropagation()">
     <h3 class="modal-title">
       <ng-container *ngIf="readOnlyMode">
         <span class="material-icons" style="font-size:18px;vertical-align:middle;margin-right:6px;color:var(--gray-text)">visibility</span>
@@ -117,6 +117,8 @@
       <ng-container *ngIf="!readOnlyMode">{{ editMode ? 'Modifier le Dossier' : duplicateMode ? 'Dupliquer le Dossier' : 'Nouveau Dossier' }}</ng-container>
     </h3>
     <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <div class="modal-body-flex">
+    <div class="modal-main">
     <form [formGroup]="form">
 
       <!-- Libellé -->
@@ -194,6 +196,22 @@
       </div>
 
     </form>
+    </div>
+
+    <div class="dossier-history-panel" *ngIf="editMode || readOnlyMode">
+      <h4 class="dossier-history-title">Historique des statuts</h4>
+      <div class="dossier-history-loading" *ngIf="historyLoading"><div class="spinner spinner-sm"></div></div>
+      <ng-container *ngIf="!historyLoading">
+        <ul class="dossier-history-list" *ngIf="statusHistory.length">
+          <li class="dossier-history-item" *ngFor="let h of statusHistory">
+            <span class="badge" [ngClass]="statusClass(h.status)">{{ h.status }}</span>
+            <span class="dossier-history-date">{{ formatDate(h.date) }}</span>
+          </li>
+        </ul>
+        <p class="dossier-history-empty" *ngIf="!statusHistory.length">Aucun historique disponible.</p>
+      </ng-container>
+    </div>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="showModal=false">{{ readOnlyMode ? 'Fermer' : 'Annuler' }}</button>
       <ng-container *ngIf="!readOnlyMode">

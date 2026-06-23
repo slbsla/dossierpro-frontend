@@ -207,6 +207,31 @@ tr:last-child td { border-bottom: none; }
 }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 
+/* Historique de statut (panneau à droite dans les modals édition/vue dossier) */
+.modal-box-wide { max-width: 860px; }
+.modal-body-flex { display: flex; gap: 24px; align-items: flex-start; }
+.modal-main { flex: 1 1 auto; min-width: 0; }
+.dossier-history-panel {
+  flex: 0 0 220px;
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-border);
+  padding: 14px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+.dossier-history-title { font-size: 13px; font-weight: 600; color: var(--text-dark); margin: 0 0 12px; }
+.dossier-history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.dossier-history-item { display: flex; flex-direction: column; gap: 4px; }
+.dossier-history-date { font-size: 11px; color: var(--gray-text); }
+.dossier-history-empty { font-size: 12px; color: var(--gray-text); margin: 0; }
+.dossier-history-loading { display: flex; justify-content: center; padding: 16px 0; }
+.spinner-sm { width: 20px; height: 20px; border-width: 2px; }
+@media (max-width: 860px) {
+  .modal-body-flex { flex-direction: column; }
+  .dossier-history-panel { flex: 1 1 auto; max-height: 200px; }
+}
+
 /* Alerts */
 .alert { padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px; }
 .alert-error   { background: var(--danger-light); color: var(--danger); border-left: 3px solid var(--danger); }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
-import { Dossier, DossierArchive, DossierStatus, PageResponse } from '../../../core/models/models';
+import { Dossier, DossierArchive, DossierStatus, DossierStatusHistory, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -20,6 +20,8 @@ export class EmDossiersComponent implements OnInit {
   rejectMode = false; rejectMotif = '';
   workflowLoading = false; workflowError = '';
   DossierStatus = DossierStatus;
+  statusHistory: DossierStatusHistory[] = [];
+  historyLoading = false;
 
   // Archive hash modal
   showHashModal = false;
@@ -93,6 +95,18 @@ export class EmDossiersComponent implements OnInit {
     if (!this.canProcessDossiers) return;
     this.selectedDossier = d; this.workflowStep = 1;
     this.rejectMode = false; this.rejectMotif = ''; this.workflowError = '';
+    this.statusHistory = [];
+    this.historyLoading = true;
+    this.api.getEmDossierHistory(d.reference).subscribe({
+      next: h => { this.statusHistory = h; this.historyLoading = false; },
+      error: () => { this.statusHistory = []; this.historyLoading = false; }
+    });
+  }
+
+  formatDate(d?: string): string {
+    if (!d) return '—';
+    try { return new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+    catch { return d; }
   }
 
   closeWorkflow() { this.selectedDossier = null; this.workflowStep = 0; this.workflowLoading = false; this.workflowError = ''; }

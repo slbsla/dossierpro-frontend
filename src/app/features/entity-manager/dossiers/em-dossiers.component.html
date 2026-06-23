@@ -168,7 +168,7 @@
 
 <!-- Validation Workflow Modal -->
 <div class="modal-overlay" *ngIf="workflowStep > 0">
-  <div class="modal-box" style="max-width:600px">
+  <div class="modal-box" [style.max-width]="workflowStep===1 ? '880px' : '600px'">
 
     <!-- Stepper -->
     <div class="stepper">
@@ -191,6 +191,8 @@
     <!-- Step 1: Review -->
     <ng-container *ngIf="workflowStep===1 && selectedDossier">
       <h3 class="modal-title">Révision du Dossier</h3>
+      <div class="modal-body-flex">
+      <div class="modal-main">
       <div class="dossier-detail">
         <div class="detail-row"><span class="detail-label">Référence</span><code>{{ selectedDossier.reference }}</code></div>
         <div class="detail-row"><span class="detail-label">Libellé</span><span>{{ selectedDossier.libelle }}</span></div>
@@ -212,6 +214,22 @@
         <div class="detail-row"><span class="detail-label">Créé le</span><span>{{ selectedDossier.creationDate | date:'dd/MM/yyyy HH:mm' }}</span></div>
         <div class="detail-row"><span class="detail-label">Soumis le</span><span>{{ selectedDossier.submitDate | date:'dd/MM/yyyy HH:mm' }}</span></div>
         <div class="detail-row"><span class="detail-label">Expire le</span><span>{{ selectedDossier.expirationDate | date:'dd/MM/yyyy' }}</span></div>
+      </div>
+      </div>
+
+      <div class="dossier-history-panel">
+        <h4 class="dossier-history-title">Historique des statuts</h4>
+        <div class="dossier-history-loading" *ngIf="historyLoading"><div class="spinner spinner-sm"></div></div>
+        <ng-container *ngIf="!historyLoading">
+          <ul class="dossier-history-list" *ngIf="statusHistory.length">
+            <li class="dossier-history-item" *ngFor="let h of statusHistory">
+              <span class="badge" [ngClass]="statusClass(h.status)">{{ h.status }}</span>
+              <span class="dossier-history-date">{{ formatDate(h.date) }}</span>
+            </li>
+          </ul>
+          <p class="dossier-history-empty" *ngIf="!statusHistory.length">Aucun historique disponible.</p>
+        </ng-container>
+      </div>
       </div>
 
       <!-- Reject form -->

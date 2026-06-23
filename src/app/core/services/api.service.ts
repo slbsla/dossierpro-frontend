@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
-  Dossier, DossierArchive, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage, ManagerRole, EmManagerInfo,
+  Dossier, DossierArchive, DossierStatusHistory, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage, ManagerRole, EmManagerInfo,
   Ticket
 } from '../models/models';
 
@@ -134,6 +134,10 @@ export class ApiService {
     return this.http.get<Dossier>(`${this.API}/em/dossiers/${ref}`);
   }
 
+  getEmDossierHistory(ref: string): Observable<DossierStatusHistory[]> {
+    return this.http.get<DossierStatusHistory[]>(`${this.API}/em/dossiers/${ref}/history`);
+  }
+
   rejectDossier(ref: string, motif: string): Observable<Dossier> {
     return this.http.post<Dossier>(`${this.API}/em/dossiers/${ref}/reject`, { motif });
   }
@@ -174,6 +178,10 @@ export class ApiService {
 
   getUserDossier(ref: string): Observable<Dossier> {
     return this.http.get<Dossier>(`${this.API}/user/dossiers/${ref}`);
+  }
+
+  getUserDossierHistory(ref: string): Observable<DossierStatusHistory[]> {
+    return this.http.get<DossierStatusHistory[]>(`${this.API}/user/dossiers/${ref}/history`);
   }
 
   createDossier(data: any): Observable<Dossier> {

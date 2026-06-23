@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
-import { Dossier, DossierStatus, DossierType, PageResponse } from '../../../core/models/models';
+import { Dossier, DossierStatus, DossierStatusHistory, DossierType, PageResponse } from '../../../core/models/models';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 
 /** Construit le groupe de contrôles communs aux 3 modes (create / edit / duplicate). */
@@ -27,6 +27,8 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
   dossierTypes = Object.values(DossierType);
   DossierStatus = DossierStatus;
   viewDossier: Dossier | null = null;
+  statusHistory: DossierStatusHistory[] = [];
+  historyLoading = false;
 
   searchTerm = '';
   selectedType = '';
@@ -54,21 +56,22 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
 
   openCreate() {
     this.editMode = false; this.duplicateMode = false; this.readOnlyMode = false; this.selectedRef = null;
-    this.viewDossier = null; this.error = '';
+    this.viewDossier = null; this.error = ''; this.statusHistory = []; this.historyLoading = false;
     this.form = this.fb.group({ ...buildFormControls(this.fb), submitNow: [false] });
     this.showModal = true;
   }
 
   openDuplicate(d: Dossier) {
     this.editMode = false; this.duplicateMode = true; this.readOnlyMode = false; this.selectedRef = null;
-    this.viewDossier = null; this.error = '';
+    this.viewDossier = null; this.error = ''; this.statusHistory = []; this.historyLoading = false;
     const base = { ...d, libelle: d.libelle.substring(0, 17) + '_cp' };
     this.form = this.fb.group({ ...buildFormControls(this.fb, base), submitNow: [false] });
     this.showModal = true;
   }
 
   openEdit(d: Dossier) {
-    this.viewDossier = d; this.error = '';
+    this.viewDossier = d; this.error = ''; this.statusHistory = [];
+    this.loadHistory(d.reference);
     this.readOnlyMode = (d.status === DossierStatus.SUBMIT || d.status === DossierStatus.VALIDATED || d.status === DossierStatus.EXPIRED);
     if (this.readOnlyMode) {
       this.editMode = false; this.duplicateMode = false; this.selectedRef = null;
@@ -81,6 +84,14 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
       motif: d.motif, budgetDepart: d.budgetDepart, nombrePart: d.nombrePart, immatriculation: d.immatriculation };
     this.form = this.fb.group(buildFormControls(this.fb, d));
     this.showModal = true;
+  }
+
+  loadHistory(ref: string) {
+    this.historyLoading = true;
+    this.api.getUserDossierHistory(ref).subscribe({
+      next: h => { this.statusHistory = h; this.historyLoading = false; },
+      error: () => { this.statusHistory = []; this.historyLoading = false; }
+    });
   }
 
   resetForm() { this.form.patchValue(this.originalValues); this.error = ''; }

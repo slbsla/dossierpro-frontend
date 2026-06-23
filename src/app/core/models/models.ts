@@ -110,6 +110,11 @@ export interface Dossier {
   immatriculation?: string;
 }
 
+export interface DossierStatusHistory {
+  status: DossierStatus;
+  date: string;
+}
+
 export interface UserPref {
   userReference: string;
   formatDate: string;
