@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
   Dossier, DossierArchive, DossierStatusHistory, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage, ManagerRole, EmManagerInfo,
-  Ticket
+  Ticket, SchedulerExecution, SchedulerJob, SchedulerJobType
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -356,5 +356,20 @@ export class ApiService {
 
   removeGroupMember(groupRef: string, userRef: string): Observable<void> {
     return this.http.delete<void>(`${this.API}/em/groups/${groupRef}/members/${userRef}`);
+  }
+
+  // ---- Admin Scheduler ----
+  getSchedulerExecutions(page = 0, size = 10): Observable<PageResponse<SchedulerExecution>> {
+    return this.http.get<PageResponse<SchedulerExecution>>(`${this.API}/admin/scheduler/executions`, {
+      params: new HttpParams().set('page', page).set('size', size)
+    });
+  }
+
+  getSchedulerJobs(): Observable<SchedulerJob[]> {
+    return this.http.get<SchedulerJob[]>(`${this.API}/admin/scheduler/jobs`);
+  }
+
+  triggerSchedulerJob(jobType: SchedulerJobType): Observable<void> {
+    return this.http.post<void>(`${this.API}/admin/scheduler/jobs/${jobType}/trigger`, {});
   }
 }

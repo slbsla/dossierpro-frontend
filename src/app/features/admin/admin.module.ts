@@ -9,6 +9,7 @@ import { EntitiesComponent } from './entities/entities.component';
 import { EntityManagersComponent } from './entity-managers/entity-managers.component';
 import { RolesComponent } from './roles/roles.component';
 import { SupportTicketsComponent } from '../../shared/support-tickets/support-tickets.component';
+import { SchedulerComponent } from './scheduler/scheduler.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -16,11 +17,12 @@ const routes: Routes = [
   { path: 'entities', component: EntitiesComponent },
   { path: 'entity-managers', component: EntityManagersComponent },
   { path: 'roles', component: RolesComponent },
-  { path: 'support', component: SupportTicketsComponent }
+  { path: 'support', component: SupportTicketsComponent },
+  { path: 'scheduler', component: SchedulerComponent }
 ];
 
 @NgModule({
-  declarations: [AdminDashboardComponent, EntitiesComponent, EntityManagersComponent, RolesComponent],
+  declarations: [AdminDashboardComponent, EntitiesComponent, EntityManagersComponent, RolesComponent, SchedulerComponent],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, SharedModule, RouterModule.forChild(routes)]
 })
 export class AdminModule {}

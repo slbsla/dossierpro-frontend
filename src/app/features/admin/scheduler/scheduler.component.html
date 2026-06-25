@@ -1,0 +1,86 @@
+<app-navbar title="Scheduler"></app-navbar>
+<div class="page-content">
+  <div class="page-header">
+    <div><h2 class="page-title">Scheduler</h2><p class="page-subtitle">Suivi des tâches automatiques</p></div>
+  </div>
+
+  <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab==='history'" (click)="activeTab='history'">
+      Historique <span class="tab-badge">{{ page.totalElements }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab==='jobs'" (click)="activeTab='jobs'">
+      Jobs <span class="tab-badge">{{ jobs.length }}</span>
+    </button>
+  </div>
+
+  <!-- Historique -->
+  <div class="card" *ngIf="activeTab==='history'">
+    <div *ngIf="loadingHistory" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loadingHistory">
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th>Statut</th>
+            <th>Lignes traitées</th>
+            <th>Déclenché par</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of page.content">
+            <td>{{ e.jobType }}</td>
+            <td>{{ e.dateDebut | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td>{{ e.dateFin | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td>
+              <span class="badge" [ngClass]="e.status === SchedulerStatus.SUCCESS ? 'badge-active' : 'badge-inactive'">
+                {{ e.status === SchedulerStatus.SUCCESS ? 'Succès' : 'Échec' }}
+              </span>
+            </td>
+            <td>{{ e.nombreLignesTraitees }}</td>
+            <td>
+              <span class="badge" [ngClass]="e.declenchePar === TriggeredBy.ADMIN ? 'badge-em' : 'badge-active'">
+                {{ e.declenchePar === TriggeredBy.ADMIN ? 'Admin' : 'System' }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="page.content.length === 0"><td colspan="6" class="empty-state"><span class="empty-state-icon">🕒</span><p>Aucune exécution</p></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" *ngIf="page.totalPages > 1">
+        <button (click)="loadHistory(page.page-1)" [disabled]="page.page===0">◀</button>
+        <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="loadHistory(p)">{{ p+1 }}</button>
+        <button (click)="loadHistory(page.page+1)" [disabled]="page.last">▶</button>
+        <span class="page-info">Page {{ page.page+1 }}/{{ page.totalPages }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jobs -->
+  <div class="card" *ngIf="activeTab==='jobs'">
+    <div *ngIf="loadingJobs" class="loading"><div class="spinner"></div></div>
+    <ul class="job-list" *ngIf="!loadingJobs">
+      <li class="job-item" *ngFor="let job of jobs">
+        <button class="trigger-btn" [disabled]="isTriggering(job)" (click)="triggerJob(job)" [title]="'Lancer manuellement : ' + job.label">
+          <span class="trigger-triangle" *ngIf="!isTriggering(job)"></span>
+          <div class="spinner spinner-sm" *ngIf="isTriggering(job)"></div>
+        </button>
+        <div class="job-info">
+          <div class="job-label">{{ job.label }}</div>
+          <div class="job-meta">
+            Dernière exécution : {{ timeSince(job.lastExecutionDate) }}
+            <span class="badge" *ngIf="job.lastStatus" [ngClass]="job.lastStatus === SchedulerStatus.SUCCESS ? 'badge-active' : 'badge-inactive'">
+              {{ job.lastStatus === SchedulerStatus.SUCCESS ? 'Succès' : 'Échec' }}
+            </span>
+          </div>
+        </div>
+      </li>
+      <li *ngIf="jobs.length === 0" class="empty-state"><span class="empty-state-icon">🕒</span><p>Aucun job</p></li>
+    </ul>
+  </div>
+</div>

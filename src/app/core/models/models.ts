@@ -6,6 +6,9 @@ export enum Theme { LIGHT = 'LIGHT', DARK = 'DARK' }
 export enum Language { FR = 'FR', EN = 'EN' }
 export enum TicketType { BUG = 'BUG', ENHANCEMENT = 'ENHANCEMENT', GROSSE_EVOLUTION = 'GROSSE_EVOLUTION' }
 export enum TicketStatus { OUVERT = 'OUVERT', EN_COURS = 'EN_COURS', CLOTURE = 'CLOTURE' }
+export enum SchedulerJobType { EXPIRATION_DOSSIER = 'EXPIRATION_DOSSIER', PURGE_ARCHIVE = 'PURGE_ARCHIVE', PURGE_ACTIVITE = 'PURGE_ACTIVITE' }
+export enum SchedulerStatus { SUCCESS = 'SUCCESS', ECHEC = 'ECHEC' }
+export enum TriggeredBy { ADMIN = 'ADMIN', SYSTEM = 'SYSTEM' }
 
 export interface UserInfo {
   uniqueReference: string;
@@ -242,4 +245,20 @@ export interface UploadResult {
   successCount: number;
   rejectedCount: number;
   rejectedReasons: string[];
+}
+
+export interface SchedulerExecution {
+  jobType: SchedulerJobType;
+  dateDebut: string;
+  dateFin: string;
+  status: SchedulerStatus;
+  nombreLignesTraitees: number;
+  declenchePar: TriggeredBy;
+}
+
+export interface SchedulerJob {
+  jobType: SchedulerJobType;
+  label: string;
+  lastExecutionDate?: string;
+  lastStatus?: SchedulerStatus;
 }
