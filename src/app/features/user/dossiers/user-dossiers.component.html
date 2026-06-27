@@ -2,7 +2,12 @@
 <div class="page-content">
   <div class="page-header">
     <div><h2 class="page-title">Mes Dossiers</h2><p class="page-subtitle">{{ page.totalElements }} dossier(s)</p></div>
-    <button class="btn btn-primary" (click)="openCreate()">+ Nouveau Dossier</button>
+    <div class="page-header-actions">
+      <a class="btn btn-secondary" routerLink="/user/upload" title="Importer plusieurs dossiers depuis un fichier Excel">
+        <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px">upload_file</span>Import
+      </a>
+      <button class="btn btn-primary" (click)="openCreate()">+ Nouveau Dossier</button>
+    </div>
   </div>
   <div class="alert alert-success" *ngIf="success">{{ success }}</div>
 

@@ -187,6 +187,7 @@ tr:last-child td { border-bottom: none; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
 .page-title { font-size: 22px; font-weight: 700; color: var(--text-dark); }
 .page-subtitle { font-size: 13px; color: var(--gray-text); margin-top: 2px; }
+.page-header-actions { display: flex; align-items: center; gap: 10px; }
 
 /* Modals */
 .modal-overlay {
