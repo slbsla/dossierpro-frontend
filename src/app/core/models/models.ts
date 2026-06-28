@@ -4,8 +4,10 @@ export enum DossierType { SINISTRE = 'SINISTRE', EER = 'EER', ADHESION = 'ADHESI
 export enum EntitySector { ASSURANCE = 'ASSURANCE', BANQUE = 'BANQUE', COMMERCE = 'COMMERCE' }
 export enum Theme { LIGHT = 'LIGHT', DARK = 'DARK' }
 export enum Language { FR = 'FR', EN = 'EN' }
-export enum TicketType { BUG = 'BUG', ENHANCEMENT = 'ENHANCEMENT', GROSSE_EVOLUTION = 'GROSSE_EVOLUTION' }
+export enum TicketType { BUG = 'BUG', ENHANCEMENT = 'ENHANCEMENT', GROSSE_EVOLUTION = 'GROSSE_EVOLUTION', TECHNICAL = 'TECHNICAL' }
 export enum TicketStatus { OUVERT = 'OUVERT', EN_COURS = 'EN_COURS', CLOTURE = 'CLOTURE' }
+export enum TicketPortail { MANAGER_PORTAL = 'MANAGER_PORTAL', ADMIN_PORTAL = 'ADMIN_PORTAL', CLIENT_PORTAL = 'CLIENT_PORTAL', BACK_OFFICE_PORTAL = 'BACK_OFFICE_PORTAL', APPLICATION_PORTAL = 'APPLICATION_PORTAL' }
+export enum TicketSize { S = 'S', M = 'M', L = 'L' }
 export enum SchedulerJobType { EXPIRATION_DOSSIER = 'EXPIRATION_DOSSIER', PURGE_ARCHIVE = 'PURGE_ARCHIVE', PURGE_ACTIVITE = 'PURGE_ACTIVITE' }
 export enum SchedulerStatus { SUCCESS = 'SUCCESS', ECHEC = 'ECHEC' }
 export enum TriggeredBy { ADMIN = 'ADMIN', SYSTEM = 'SYSTEM' }
@@ -226,6 +228,10 @@ export interface Ticket {
   description?: string;
   type: TicketType;
   status: TicketStatus;
+  portail: TicketPortail;
+  scope?: string;
+  priority?: number;
+  size: TicketSize;
   creationDate: string;
   creatorReference?: string;
   creatorFullName?: string;

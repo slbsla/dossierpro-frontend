@@ -95,3 +95,93 @@
 }
 /* Le panneau de titre mauve fonce sur fond de modal mauve clair est
    desormais gere globalement dans styles.css (classes .modal-box / .modal-title). */
+
+/* ---- Badges de type : couleur dediee par type ---- */
+
+.badge-type-bug {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.badge-type-enhancement {
+  background-color: #ccfbf1;
+  color: #0d9488;
+}
+
+.badge-type-evolution {
+  background-color: #ffedd5;
+  color: #ea580c;
+}
+
+.badge-type-technical {
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+/* ---- Badges de portail ---- */
+
+.badge-portail-manager {
+  background-color: #e0e7ff;
+  color: #4338ca;
+}
+
+.badge-portail-admin {
+  background-color: #ede9fe;
+  color: #7c3aed;
+}
+
+.badge-portail-client {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.badge-portail-backoffice {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.badge-portail-application {
+  background-color: #cffafe;
+  color: #0e7490;
+}
+
+/* ---- Badges de taille ---- */
+
+.badge-size-s {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.badge-size-m {
+  background-color: #fef9c3;
+  color: #ca8a04;
+}
+
+.badge-size-l {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* ---- En-tete de la modale avec navigation precedent/suivant ---- */
+
+.modal-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modal-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}

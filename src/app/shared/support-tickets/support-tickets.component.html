@@ -24,7 +24,7 @@
       <table>
         <thead>
           <tr>
-            <th class="col-check"></th><th>N° Ticket</th><th>Libellé</th><th>Date</th><th>Type</th><th>Statut</th><th>Actions</th>
+            <th class="col-check"></th><th>N° Ticket</th><th>Libellé</th><th>Date</th><th>Type</th><th>Portail</th><th>Taille</th><th>Statut</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -38,7 +38,9 @@
             <td><code>{{ t.ticketRef }}</code></td>
             <td><strong>{{ t.label }}</strong></td>
             <td>{{ t.creationDate | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td><span class="badge badge-em">{{ typeLabel(t.type) }}</span></td>
+            <td><span class="badge" [ngClass]="typeClass(t.type)">{{ typeLabel(t.type) }}</span></td>
+            <td><span class="badge" [ngClass]="portailClass(t.portail)">{{ portailLabel(t.portail) }}</span></td>
+            <td><span class="badge" [ngClass]="sizeClass(t.size)">{{ sizeLabel(t.size) }}</span></td>
             <td><span class="badge" [ngClass]="statusClass(t.status)">{{ statusLabel(t.status) }}</span></td>
             <td (click)="$event.stopPropagation()">
               <button class="btn btn-sm btn-secondary" (click)="openEdit(t)" [disabled]="!canEdit(t)"
@@ -47,7 +49,7 @@
             </td>
           </tr>
           <tr *ngIf="page.content.length === 0">
-            <td colspan="7"><div class="empty-state"><div class="empty-state-icon">🎫</div><p>Aucun ticket</p></div></td>
+            <td colspan="9"><div class="empty-state"><div class="empty-state-icon">🎫</div><p>Aucun ticket</p></div></td>
           </tr>
         </tbody>
       </table>
@@ -65,7 +67,13 @@
 <!-- Modal Créer / Modifier -->
 <div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
   <div class="modal-box" (click)="$event.stopPropagation()">
-    <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Créer' }} un ticket</h3>
+    <div class="modal-header-row">
+      <h3 class="modal-title">{{ editMode ? 'Modifier' : 'Créer' }} un ticket</h3>
+      <div class="modal-nav" *ngIf="editMode">
+        <button class="btn btn-sm btn-secondary" (click)="showPrevious()" [disabled]="!hasPrevious" title="Ticket précédent">◀ Précédent</button>
+        <button class="btn btn-sm btn-secondary" (click)="showNext()" [disabled]="!hasNext" title="Ticket suivant">Suivant ▶</button>
+      </div>
+    </div>
     <div class="alert alert-error" *ngIf="error">{{ error }}</div>
 
     <div class="form-group">
@@ -76,10 +84,44 @@
     <div class="form-group">
       <label class="form-label">Type *</label>
       <div class="radio-group">
-        <label class="radio-pill" *ngFor="let o of typeOptions">
+        <label class="radio-pill" *ngFor="let o of typeOptions" [ngClass]="typeClass(o.value)">
           <input type="radio" name="type" [value]="o.value" [checked]="current.type===o.value" (change)="current.type=o.value">
           <span>{{ o.label }}</span>
         </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Portail *</label>
+      <select class="form-control" [(ngModel)]="current.portail">
+        <option [ngValue]="null" disabled>Sélectionner un portail…</option>
+        <option *ngFor="let o of portailOptions" [ngValue]="o.value">{{ o.label }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Scope</label>
+      <input class="form-control" [(ngModel)]="current.scope" list="scope-suggestions" placeholder="Connexion, UI, Amélioration… (facultatif)" maxlength="100">
+      <datalist id="scope-suggestions">
+        <option *ngFor="let s of scopeSuggestions" [value]="s"></option>
+      </datalist>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Priorité</label>
+        <select class="form-control" [(ngModel)]="current.priority">
+          <option [ngValue]="null">— (facultatif)</option>
+          <option *ngFor="let p of priorityOptions" [ngValue]="p">{{ p }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Taille *</label>
+        <select class="form-control" [(ngModel)]="current.size">
+          <option [ngValue]="null" disabled>Sélectionner une taille…</option>
+          <option *ngFor="let o of sizeOptions" [ngValue]="o.value">{{ o.label }}</option>
+        </select>
       </div>
     </div>
 
@@ -100,7 +142,7 @@
 
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="showModal=false">Annuler</button>
-      <button class="btn btn-primary" (click)="save()" [disabled]="saving || !current.label.trim()">
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving || !isFormValid()">
         {{ saving ? 'Enregistrement...' : (editMode ? 'Enregistrer' : 'Créer') }}
       </button>
     </div>
