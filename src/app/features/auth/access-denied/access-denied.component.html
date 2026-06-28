@@ -1,0 +1,21 @@
+<section class="denied-section">
+  <div class="denied-card card">
+    <div class="denied-icon icon-btn"><span class="material-icons">person</span></div>
+    <h1>Espace réservé aux administrateurs / gestionnaires</h1>
+    <p class="denied-text">
+      Votre compte (<strong>{{ auth.currentUser?.roleName || auth.currentUser?.role }}</strong>) est un profil
+      client. Ce portail <strong>DossierPro</strong> est exclusivement destiné aux administrateurs et gestionnaires.
+    </p>
+    <p class="denied-text">
+      Pour consulter et gérer vos dossiers, merci d'utiliser votre espace client.
+    </p>
+    <div class="denied-actions">
+      <a [href]="clientUrl" class="btn btn-primary">
+        <span class="material-icons">open_in_new</span> Aller à l'espace client
+      </a>
+      <button class="btn btn-outline" (click)="logout()">
+        <span class="material-icons">logout</span> Se déconnecter
+      </button>
+    </div>
+  </div>
+</section>

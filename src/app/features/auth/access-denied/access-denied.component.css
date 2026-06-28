@@ -1,0 +1,7 @@
+.denied-section { display: flex; justify-content: center; padding: 64px 20px; min-height: 60vh; }
+.denied-card { width: 100%; max-width: 480px; padding: 40px 32px; text-align: center; }
+.denied-icon { width: 64px; height: 64px; margin: 0 auto 18px; background: #ede9fe; color: #6d28d9; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.denied-icon .material-icons { font-size: 32px; }
+.denied-card h1 { font-size: 22px; margin: 0 0 14px; color: #1e293b; }
+.denied-text { color: #64748b; font-size: 14.5px; margin: 0 0 12px; line-height: 1.5; }
+.denied-actions { display: flex; gap: 12px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }

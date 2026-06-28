@@ -6,7 +6,8 @@ import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API = 'http://localhost:8080/api';
+  // Relatif : fonctionne quel que soit l'hôte/port (ex: servi sous /dossier-entrprise/ par le même jar Spring Boot).
+  private readonly API = '/api';
   private userSubject = new BehaviorSubject<UserInfo | null>(null);
   public user$ = this.userSubject.asObservable();
 
@@ -69,7 +70,9 @@ export class AuthService {
     switch (this.currentUser?.role) {
       case Role.ADMIN: return '/admin/dashboard';
       case Role.ENTITY_MANAGER: return '/em/dashboard';
-      case Role.USER: return '/user/dossiers';
+      // Les profils USER (clients) ont leur propre portail dédié (dossierpro-web) ;
+      // ce portail back-office ne leur est pas accessible.
+      case Role.USER: return '/acces-reserve';
       default: return '/login';
     }
   }
