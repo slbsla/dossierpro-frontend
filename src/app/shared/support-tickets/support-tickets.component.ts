@@ -20,7 +20,7 @@ export class SupportTicketsComponent implements OnInit {
   TicketSize = TicketSize;
 
   readonly typeOptions: { value: TicketType; label: string }[] = [
-    { value: TicketType.BUG, label: 'Bug' },
+    { value: TicketType.BUG, label: 'Incident' },
     { value: TicketType.ENHANCEMENT, label: 'Enhancement' },
     { value: TicketType.GROSSE_EVOLUTION, label: 'Grosse Evolution' },
     { value: TicketType.TECHNICAL, label: 'Technical' }
