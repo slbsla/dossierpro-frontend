@@ -1,0 +1,71 @@
+/* ---- Tabs (Reçus / Envoyés) ---- */
+.tabs { display:flex; gap:4px; margin-bottom:16px; border-bottom:2px solid var(--gray-border); }
+.tab-btn { padding:10px 20px; border:none; background:none; cursor:pointer; font-size:14px; font-weight:500; color:var(--gray-text); border-bottom:2px solid transparent; margin-bottom:-2px; }
+.tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+.tab-badge { display:inline-flex; align-items:center; justify-content:center; background:var(--primary-light); color:var(--primary); border-radius:20px; font-size:11px; font-weight:700; padding:1px 7px; margin-left:6px; }
+
+/* ---- Carte large : cette page comporte de nombreuses colonnes (réf, email, objet,
+   dossier, date, pièces jointes, action) donc on dépasse la largeur "form" classique. ---- */
+.card-wide { width: 100%; min-width: 0; }
+
+/* ---- Ligne non lue : en gras, convention reprise du portail client ---- */
+tr.unread td { font-weight: 700; }
+tr.unread .subject-cell { font-weight: 700; }
+
+.subject-cell { display: flex; align-items: center; gap: 6px; }
+.subject-icon { font-size: 16px; color: var(--primary, #2563eb); }
+
+.attachment-icon { font-size: 18px; color: var(--gray-text); vertical-align: middle; }
+
+.actions-cell { white-space: nowrap; }
+
+/* ---- Modale de détail / réponse / nouveau message ---- */
+.modal-support-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.modal-support-icon { font-size: 28px; color: var(--primary, #2563eb); }
+.modal-subtitle { font-size: 13px; color: var(--gray-text); }
+
+.view-meta { display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:13px; margin-bottom:6px; }
+.view-meta-label { font-weight:600; color: var(--gray-text); }
+.view-meta-value { color: var(--text-dark); }
+
+.view-message-body {
+  white-space: pre-wrap;
+  background: var(--gray-light, #f8f9fb);
+  border-radius: var(--radius-sm, 6px);
+  padding: 14px;
+  margin: 14px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.attachments-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 10px; }
+
+.support-textarea { resize: vertical; }
+
+.form-row { display:flex; gap:16px; }
+.form-row .form-group { flex:1; }
+
+.form-hint-small { display:block; margin-top:4px; font-size:12px; color: var(--gray-text); }
+
+.modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+
+/* ---- Bouton "pièce jointe" stylé selon le thème du portail manager (au lieu de l'input natif) ---- */
+.file-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 14px;
+  border: 1px solid var(--primary, #2563eb);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--primary-light, #eef2ff);
+  color: var(--primary, #2563eb);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.file-upload-btn:hover {
+  background: var(--primary, #2563eb);
+  color: #fff;
+}

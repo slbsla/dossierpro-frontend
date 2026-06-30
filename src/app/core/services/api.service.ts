@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
   Dossier, DossierArchive, DossierStatusHistory, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage, ManagerRole, EmManagerInfo,
-  Ticket, SchedulerExecution, SchedulerJob, SchedulerJobType
+  Ticket, SchedulerExecution, SchedulerJob, SchedulerJobType, EmSupportMessage, EmSupportRecipient
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -371,5 +371,60 @@ export class ApiService {
 
   triggerSchedulerJob(jobType: SchedulerJobType): Observable<void> {
     return this.http.post<void>(`${this.API}/admin/scheduler/jobs/${jobType}/trigger`, {});
+  }
+
+  // ---- EM Messagerie (contact clients) ----
+  getEmSupportSent(): Observable<EmSupportMessage[]> {
+    return this.http.get<EmSupportMessage[]>(`${this.API}/em/support/sent`);
+  }
+
+  getEmSupportReceived(): Observable<EmSupportMessage[]> {
+    return this.http.get<EmSupportMessage[]>(`${this.API}/em/support/received`);
+  }
+
+  getEmSupportUnreadCount(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.API}/em/support/unread-count`);
+  }
+
+  getEmSupportUnread(): Observable<EmSupportMessage[]> {
+    return this.http.get<EmSupportMessage[]>(`${this.API}/em/support/unread`);
+  }
+
+  markEmSupportRead(ref: string): Observable<void> {
+    return this.http.put<void>(`${this.API}/em/support/${ref}/read`, {});
+  }
+
+  getEmSupportMessage(ref: string): Observable<EmSupportMessage> {
+    return this.http.get<EmSupportMessage>(`${this.API}/em/support/${ref}`);
+  }
+
+  getEmSupportAttachmentUrl(ref: string, slot: 1 | 2): string {
+    return `${this.API}/em/support/${ref}/attachment/${slot}`;
+  }
+
+  getEmSupportRecipients(): Observable<EmSupportRecipient[]> {
+    return this.http.get<EmSupportRecipient[]>(`${this.API}/em/support/recipients`);
+  }
+
+  sendEmSupportMessage(data: {
+    recipientReference: string; subject: string; dossierReference?: string; message: string;
+    attachment1?: File | null;
+  }): Observable<EmSupportMessage> {
+    const form = new FormData();
+    form.append('recipientReference', data.recipientReference);
+    form.append('subject', data.subject);
+    if (data.dossierReference) form.append('dossierReference', data.dossierReference);
+    form.append('message', data.message);
+    if (data.attachment1) form.append('attachment1', data.attachment1);
+    return this.http.post<EmSupportMessage>(`${this.API}/em/support`, form);
+  }
+
+  replyEmSupportMessage(ref: string, data: {
+    message: string; attachment1?: File | null;
+  }): Observable<EmSupportMessage> {
+    const form = new FormData();
+    form.append('message', data.message);
+    if (data.attachment1) form.append('attachment1', data.attachment1);
+    return this.http.post<EmSupportMessage>(`${this.API}/em/support/${ref}/reply`, form);
   }
 }

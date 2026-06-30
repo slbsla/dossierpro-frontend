@@ -1,0 +1,293 @@
+<app-navbar title="Messages"></app-navbar>
+<div class="page-content">
+
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Messages</h2>
+      <p class="page-subtitle">Échangez avec vos clients : messages reçus et envoyés</p>
+    </div>
+    <button class="btn btn-primary" (click)="openNew()">
+      <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:4px">add</span>
+      Nouveau message
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab==='received'" (click)="switchTab('received')">
+      Reçus <span class="tab-badge">{{ received.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab==='sent'" (click)="switchTab('sent')">
+      Envoyés <span class="tab-badge">{{ sent.length }}</span>
+    </button>
+  </div>
+
+  <!-- ══ Reçus ══ -->
+  <div class="card card-wide" *ngIf="activeTab==='received'">
+    <div *ngIf="loadingReceived" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loadingReceived">
+      <table>
+        <thead>
+          <tr>
+            <th>Référence client</th>
+            <th>Email</th>
+            <th>Objet</th>
+            <th>Dossier</th>
+            <th>Date</th>
+            <th>Pièces jointes</th>
+            <th style="width:170px">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of received" [class.unread]="!m.read">
+            <td><code>{{ m.senderReference }}</code></td>
+            <td>{{ m.senderEmail || '—' }}</td>
+            <td>
+              <div class="subject-cell">
+                <span class="material-icons subject-icon">mail_outline</span>
+                {{ m.subject }}
+              </div>
+            </td>
+            <td>{{ m.dossierReference || '—' }}</td>
+            <td>{{ m.sentAt | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <span class="material-icons attachment-icon" *ngIf="m.hasAttachment1 || m.hasAttachment2" title="Pièce(s) jointe(s)">attach_file</span>
+              <span *ngIf="!m.hasAttachment1 && !m.hasAttachment2">—</span>
+            </td>
+            <td class="actions-cell">
+              <button class="btn btn-sm btn-secondary" (click)="view(m)">
+                <span class="material-icons" style="font-size:15px;vertical-align:middle">visibility</span>
+                Voir
+              </button>
+              <button class="btn btn-sm btn-primary" *ngIf="!m.hasReply" (click)="openReply(m)" style="margin-left:4px">
+                <span class="material-icons" style="font-size:15px;vertical-align:middle">reply</span>
+                Répondre
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="received.length === 0">
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p>Aucun message reçu pour l'instant</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ Envoyés ══ -->
+  <div class="card card-wide" *ngIf="activeTab==='sent'">
+    <div *ngIf="loadingSent" class="loading"><div class="spinner"></div></div>
+    <div class="table-wrapper" *ngIf="!loadingSent">
+      <table>
+        <thead>
+          <tr>
+            <th>Référence client</th>
+            <th>Email</th>
+            <th>Objet</th>
+            <th>Dossier</th>
+            <th>Date</th>
+            <th>Pièces jointes</th>
+            <th style="width:90px">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of sent" [class.unread]="!m.read">
+            <td><code>{{ m.recipientReference || '—' }}</code></td>
+            <td>{{ m.recipientEmail || '—' }}</td>
+            <td>
+              <div class="subject-cell">
+                <span class="material-icons subject-icon">mail_outline</span>
+                {{ m.subject }}
+              </div>
+            </td>
+            <td>{{ m.dossierReference || '—' }}</td>
+            <td>{{ m.sentAt | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <span class="material-icons attachment-icon" *ngIf="m.hasAttachment1 || m.hasAttachment2" title="Pièce(s) jointe(s)">attach_file</span>
+              <span *ngIf="!m.hasAttachment1 && !m.hasAttachment2">—</span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-secondary" (click)="view(m)">
+                <span class="material-icons" style="font-size:15px;vertical-align:middle">visibility</span>
+                Voir
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="sent.length === 0">
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-state-icon">📤</div>
+                <p>Aucun message envoyé pour l'instant</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ Modal : voir un message ══ -->
+<div class="modal-overlay" *ngIf="showViewModal && viewMessage" (click)="closeView()">
+  <div class="modal-box modal-box-wide" (click)="$event.stopPropagation()">
+    <div class="modal-support-header">
+      <span class="modal-support-icon material-icons">mail</span>
+      <div>
+        <h3 class="modal-title" style="margin:0">{{ viewMessage.subject }}</h3>
+        <p class="modal-subtitle" style="margin:4px 0 0">
+          Envoyé le {{ viewMessage.sentAt | date:'dd/MM/yyyy à HH:mm' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="view-meta">
+      <span class="view-meta-label">De :</span>
+      <span class="view-meta-value">{{ viewMessage.senderFullName }} ({{ viewMessage.senderReference }})</span>
+      <span class="view-meta-value" *ngIf="viewMessage.senderEmail">— {{ viewMessage.senderEmail }}</span>
+    </div>
+    <div class="view-meta" *ngIf="viewMessage.recipientReference">
+      <span class="view-meta-label">À :</span>
+      <span class="view-meta-value">{{ viewMessage.recipientFullName }} ({{ viewMessage.recipientReference }})</span>
+      <span class="view-meta-value" *ngIf="viewMessage.recipientEmail">— {{ viewMessage.recipientEmail }}</span>
+    </div>
+    <div class="view-meta" *ngIf="viewMessage.dossierReference">
+      <span class="view-meta-label">Dossier :</span>
+      <span class="view-meta-value"><code>{{ viewMessage.dossierReference }}</code></span>
+    </div>
+
+    <div class="view-message-body">{{ viewMessage.message }}</div>
+
+    <div class="attachments-row" *ngIf="viewMessage.hasAttachment1 || viewMessage.hasAttachment2">
+      <button class="btn btn-sm btn-secondary" *ngIf="viewMessage.hasAttachment1" (click)="downloadAttachment(viewMessage.reference, 1)">
+        <span class="material-icons" style="font-size:15px;vertical-align:middle">attach_file</span>
+        {{ viewMessage.attachment1Name || 'Pièce jointe 1' }}
+      </button>
+      <button class="btn btn-sm btn-secondary" *ngIf="viewMessage.hasAttachment2" (click)="downloadAttachment(viewMessage.reference, 2)">
+        <span class="material-icons" style="font-size:15px;vertical-align:middle">attach_file</span>
+        {{ viewMessage.attachment2Name || 'Pièce jointe 2' }}
+      </button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" *ngIf="viewMessage.direction==='RECU' && !viewMessage.hasReply" (click)="closeView(); openReply(viewMessage)">
+        <span class="material-icons" style="font-size:15px;vertical-align:middle">reply</span>
+        Répondre
+      </button>
+      <button class="btn btn-secondary" (click)="closeView()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal : répondre ══ -->
+<div class="modal-overlay" *ngIf="showReplyModal && replyTarget" (click)="closeReply()">
+  <div class="modal-box modal-box-wide" (click)="$event.stopPropagation()">
+    <div class="modal-support-header">
+      <span class="modal-support-icon material-icons">reply</span>
+      <div>
+        <h3 class="modal-title" style="margin:0">Répondre au message</h3>
+        <p class="modal-subtitle" style="margin:4px 0 0">
+          À {{ replyTarget.senderFullName }} ({{ replyTarget.senderReference }})
+        </p>
+      </div>
+    </div>
+
+    <div class="alert alert-error" *ngIf="replyError">{{ replyError }}</div>
+
+    <div class="form-group">
+      <label class="form-label">Objet</label>
+      <input class="form-control" [value]="replySubjectPreview" disabled>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Message *</label>
+      <textarea class="form-control support-textarea" [(ngModel)]="replyMessage"
+                placeholder="Votre réponse..." rows="6"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Pièce jointe</label>
+      <label class="file-upload-btn">
+        <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:6px">attach_file</span>
+        {{ replyAttachment1 ? replyAttachment1.name : 'Choisir un fichier' }}
+        <input type="file" (change)="onReplyFileChange($event)" hidden>
+      </label>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeReply()">Annuler</button>
+      <button class="btn btn-primary" (click)="submitReply()" [disabled]="replyInvalid">
+        <span *ngIf="!replySubmitting">Envoyer la réponse</span>
+        <span *ngIf="replySubmitting">Envoi...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal : nouveau message ══ -->
+<div class="modal-overlay" *ngIf="showNewModal" (click)="closeNew()">
+  <div class="modal-box modal-box-wide" (click)="$event.stopPropagation()">
+    <div class="modal-support-header">
+      <span class="modal-support-icon material-icons">mail</span>
+      <div>
+        <h3 class="modal-title" style="margin:0">Nouveau message</h3>
+        <p class="modal-subtitle" style="margin:4px 0 0">Contactez un de vos clients</p>
+      </div>
+    </div>
+
+    <div class="alert alert-error" *ngIf="newError">{{ newError }}</div>
+
+    <div class="form-group">
+      <label class="form-label">Référence utilisateur</label>
+      <input class="form-control" [value]="myReference" disabled>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Destinataire *</label>
+      <select class="form-control" [(ngModel)]="newRecipientReference" [disabled]="recipientsLoading">
+        <option value="" disabled>{{ recipientsLoading ? 'Chargement...' : 'Sélectionner un destinataire…' }}</option>
+        <option *ngFor="let r of recipients" [value]="r.reference">{{ r.fullName }} ({{ r.email }})</option>
+      </select>
+      <small class="form-hint-small" *ngIf="!recipientsLoading && recipients.length === 0">
+        Aucun client avec une adresse email n'a été trouvé.
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Objet *</label>
+      <input class="form-control" [(ngModel)]="newSubject" placeholder="ex : Information sur votre dossier" maxlength="120">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Référence dossier</label>
+      <input class="form-control" [(ngModel)]="newDossierReference" placeholder="Facultatif" maxlength="50">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Message *</label>
+      <textarea class="form-control support-textarea" [(ngModel)]="newMessage"
+                placeholder="Votre message..." rows="6"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Pièce jointe</label>
+      <label class="file-upload-btn">
+        <span class="material-icons" style="font-size:16px;vertical-align:middle;margin-right:6px">attach_file</span>
+        {{ newAttachment1 ? newAttachment1.name : 'Choisir un fichier' }}
+        <input type="file" (change)="onNewFileChange($event)" hidden>
+      </label>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeNew()">Annuler</button>
+      <button class="btn btn-primary" (click)="submitNew()" [disabled]="newInvalid">
+        <span *ngIf="!newSubmitting">Envoyer</span>
+        <span *ngIf="newSubmitting">Envoi...</span>
+      </button>
+    </div>
+  </div>
+</div>

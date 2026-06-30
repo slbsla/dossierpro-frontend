@@ -50,3 +50,105 @@
 .chip-change-btn:hover { background: #1d4ed8; }
 .chip-change-btn:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
 .chip-change-btn:disabled:hover { background: #cbd5e1; }
+
+/* ---- Notification bell ---- */
+.navbar-notif { position: relative; flex-shrink: 0; }
+
+.notif-bell-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  transition: background .15s;
+}
+.notif-bell-btn:hover { background: rgba(255, 255, 255, 0.22); }
+
+.notif-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  max-height: 380px;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: var(--radius-sm, 8px);
+  box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,.18));
+  z-index: 50;
+  padding: 6px 0;
+}
+
+.notif-dropdown-header {
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-dark, #1f2937);
+  border-bottom: 1px solid var(--gray-border, #e5e7eb);
+}
+
+.notif-empty {
+  padding: 16px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--gray-text, #6b7280);
+  text-align: center;
+}
+
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--text-dark, #1f2937);
+  cursor: pointer;
+  text-decoration: none;
+}
+.notif-item:hover { background: var(--gray-light, #f8f9fb); }
+
+.notif-item-icon { font-size: 16px; color: var(--primary, #2563eb); }
+
+.notif-item-subject {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notif-dropdown-footer {
+  border-top: 1px solid var(--gray-border, #e5e7eb);
+  padding: 8px 16px;
+  text-align: center;
+}
+.notif-dropdown-footer a {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary, #2563eb);
+  cursor: pointer;
+  text-decoration: none;
+}
+.notif-dropdown-footer a:hover { text-decoration: underline; }

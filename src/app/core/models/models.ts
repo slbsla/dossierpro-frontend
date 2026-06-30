@@ -247,6 +247,40 @@ export interface SupportMessage {
   entityCode?: string;
 }
 
+// ---- Messagerie EM <-> Client (contact) ----
+export type EmSupportDirection = 'ENVOYE' | 'RECU';
+export type EmSupportSenderRole = 'USER' | 'ENTITY_MANAGER';
+
+export interface EmSupportMessage {
+  reference: string;
+  subject: string;
+  message: string;
+  dossierReference: string | null;
+  sentAt: string;
+  read: boolean;
+  senderReference: string;
+  senderRole: EmSupportSenderRole;
+  senderFullName: string;
+  senderEmail: string | null;
+  recipientReference: string | null;
+  recipientFullName: string | null;
+  recipientEmail: string | null;
+  entityCode: string | null;
+  direction: EmSupportDirection;
+  parentReference: string | null;
+  hasReply: boolean;
+  hasAttachment1: boolean;
+  attachment1Name: string | null;
+  hasAttachment2: boolean;
+  attachment2Name: string | null;
+}
+
+export interface EmSupportRecipient {
+  reference: string;
+  fullName: string;
+  email: string;
+}
+
 export interface UploadResult {
   successCount: number;
   rejectedCount: number;

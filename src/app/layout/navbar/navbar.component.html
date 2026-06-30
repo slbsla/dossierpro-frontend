@@ -2,6 +2,25 @@
   <img src="assets/logo.png" alt="DosPros" class="navbar-logo">
   <h1 class="navbar-title">{{ title }}</h1>
 
+  <!-- Notification bell — messagerie EM <-> clients (ENTITY_MANAGER uniquement) -->
+  <div class="navbar-notif" *ngIf="showNotifBell">
+    <button class="notif-bell-btn" (click)="toggleNotif()" title="Notifications">
+      <span class="material-icons">notifications</span>
+      <span class="notif-badge" *ngIf="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+    </button>
+    <div class="notif-dropdown" *ngIf="notifOpen">
+      <div class="notif-dropdown-header">Notifications</div>
+      <p class="notif-empty" *ngIf="!unreadMessages.length">Aucune notification pour le moment.</p>
+      <a class="notif-item" *ngFor="let m of unreadMessages" (click)="goToMessage()">
+        <span class="material-icons notif-item-icon">mail</span>
+        <span class="notif-item-subject">{{ m.subject }}</span>
+      </a>
+      <div class="notif-dropdown-footer" *ngIf="unreadMessages.length">
+        <a (click)="goToMessage()">Voir tous les messages</a>
+      </div>
+    </div>
+  </div>
+
   <!-- EM entity chip — top right -->
   <div class="em-entity-chip"
        *ngIf="role === Role.ENTITY_MANAGER && emSession.isSelected">

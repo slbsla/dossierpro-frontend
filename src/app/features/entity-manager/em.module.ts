@@ -11,6 +11,7 @@ import { EmDossiersComponent } from './dossiers/em-dossiers.component';
 import { EmShellComponent } from './shell/em-shell.component';
 import { EmEntityPickerComponent } from './entity-picker/em-entity-picker.component';
 import { SupportTicketsComponent } from '../../shared/support-tickets/support-tickets.component';
+import { EmMessagesComponent } from './messages/em-messages.component';
 
 const routes: Routes = [
   {
@@ -22,7 +23,8 @@ const routes: Routes = [
       { path: 'info', component: EmInfoComponent },
       { path: 'users', component: EmUsersComponent },
       { path: 'dossiers', component: EmDossiersComponent },
-      { path: 'support', component: SupportTicketsComponent }
+      { path: 'support', component: SupportTicketsComponent },
+      { path: 'messages', component: EmMessagesComponent }
     ]
   }
 ];
@@ -34,7 +36,8 @@ const routes: Routes = [
     EmUsersComponent,
     EmDossiersComponent,
     EmShellComponent,
-    EmEntityPickerComponent
+    EmEntityPickerComponent,
+    EmMessagesComponent
   ],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, LayoutModule, SharedModule, RouterModule.forChild(routes)]
 })
