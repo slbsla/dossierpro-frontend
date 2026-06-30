@@ -1,0 +1,5 @@
+.pagination-ellipsis {
+  padding: 0 4px;
+  color: var(--gray-text);
+  font-size: 13px;
+}

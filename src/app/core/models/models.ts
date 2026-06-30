@@ -250,6 +250,8 @@ export interface SupportMessage {
 // ---- Messagerie EM <-> Client (contact) ----
 export type EmSupportDirection = 'ENVOYE' | 'RECU';
 export type EmSupportSenderRole = 'USER' | 'ENTITY_MANAGER';
+/** Envoi multiple : premier envoi uniquement, jamais sur une réponse. NONE = destinataire unique. */
+export type EmSupportMultiSendType = 'NONE' | 'ALL_USERS' | 'GROUP';
 
 export interface EmSupportMessage {
   reference: string;
@@ -273,6 +275,9 @@ export interface EmSupportMessage {
   attachment1Name: string | null;
   hasAttachment2: boolean;
   attachment2Name: string | null;
+  multiSendType: EmSupportMultiSendType;
+  multiSendLabel: string | null;
+  recipientCount: number;
 }
 
 export interface EmSupportRecipient {

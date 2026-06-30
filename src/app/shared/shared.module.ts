@@ -6,10 +6,11 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
 import { PhonePipe } from './pipes/phone.pipe';
 import { PhoneFormatDirective } from './directives/phone-format.directive';
 import { SupportTicketsComponent } from './support-tickets/support-tickets.component';
+import { PaginationComponent } from './pagination/pagination.component';
 
 @NgModule({
-  declarations: [ConfirmDialogComponent, PhonePipe, PhoneFormatDirective, SupportTicketsComponent],
+  declarations: [ConfirmDialogComponent, PhonePipe, PhoneFormatDirective, SupportTicketsComponent, PaginationComponent],
   imports: [CommonModule, FormsModule, LayoutModule],
-  exports: [ConfirmDialogComponent, PhonePipe, PhoneFormatDirective, SupportTicketsComponent]
+  exports: [ConfirmDialogComponent, PhonePipe, PhoneFormatDirective, SupportTicketsComponent, PaginationComponent]
 })
 export class SharedModule {}

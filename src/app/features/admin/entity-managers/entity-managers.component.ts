@@ -95,6 +95,4 @@ export class EntityManagersComponent implements OnInit {
       error: (e) => this.confirm.open({ title: 'Erreur', message: e?.error?.message || 'Erreur lors de la suppression', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
     });
   }
-
-  pages() { return Array.from({ length: this.page.totalPages }, (_, i) => i); }
 }

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   DashboardAdmin, DashboardEm, EntityOrg, EntityMng, EntityUser,
   Dossier, DossierArchive, DossierStatusHistory, UserPref, PageResponse, DossierUpload, UploadResult, UserDashboard, UserBankInfo, SupportMessage, ManagerRole, EmManagerInfo,
-  Ticket, SchedulerExecution, SchedulerJob, SchedulerJobType, EmSupportMessage, EmSupportRecipient
+  Ticket, SchedulerExecution, SchedulerJob, SchedulerJobType, EmSupportMessage, EmSupportRecipient, EmSupportMultiSendType
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -406,12 +406,19 @@ export class ApiService {
     return this.http.get<EmSupportRecipient[]>(`${this.API}/em/support/recipients`);
   }
 
+  /** Liste des destinataires réels (snapshot) d'un envoi multiple — icône "qui a reçu ce mail". */
+  getEmSupportMessageRecipients(ref: string): Observable<EmSupportRecipient[]> {
+    return this.http.get<EmSupportRecipient[]>(`${this.API}/em/support/${ref}/recipients`);
+  }
+
   sendEmSupportMessage(data: {
-    recipientReference: string; subject: string; dossierReference?: string; message: string;
-    attachment1?: File | null;
+    sendMode?: EmSupportMultiSendType; recipientReference?: string; groupReference?: string;
+    subject: string; dossierReference?: string; message: string; attachment1?: File | null;
   }): Observable<EmSupportMessage> {
     const form = new FormData();
-    form.append('recipientReference', data.recipientReference);
+    form.append('sendMode', data.sendMode === 'ALL_USERS' ? 'ALL_USERS' : data.sendMode === 'GROUP' ? 'GROUP' : 'SINGLE');
+    if (data.recipientReference) form.append('recipientReference', data.recipientReference);
+    if (data.groupReference) form.append('groupReference', data.groupReference);
     form.append('subject', data.subject);
     if (data.dossierReference) form.append('dossierReference', data.dossierReference);
     form.append('message', data.message);

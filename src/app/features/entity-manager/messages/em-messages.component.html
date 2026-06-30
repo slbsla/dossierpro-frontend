@@ -59,7 +59,7 @@
                 <span class="material-icons" style="font-size:15px;vertical-align:middle">visibility</span>
                 Voir
               </button>
-              <button class="btn btn-sm btn-primary" *ngIf="!m.hasReply" (click)="openReply(m)" style="margin-left:4px">
+              <button class="btn btn-sm btn-primary" *ngIf="!m.hasReply && m.multiSendType==='NONE'" (click)="openReply(m)" style="margin-left:4px">
                 <span class="material-icons" style="font-size:15px;vertical-align:middle">reply</span>
                 Répondre
               </button>
@@ -85,7 +85,7 @@
       <table>
         <thead>
           <tr>
-            <th>Référence client</th>
+            <th>Destinataire</th>
             <th>Email</th>
             <th>Objet</th>
             <th>Dossier</th>
@@ -96,8 +96,17 @@
         </thead>
         <tbody>
           <tr *ngFor="let m of sent" [class.unread]="!m.read">
-            <td><code>{{ m.recipientReference || '—' }}</code></td>
-            <td>{{ m.recipientEmail || '—' }}</td>
+            <td>
+              <ng-container *ngIf="m.multiSendType==='NONE'"><code>{{ m.recipientReference || '—' }}</code></ng-container>
+              <span class="multi-send-badge" *ngIf="m.multiSendType!=='NONE'" title="Envoi multiple">
+                <span class="material-icons" style="font-size:14px;vertical-align:middle">groups</span>
+                {{ m.multiSendLabel }} ({{ m.recipientCount }})
+                <button class="icon-btn" title="Voir qui a reçu ce message" (click)="openRecipientsModal(m)">
+                  <span class="material-icons" style="font-size:15px;vertical-align:middle">visibility</span>
+                </button>
+              </span>
+            </td>
+            <td>{{ m.multiSendType==='NONE' ? (m.recipientEmail || '—') : '—' }}</td>
             <td>
               <div class="subject-cell">
                 <span class="material-icons subject-icon">mail_outline</span>
@@ -150,10 +159,20 @@
       <span class="view-meta-value">{{ viewMessage.senderFullName }} ({{ viewMessage.senderReference }})</span>
       <span class="view-meta-value" *ngIf="viewMessage.senderEmail">— {{ viewMessage.senderEmail }}</span>
     </div>
-    <div class="view-meta" *ngIf="viewMessage.recipientReference">
+    <div class="view-meta" *ngIf="viewMessage.recipientReference && viewMessage.multiSendType==='NONE'">
       <span class="view-meta-label">À :</span>
       <span class="view-meta-value">{{ viewMessage.recipientFullName }} ({{ viewMessage.recipientReference }})</span>
       <span class="view-meta-value" *ngIf="viewMessage.recipientEmail">— {{ viewMessage.recipientEmail }}</span>
+    </div>
+    <div class="view-meta" *ngIf="viewMessage.multiSendType!=='NONE'">
+      <span class="view-meta-label">À :</span>
+      <span class="view-meta-value">
+        <span class="material-icons" style="font-size:14px;vertical-align:middle">groups</span>
+        {{ viewMessage.multiSendLabel }} — {{ viewMessage.recipientCount }} destinataire(s)
+      </span>
+      <button class="btn btn-sm btn-secondary" style="margin-left:8px" (click)="openRecipientsModal(viewMessage)">
+        Voir la liste
+      </button>
     </div>
     <div class="view-meta" *ngIf="viewMessage.dossierReference">
       <span class="view-meta-label">Dossier :</span>
@@ -174,7 +193,7 @@
     </div>
 
     <div class="modal-actions">
-      <button class="btn btn-primary" *ngIf="viewMessage.direction==='RECU' && !viewMessage.hasReply" (click)="closeView(); openReply(viewMessage)">
+      <button class="btn btn-primary" *ngIf="viewMessage.direction==='RECU' && !viewMessage.hasReply && viewMessage.multiSendType==='NONE'" (click)="closeView(); openReply(viewMessage)">
         <span class="material-icons" style="font-size:15px;vertical-align:middle">reply</span>
         Répondre
       </button>
@@ -248,12 +267,32 @@
 
     <div class="form-group">
       <label class="form-label">Destinataire *</label>
-      <select class="form-control" [(ngModel)]="newRecipientReference" [disabled]="recipientsLoading">
+      <select class="form-control" [(ngModel)]="newRecipientReference" (ngModelChange)="onRecipientChange()"
+              [disabled]="recipientsLoading || sendToAllUsers || !!newGroupReference">
         <option value="" disabled>{{ recipientsLoading ? 'Chargement...' : 'Sélectionner un destinataire…' }}</option>
         <option *ngFor="let r of recipients" [value]="r.reference">{{ r.fullName }} ({{ r.email }})</option>
       </select>
       <small class="form-hint-small" *ngIf="!recipientsLoading && recipients.length === 0">
         Aucun client avec une adresse email n'a été trouvé.
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label class="form-checkbox-label">
+        <input type="checkbox" [(ngModel)]="sendToAllUsers" (ngModelChange)="onSendToAllChange()" [disabled]="!!newGroupReference">
+        Envoyer à tous les utilisateurs de l'entité
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Ou envoyer à un groupe</label>
+      <select class="form-control" [(ngModel)]="newGroupReference" (ngModelChange)="onGroupChange()"
+              [disabled]="groupsLoading || sendToAllUsers">
+        <option value="">{{ groupsLoading ? 'Chargement...' : 'Aucun groupe sélectionné' }}</option>
+        <option *ngFor="let g of groups" [value]="g.groupReference">{{ g.groupName }} ({{ g.memberCount }})</option>
+      </select>
+      <small class="form-hint-small" *ngIf="isMultiSendSelected">
+        Un seul message sera créé, envoyé à tous les destinataires de ce choix.
       </small>
     </div>
 
@@ -288,6 +327,35 @@
         <span *ngIf="!newSubmitting">Envoyer</span>
         <span *ngIf="newSubmitting">Envoi...</span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal : destinataires d'un envoi multiple ══ -->
+<div class="modal-overlay" *ngIf="showRecipientsModal && recipientsModalTarget" (click)="closeRecipientsModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-support-header">
+      <span class="modal-support-icon material-icons">groups</span>
+      <div>
+        <h3 class="modal-title" style="margin:0">Destinataires</h3>
+        <p class="modal-subtitle" style="margin:4px 0 0">{{ recipientsModalTarget.subject }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="recipientsModalLoading" class="loading"><div class="spinner"></div></div>
+
+    <ul class="recipients-list" *ngIf="!recipientsModalLoading">
+      <li *ngFor="let r of recipientsModalList">
+        <span class="material-icons" style="font-size:15px;vertical-align:middle;margin-right:6px">person</span>
+        {{ r.fullName }} ({{ r.reference }}) <span *ngIf="r.email">— {{ r.email }}</span>
+      </li>
+      <li *ngIf="recipientsModalList.length === 0" class="empty-state">
+        <p>Aucun destinataire trouvé.</p>
+      </li>
+    </ul>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeRecipientsModal()">Fermer</button>
     </div>
   </div>
 </div>

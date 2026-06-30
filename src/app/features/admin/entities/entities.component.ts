@@ -255,6 +255,4 @@ export class EntitiesComponent implements OnInit {
       error: (err) => this.confirm.open({ title: 'Erreur', message: err?.error?.message || 'Erreur lors de la suppression', confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' })
     });
   }
-
-  pages() { return Array.from({ length: this.page.totalPages }, (_, i) => i); }
 }

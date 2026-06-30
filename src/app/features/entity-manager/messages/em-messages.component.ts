@@ -3,6 +3,8 @@ import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { EmSupportMessage, EmSupportRecipient } from '../../../core/models/models';
 
+interface EmGroupOption { groupReference: string; groupName: string; icon: string; memberCount: number; }
+
 @Component({
   selector: 'app-em-messages',
   templateUrl: './em-messages.component.html',
@@ -40,6 +42,18 @@ export class EmMessagesComponent implements OnInit {
   newAttachment1: File | null = null;
   newSubmitting = false;
   newError = '';
+
+  // Envoi multiple (premier envoi uniquement) : un seul mode actif à la fois.
+  groups: EmGroupOption[] = [];
+  groupsLoading = false;
+  sendToAllUsers = false;
+  newGroupReference = '';
+
+  // ── Destinataires d'un envoi multiple (icône sur la ligne "Envoyés") ──
+  showRecipientsModal = false;
+  recipientsModalLoading = false;
+  recipientsModalTarget: EmSupportMessage | null = null;
+  recipientsModalList: EmSupportRecipient[] = [];
 
   constructor(private api: ApiService, public auth: AuthService) {}
 
@@ -96,9 +110,9 @@ export class EmMessagesComponent implements OnInit {
     window.open(this.api.getEmSupportAttachmentUrl(ref, slot), '_blank');
   }
 
-  // ── Répondre ──
+  // ── Répondre ── (jamais possible sur un message envoyé à plusieurs destinataires)
   openReply(m: EmSupportMessage): void {
-    if (m.hasReply) return;
+    if (m.hasReply || m.multiSendType !== 'NONE') return;
     this.replyTarget = m;
     this.replyMessage = '';
     this.replyAttachment1 = null;
@@ -155,8 +169,11 @@ export class EmMessagesComponent implements OnInit {
     this.newMessage = '';
     this.newAttachment1 = null;
     this.newError = '';
+    this.sendToAllUsers = false;
+    this.newGroupReference = '';
     this.showNewModal = true;
     this.loadRecipients();
+    this.loadGroups();
   }
 
   closeNew(): void {
@@ -171,6 +188,41 @@ export class EmMessagesComponent implements OnInit {
     });
   }
 
+  private loadGroups(): void {
+    this.groupsLoading = true;
+    this.api.getEmGroups().subscribe({
+      next: g => { this.groups = g; this.groupsLoading = false; },
+      error: () => this.groupsLoading = false
+    });
+  }
+
+  // "Tous les utilisateurs" et "Groupe" sont mutuellement exclusifs entre eux et avec le
+  // destinataire unique : cocher l'un désactive/efface les deux autres.
+  onSendToAllChange(): void {
+    if (this.sendToAllUsers) {
+      this.newGroupReference = '';
+      this.newRecipientReference = '';
+    }
+  }
+
+  onGroupChange(): void {
+    if (this.newGroupReference) {
+      this.sendToAllUsers = false;
+      this.newRecipientReference = '';
+    }
+  }
+
+  onRecipientChange(): void {
+    if (this.newRecipientReference) {
+      this.sendToAllUsers = false;
+      this.newGroupReference = '';
+    }
+  }
+
+  get isMultiSendSelected(): boolean {
+    return this.sendToAllUsers || !!this.newGroupReference;
+  }
+
   onNewFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files && input.files.length > 0 ? input.files[0] : null;
@@ -178,7 +230,8 @@ export class EmMessagesComponent implements OnInit {
   }
 
   get newInvalid(): boolean {
-    return !this.newRecipientReference || !this.newSubject.trim() || !this.newMessage.trim() || this.newSubmitting;
+    const hasRecipient = this.sendToAllUsers || !!this.newGroupReference || !!this.newRecipientReference;
+    return !hasRecipient || !this.newSubject.trim() || !this.newMessage.trim() || this.newSubmitting;
   }
 
   submitNew(): void {
@@ -186,7 +239,9 @@ export class EmMessagesComponent implements OnInit {
     this.newSubmitting = true;
     this.newError = '';
     this.api.sendEmSupportMessage({
-      recipientReference: this.newRecipientReference,
+      sendMode: this.sendToAllUsers ? 'ALL_USERS' : this.newGroupReference ? 'GROUP' : 'NONE',
+      recipientReference: this.sendToAllUsers || this.newGroupReference ? undefined : this.newRecipientReference,
+      groupReference: this.newGroupReference || undefined,
       subject: this.newSubject.trim(),
       dossierReference: this.newDossierReference.trim() || undefined,
       message: this.newMessage.trim(),
@@ -203,5 +258,22 @@ export class EmMessagesComponent implements OnInit {
         this.newError = e?.error?.message || 'Erreur lors de l\'envoi du message';
       }
     });
+  }
+
+  // ── Liste des destinataires d'un envoi multiple (icône sur la ligne "Envoyés") ──
+  openRecipientsModal(m: EmSupportMessage): void {
+    this.recipientsModalTarget = m;
+    this.recipientsModalList = [];
+    this.recipientsModalLoading = true;
+    this.showRecipientsModal = true;
+    this.api.getEmSupportMessageRecipients(m.reference).subscribe({
+      next: list => { this.recipientsModalList = list; this.recipientsModalLoading = false; },
+      error: () => this.recipientsModalLoading = false
+    });
+  }
+
+  closeRecipientsModal(): void {
+    this.showRecipientsModal = false;
+    this.recipientsModalTarget = null;
   }
 }

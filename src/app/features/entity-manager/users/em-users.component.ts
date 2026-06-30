@@ -177,8 +177,6 @@ export class EmUsersComponent implements OnInit {
     });
   }
 
-  pages() { return Array.from({ length: this.page.totalPages }, (_, i) => i); }
-
   // ──────────── Groups shared ──────────────────────────────────────────────
   loadGroups() {
     this.groupsLoading = true;

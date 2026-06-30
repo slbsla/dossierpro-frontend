@@ -42,11 +42,7 @@
           <tr *ngIf="pendingPage.content.length===0"><td colspan="7"><div class="empty-state"><div class="empty-state-icon">✅</div><p>Aucun dossier en attente</p></div></td></tr>
         </tbody>
       </table>
-      <div class="pagination" *ngIf="pendingPage.totalPages>1">
-        <button (click)="loadPending(pendingPage.page-1)" [disabled]="pendingPage.page===0">◀</button>
-        <button *ngFor="let p of pages(pendingPage)" [class.active]="p===pendingPage.page" (click)="loadPending(p)">{{ p+1 }}</button>
-        <button (click)="loadPending(pendingPage.page+1)" [disabled]="pendingPage.last">▶</button>
-      </div>
+      <app-pagination [page]="pendingPage.page" [totalPages]="pendingPage.totalPages" [last]="pendingPage.last" (pageChange)="loadPending($event)"></app-pagination>
     </div>
   </div>
 
@@ -91,11 +87,7 @@
           <tr *ngIf="validatedPage.content.length===0"><td colspan="8"><div class="empty-state"><div class="empty-state-icon">📋</div><p>Aucun dossier traité</p></div></td></tr>
         </tbody>
       </table>
-      <div class="pagination" *ngIf="validatedPage.totalPages > 1">
-        <button (click)="loadValidated(validatedPage.page-1)" [disabled]="validatedPage.page===0">◀</button>
-        <button *ngFor="let p of pages(validatedPage)" [class.active]="p===validatedPage.page" (click)="loadValidated(p)">{{ p+1 }}</button>
-        <button (click)="loadValidated(validatedPage.page+1)" [disabled]="validatedPage.last">▶</button>
-      </div>
+      <app-pagination [page]="validatedPage.page" [totalPages]="validatedPage.totalPages" [last]="validatedPage.last" (pageChange)="loadValidated($event)"></app-pagination>
     </div>
   </div>
 
@@ -120,11 +112,7 @@
           <tr *ngIf="archivedPage.content.length===0"><td colspan="5"><div class="empty-state"><div class="empty-state-icon">🗄️</div><p>Aucune archive</p></div></td></tr>
         </tbody>
       </table>
-      <div class="pagination" *ngIf="archivedPage.totalPages > 1">
-        <button (click)="loadArchived(archivedPage.page-1)" [disabled]="archivedPage.page===0">◀</button>
-        <button *ngFor="let p of pages(archivedPage)" [class.active]="p===archivedPage.page" (click)="loadArchived(p)">{{ p+1 }}</button>
-        <button (click)="loadArchived(archivedPage.page+1)" [disabled]="archivedPage.last">▶</button>
-      </div>
+      <app-pagination [page]="archivedPage.page" [totalPages]="archivedPage.totalPages" [last]="archivedPage.last" (pageChange)="loadArchived($event)"></app-pagination>
     </div>
   </div>
 </div>

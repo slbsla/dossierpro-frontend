@@ -95,10 +95,6 @@ export class SupportTicketsComponent implements OnInit {
     this.load(0);
   }
 
-  pages(): number[] {
-    return Array.from({ length: this.page.totalPages }, (_, i) => i);
-  }
-
   // Sélection simple (exclusive) d'une ligne via checkbox : un clic la sélectionne,
   // un second clic sur la même ligne la désélectionne. Pas de sélection multiple.
   selectRow(t: Ticket): void {

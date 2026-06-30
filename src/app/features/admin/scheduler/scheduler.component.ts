@@ -77,6 +77,4 @@ export class SchedulerComponent implements OnInit {
     const d = Math.floor(h / 24);
     return `Il y a ${d} j ${h % 24} h`;
   }
-
-  pages() { return Array.from({ length: this.page.totalPages }, (_, i) => i); }
 }

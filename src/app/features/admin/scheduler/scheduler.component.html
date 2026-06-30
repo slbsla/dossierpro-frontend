@@ -52,12 +52,7 @@
           <tr *ngIf="page.content.length === 0"><td colspan="6" class="empty-state"><span class="empty-state-icon">🕒</span><p>Aucune exécution</p></td></tr>
         </tbody>
       </table>
-      <div class="pagination" *ngIf="page.totalPages > 1">
-        <button (click)="loadHistory(page.page-1)" [disabled]="page.page===0">◀</button>
-        <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="loadHistory(p)">{{ p+1 }}</button>
-        <button (click)="loadHistory(page.page+1)" [disabled]="page.last">▶</button>
-        <span class="page-info">Page {{ page.page+1 }}/{{ page.totalPages }}</span>
-      </div>
+      <app-pagination [page]="page.page" [totalPages]="page.totalPages" [last]="page.last" (pageChange)="loadHistory($event)"></app-pagination>
     </div>
   </div>
 

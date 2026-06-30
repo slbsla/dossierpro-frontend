@@ -168,6 +168,5 @@ export class UserDossiersComponent implements OnInit, OnDestroy {
     await this.confirm.open({ title: 'Erreur', message: msg, confirmLabel: 'OK', cancelLabel: ' ', type: 'warning' });
   }
 
-  pages() { return Array.from({ length: this.page.totalPages }, (_, i) => i); }
   statusClass(s: string) { return 'badge-' + s.toLowerCase(); }
 }

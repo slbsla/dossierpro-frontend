@@ -87,11 +87,7 @@
         </tbody>
       </table>
       <div class="table-footer">
-        <div class="pagination" *ngIf="page.totalPages>1">
-          <button (click)="load(page.page-1)" [disabled]="page.page===0">◀</button>
-          <button *ngFor="let p of pages()" [class.active]="p===page.page" (click)="load(p)">{{ p+1 }}</button>
-          <button (click)="load(page.page+1)" [disabled]="page.last">▶</button>
-        </div>
+        <app-pagination [page]="page.page" [totalPages]="page.totalPages" [last]="page.last" (pageChange)="load($event)"></app-pagination>
         <button class="btn-export-excel" (click)="exportExcel()" [disabled]="exporting" *ngIf="page.totalElements > 0">
           <span *ngIf="!exporting">
             <svg class="excel-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" style="vertical-align:middle;margin-right:4px">

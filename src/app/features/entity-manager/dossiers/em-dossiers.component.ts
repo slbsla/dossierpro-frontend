@@ -150,6 +150,5 @@ export class EmDossiersComponent implements OnInit {
     });
   }
 
-  pages(p: PageResponse<any>) { return Array.from({ length: p.totalPages }, (_, i) => i); }
   statusClass(s: string) { return 'badge-' + s.toLowerCase(); }
 }
