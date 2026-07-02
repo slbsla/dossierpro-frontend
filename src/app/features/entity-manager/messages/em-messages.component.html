@@ -39,7 +39,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let m of received" [class.unread]="!m.read">
+          <tr *ngFor="let m of received" [class.unread]="!m.read" [class.row-selected]="isSelected(m)"
+              (click)="selectRow(m)" (dblclick)="view(m)">
             <td><code>{{ m.senderReference }}</code></td>
             <td>{{ m.senderEmail || '—' }}</td>
             <td>
@@ -54,12 +55,12 @@
               <span class="material-icons attachment-icon" *ngIf="m.hasAttachment1 || m.hasAttachment2" title="Pièce(s) jointe(s)">attach_file</span>
               <span *ngIf="!m.hasAttachment1 && !m.hasAttachment2">—</span>
             </td>
-            <td class="actions-cell">
+            <td class="actions-cell" (click)="$event.stopPropagation()">
               <button class="btn btn-sm btn-secondary" (click)="view(m)">
                 <span class="material-icons" style="font-size:15px;vertical-align:middle">visibility</span>
                 Voir
               </button>
-              <button class="btn btn-sm btn-primary" *ngIf="!m.hasReply && m.multiSendType==='NONE'" (click)="openReply(m)" style="margin-left:4px">
+              <button class="btn btn-sm btn-primary" *ngIf="!m.hasReply && m.multiSendType==='NONE' && !isSystemSender(m)" (click)="openReply(m)" style="margin-left:4px">
                 <span class="material-icons" style="font-size:15px;vertical-align:middle">reply</span>
                 Répondre
               </button>
@@ -95,8 +96,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let m of sent" [class.unread]="!m.read">
-            <td>
+          <tr *ngFor="let m of sent" [class.unread]="!m.read" [class.row-selected]="isSelected(m)"
+              (click)="selectRow(m)" (dblclick)="view(m)">
+            <td (click)="$event.stopPropagation()">
               <ng-container *ngIf="m.multiSendType==='NONE'"><code>{{ m.recipientReference || '—' }}</code></ng-container>
               <span class="multi-send-badge" *ngIf="m.multiSendType!=='NONE'" title="Envoi multiple">
                 <span class="material-icons" style="font-size:14px;vertical-align:middle">groups</span>
@@ -119,7 +121,7 @@
               <span class="material-icons attachment-icon" *ngIf="m.hasAttachment1 || m.hasAttachment2" title="Pièce(s) jointe(s)">attach_file</span>
               <span *ngIf="!m.hasAttachment1 && !m.hasAttachment2">—</span>
             </td>
-            <td>
+            <td (click)="$event.stopPropagation()">
               <button class="btn btn-sm btn-secondary" (click)="view(m)">
                 <span class="material-icons" style="font-size:15px;vertical-align:middle">visibility</span>
                 Voir
@@ -193,10 +195,14 @@
     </div>
 
     <div class="modal-actions">
-      <button class="btn btn-primary" *ngIf="viewMessage.direction==='RECU' && !viewMessage.hasReply && viewMessage.multiSendType==='NONE'" (click)="closeView(); openReply(viewMessage)">
+      <button class="btn btn-primary" *ngIf="viewMessage.direction==='RECU' && !viewMessage.hasReply && viewMessage.multiSendType==='NONE' && !isSystemSender(viewMessage)" (click)="closeView(); openReply(viewMessage)">
         <span class="material-icons" style="font-size:15px;vertical-align:middle">reply</span>
         Répondre
       </button>
+      <p class="muted" *ngIf="viewMessage.direction==='RECU' && isSystemSender(viewMessage)" style="font-size:12.5px;margin:0 12px 0 0">
+        <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:3px">info</span>
+        Notification automatique, non modifiable.
+      </p>
       <button class="btn btn-secondary" (click)="closeView()">Fermer</button>
     </div>
   </div>

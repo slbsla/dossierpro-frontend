@@ -1,9 +1,10 @@
 import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, interval } from 'rxjs';
+import { Subscription, interval, merge } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { EmSessionService } from '../../core/services/em-session.service';
+import { EmNotificationService } from '../../core/services/em-notification.service';
 import { ApiService } from '../../core/services/api.service';
 import { EmSupportMessage, Role } from '../../core/models/models';
 
@@ -30,6 +31,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     public emSession: EmSessionService,
+    private emNotification: EmNotificationService,
     private api: ApiService,
     private router: Router,
     private elRef: ElementRef
@@ -64,8 +66,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.pollSub = null;
     if (!this.showNotifBell) return;
 
-    this.pollSub = interval(NOTIF_POLL_INTERVAL_MS).pipe(
-      startWith(0),
+    // Rafraîchit le compteur toutes les 45s, ET immédiatement dès qu'un autre composant
+    // signale un changement (ex : message marqué lu dans l'écran Messages) via
+    // EmNotificationService, sans attendre le prochain cycle de polling.
+    this.pollSub = merge(interval(NOTIF_POLL_INTERVAL_MS).pipe(startWith(0)), this.emNotification.changed$).pipe(
       switchMap(() => this.api.getEmSupportUnreadCount())
     ).subscribe({
       next: res => this.unreadCount = res.count,

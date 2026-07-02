@@ -202,6 +202,16 @@
           <p class="addr-title">
             <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:4px">group_add</span>Managers additionnels
           </p>
+
+          <!-- Guide des rôles -->
+          <div class="extra-mgr-hint">
+            <span class="material-icons" style="font-size:14px;vertical-align:middle;margin-right:5px;color:#2563eb">info</span>
+            <span>
+              <strong>Entity Auditor</strong> : consulte et contrôle les dossiers de l'entité, sans droit de modification.<br>
+              <strong>Entity Signataire</strong> : signe et valide officiellement les dossiers pour le compte de l'entité.
+            </span>
+          </div>
+
           <div class="form-group">
             <label class="form-label">Ajouter un manager <span style="font-weight:400;color:var(--gray-text)">(rôle ≠ Entity Manager, libre)</span></label>
             <select class="form-control" [(ngModel)]="extraManagerToAdd" [ngModelOptions]="{standalone:true}">
@@ -234,6 +244,7 @@
 .addr-card { border:1px solid var(--gray-border,#e2e8f0); border-radius:8px; padding:14px 16px; margin-bottom:12px; }
 .addr-title { font-size:12px; font-weight:700; color:var(--gray-text); margin:0 0 10px; text-transform:uppercase; letter-spacing:.05em; }
 .addr-hint { font-size:12px; color:#374151; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:8px 10px; margin-bottom:12px; line-height:1.6; }
+.extra-mgr-hint { font-size:12px; color:#374151; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:8px 10px; margin-bottom:12px; line-height:1.6; }
 .addr-search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); font-size:18px; color:var(--gray-text); pointer-events:none; }
 .addr-search-input { padding-left:34px !important; }
 .addr-linked-icon { position:absolute; right:9px; top:50%; transform:translateY(-50%); font-size:18px; color:#16a34a; pointer-events:none; }

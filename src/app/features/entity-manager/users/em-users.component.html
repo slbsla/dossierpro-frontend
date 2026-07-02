@@ -264,7 +264,11 @@
         </div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Téléphone</label><input class="form-control" formControlName="telephone" appPhoneFormat placeholder="06 12 34 56 78"></div>
-          <div class="form-group"><label class="form-label">Email</label><input class="form-control" type="email" formControlName="email" placeholder="marc.dupont@dossierpro.com"></div>
+          <div class="form-group">
+            <label class="form-label">Email *</label>
+            <input class="form-control" type="email" formControlName="email" placeholder="marc.dupont@dossierpro.com">
+            <p class="form-section-hint" *ngIf="!editMode">Généré automatiquement à partir du nom/prénom (modifiable).</p>
+          </div>
         </div>
       </div>
       <div class="form-section" *ngIf="!editMode">

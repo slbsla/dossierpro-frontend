@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { EmNotificationService } from '../../../core/services/em-notification.service';
 import { EmSupportMessage, EmSupportRecipient } from '../../../core/models/models';
 
 interface EmGroupOption { groupReference: string; groupName: string; icon: string; memberCount: number; }
@@ -18,6 +19,9 @@ export class EmMessagesComponent implements OnInit {
   sent: EmSupportMessage[] = [];
   loadingReceived = false;
   loadingSent = false;
+
+  // ── Sélection de ligne (grille sélectionnable : simple clic = sélectionne, double-clic = ouvre) ──
+  selectedRef: string | null = null;
 
   // ── Détail (lecture) ──
   showViewModal = false;
@@ -55,7 +59,7 @@ export class EmMessagesComponent implements OnInit {
   recipientsModalTarget: EmSupportMessage | null = null;
   recipientsModalList: EmSupportRecipient[] = [];
 
-  constructor(private api: ApiService, public auth: AuthService) {}
+  constructor(private api: ApiService, public auth: AuthService, private emNotification: EmNotificationService) {}
 
   ngOnInit(): void {
     this.loadReceived();
@@ -64,6 +68,15 @@ export class EmMessagesComponent implements OnInit {
 
   get myReference(): string {
     return this.auth.currentUser?.uniqueReference ?? '';
+  }
+
+  // ── Sélection de ligne (simple clic) ──
+  selectRow(m: EmSupportMessage): void {
+    this.selectedRef = this.isSelected(m) ? null : m.reference;
+  }
+
+  isSelected(m: EmSupportMessage): boolean {
+    return this.selectedRef === m.reference;
   }
 
   // ── Chargement des listes ──
@@ -89,6 +102,7 @@ export class EmMessagesComponent implements OnInit {
 
   // ── Voir un message (marque comme lu côté serveur) ──
   view(m: EmSupportMessage): void {
+    const wasUnread = !m.read;
     this.api.getEmSupportMessage(m.reference).subscribe({
       next: full => {
         this.viewMessage = full;
@@ -97,6 +111,10 @@ export class EmMessagesComponent implements OnInit {
         if (!m.read) {
           m.read = true;
         }
+        // Le message vient d'être marqué lu côté serveur (cf. SupportMessageService.get) :
+        // prévient immédiatement la navbar pour que le compteur de notifications se
+        // mette à jour sans attendre son prochain cycle de polling (45s).
+        if (wasUnread) this.emNotification.notifyChanged();
       }
     });
   }
@@ -110,14 +128,20 @@ export class EmMessagesComponent implements OnInit {
     window.open(this.api.getEmSupportAttachmentUrl(ref, slot), '_blank');
   }
 
-  // ── Répondre ── (jamais possible sur un message envoyé à plusieurs destinataires)
+  // ── Répondre ── (jamais possible sur un message envoyé à plusieurs destinataires,
+  // ni sur une notification automatique envoyée par le système)
   openReply(m: EmSupportMessage): void {
-    if (m.hasReply || m.multiSendType !== 'NONE') return;
+    if (m.hasReply || m.multiSendType !== 'NONE' || this.isSystemSender(m)) return;
     this.replyTarget = m;
     this.replyMessage = '';
     this.replyAttachment1 = null;
     this.replyError = '';
     this.showReplyModal = true;
+  }
+
+  /** Notification générée automatiquement par le système ("DEFAULT" / rôle SYSTEM) : pas de réponse possible. */
+  isSystemSender(m: EmSupportMessage): boolean {
+    return m.senderRole === 'SYSTEM' || m.senderReference === 'DEFAULT';
   }
 
   closeReply(): void {

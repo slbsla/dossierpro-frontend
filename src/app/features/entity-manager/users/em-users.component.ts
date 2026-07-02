@@ -40,6 +40,10 @@ export class EmUsersComponent implements OnInit {
   sortBy = '';
   sortDir: 'asc' | 'desc' | '' = '';
 
+  /** Dernière adresse email auto-générée (permet de savoir si l'utilisateur l'a modifiée à la main). */
+  private lastGeneratedEmail = '';
+  private static readonly EMAIL_DOMAINS = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com'];
+
   // ── Groups shared state (tabs 2 & 3) ──
   groups: EmGroup[] = [];
   groupsLoading = false;
@@ -106,14 +110,20 @@ export class EmUsersComponent implements OnInit {
     if (!this.canManageUsers) return;
     this.editMode = false; this.selectedRef = null; this.error = '';
     this.showPassword = false; this.showConfirmPassword = false;
+    this.lastGeneratedEmail = '';
     this.form = this.fb.group({
       firstName:       ['', Validators.required],
       lastName:        ['', Validators.required],
       telephone:       [''],
-      email:           ['', Validators.email],
+      email:           ['', [Validators.required, Validators.email]],
       password:        ['', [Validators.required, Validators.minLength(4)]],
       confirmPassword: ['', Validators.required]
     });
+    // Propose automatiquement une adresse email (nom.prenom ou nom-prenom + 2 chiffres
+    // @gmail/hotmail/yahoo/outlook) dès que nom/prénom sont saisis ; reste modifiable et
+    // ne se régénère plus si l'utilisateur a tapé sa propre adresse.
+    this.form.get('firstName')!.valueChanges.subscribe(() => this.autoGenerateEmail());
+    this.form.get('lastName')!.valueChanges.subscribe(() => this.autoGenerateEmail());
     this.showModal = true;
   }
 
@@ -125,9 +135,37 @@ export class EmUsersComponent implements OnInit {
       firstName: [u.firstName, Validators.required],
       lastName:  [u.lastName,  Validators.required],
       telephone: [u.telephone],
-      email:     [u.email, Validators.email]
+      email:     [u.email, [Validators.required, Validators.email]]
     });
     this.showModal = true;
+  }
+
+  /** Génère une proposition d'email tant que le champ est vide ou égal à la dernière valeur auto-générée. */
+  private autoGenerateEmail() {
+    const emailCtrl = this.form.get('email');
+    if (!emailCtrl) return;
+    const current = (emailCtrl.value || '').trim();
+    if (current && current !== this.lastGeneratedEmail) return;
+    const firstName = (this.form.get('firstName')!.value || '').trim();
+    const lastName = (this.form.get('lastName')!.value || '').trim();
+    if (!firstName || !lastName) return;
+    const generated = this.generateEmail(firstName, lastName);
+    this.lastGeneratedEmail = generated;
+    emailCtrl.setValue(generated, { emitEvent: false });
+  }
+
+  private sanitizeForEmail(s: string): string {
+    const noAccents = s.normalize('NFD').split('').filter(ch => ch.charCodeAt(0) < 0x0300 || ch.charCodeAt(0) > 0x036f).join('');
+    return noAccents.toLowerCase().replace(/[^a-z]/g, '');
+  }
+
+  private generateEmail(firstName: string, lastName: string): string {
+    const sep = Math.random() < 0.5 ? '.' : '-';
+    const digits = String(Math.floor(Math.random() * 100)).padStart(2, '0');
+    const domain = EmUsersComponent.EMAIL_DOMAINS[Math.floor(Math.random() * EmUsersComponent.EMAIL_DOMAINS.length)];
+    const fn = this.sanitizeForEmail(firstName);
+    const ln = this.sanitizeForEmail(lastName);
+    return `${ln}${sep}${fn}${digits}@${domain}`;
   }
 
   /** Vue lecture seule — toujours disponible, même pour les prospects ou les rôles non-EM. */

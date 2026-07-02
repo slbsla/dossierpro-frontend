@@ -249,7 +249,7 @@ export interface SupportMessage {
 
 // ---- Messagerie EM <-> Client (contact) ----
 export type EmSupportDirection = 'ENVOYE' | 'RECU';
-export type EmSupportSenderRole = 'USER' | 'ENTITY_MANAGER';
+export type EmSupportSenderRole = 'USER' | 'ENTITY_MANAGER' | 'ADMIN' | 'SYSTEM';
 /** Envoi multiple : premier envoi uniquement, jamais sur une réponse. NONE = destinataire unique. */
 export type EmSupportMultiSendType = 'NONE' | 'ALL_USERS' | 'GROUP';
 

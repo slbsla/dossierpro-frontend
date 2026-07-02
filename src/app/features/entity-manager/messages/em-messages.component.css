@@ -12,6 +12,10 @@
 tr.unread td { font-weight: 700; }
 tr.unread .subject-cell { font-weight: 700; }
 
+/* ---- Grille sélectionnable : simple clic = sélectionne (surlignage via .row-selected,
+   défini globalement dans styles.css), double-clic = ouvre le message (cf. view()). ---- */
+.table-wrapper tbody tr { cursor: pointer; }
+
 .subject-cell { display: flex; align-items: center; gap: 6px; }
 .subject-icon { font-size: 16px; color: var(--primary, #2563eb); }
 
